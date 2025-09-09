@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Precios - Sistema de Trazabilidad</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .dashboard-card h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .dashboard-card p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .bg-gradient-purple { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        .bg-gradient-blue { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        .bg-gradient-green { background: linear-gradient(135deg, #fb930c 0%, #f39c12 100%); }
+        .bg-gradient-orange { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .sidebar .btn {
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .precio-input {
+            width: 120px;
+        }
+        .currency-symbol {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div class="text-center mb-4">
+                    <img src="LOGO TECH SISTEMA ADMON.svg" alt="Logo Empresa" height="60" class="mb-3">
+                    <h3 class="text-white">
+                        <i class="bi bi-currency-dollar"></i> Panel de Precios
+                    </h3>
+                </div>
+                
+                <button class="btn btn-success" onclick="agregarNuevoPrecio()">
+                    <i class="bi bi-plus-circle"></i> Nuevo Precio
+                </button>
+                
+                <button class="btn btn-warning" onclick="restaurarPrecios()">
+                    <i class="bi bi-arrow-clockwise"></i> Restaurar Precios
+                </button>
+                
+                <button class="btn btn-danger" onclick="limpiarElementosVacios()">
+                    <i class="bi bi-trash"></i> Limpiar Elementos Vacíos
+                </button>
+
+                
+                <div class="mt-4">
+                    <a href="./cotizaciones-completo.html" class="btn btn-outline-light">
+                        <i class="bi bi-arrow-left"></i> Volver al Sistema Principal
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Header -->
+                <nav class="navbar navbar-dark bg-dark">
+                    <div class="container-fluid">
+                        <div class="d-flex align-items-center">
+                            <img src="LOGO TECH SISTEMA ADMON.svg" alt="Logo Empresa" height="40" class="me-3">
+                            <span class="navbar-brand mb-0 h1">
+                                <i class="bi bi-currency-dollar"></i> Administrador de Precios
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="./cotizaciones-completo.html" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-arrow-left"></i> Principal
+                            </a>
+                            <button class="btn btn-outline-light btn-sm" id="btnLogout">
+                                <i class="bi bi-box-arrow-right"></i> Salir
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Dashboard -->
+                <div class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-purple">
+                                <h2 id="totalElementos">0</h2>
+                                <p>Elementos con Precio</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-blue">
+                                <h2 id="promedioPrecios">$0</h2>
+                                <p>Precio Promedio</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="totalCategorias">0</h2>
+                                <p>Categorías</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-orange">
+                                <h2 id="sinPrecio">0</h2>
+                                <p>Sin Precio</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filter-section">
+                        <h5><i class="bi bi-funnel"></i> Filtros</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="filtroCategoria" class="form-label">Categoría:</label>
+                                <select class="form-select" id="filtroCategoria" onchange="aplicarFiltros()">
+                                    <option value="">Todas</option>
+                                    <option value="insumos">Insumos</option>
+                                    <option value="accesorios">Accesorios</option>
+                                    <option value="equipos">Equipos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroEstado" class="form-label">Estado:</label>
+                                <select class="form-select" id="filtroEstado" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="con-precio">Con Precio</option>
+                                    <option value="sin-precio">Sin Precio</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroRango" class="form-label">Rango de Precio:</label>
+                                <select class="form-select" id="filtroRango" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="0-100">$0 - $100</option>
+                                    <option value="100-500">$100 - $500</option>
+                                    <option value="500-1000">$500 - $1,000</option>
+                                    <option value="1000+">$1,000+</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroNombre" class="form-label">Buscar Elemento:</label>
+                                <input type="text" class="form-control" id="filtroNombre" placeholder="Escriba para buscar..." onkeyup="aplicarFiltros()">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()">
+                                    <i class="bi bi-x-circle"></i> Limpiar Filtros
+                                </button>
+                                <span class="badge bg-info ms-2" id="resultadosFiltro">Mostrando todos los elementos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Precios -->
+                    <div class="card">
+                        <div class="card-header text-white" style="background: linear-gradient(135deg, #fb930c, #e67e22);">
+                            <h4><i class="bi bi-currency-dollar"></i> Lista de Precios</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th>Elemento</th>
+                                            <th>Categoría</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Última Actualización</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaPrecios">
+                                        <!-- Se llena dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Precio -->
+    <div class="modal fade" id="modalEditarPrecio" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Precio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editElemento" class="form-label">Elemento:</label>
+                        <input type="text" class="form-control" id="editElemento" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCategoria" class="form-label">Categoría:</label>
+                        <select class="form-control" id="editCategoria">
+                            <option value="insumos">Insumos</option>
+                            <option value="accesorios">Accesorios</option>
+                            <option value="equipos">Equipos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPrecio" class="form-label">Precio Unitario:</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="editPrecio" step="0.01" min="0">
+                            <span class="input-group-text">MXN</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarEdicionPrecio()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Actualización en Lote -->
+    <div class="modal fade" id="modalActualizacionLote" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Actualización de Precios en Lote</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="loteCategoria" class="form-label">Categoría a Actualizar:</label>
+                        <select class="form-control" id="loteCategoria">
+                            <option value="">Todas las categorías</option>
+                            <option value="insumos">Solo Insumos</option>
+                            <option value="accesorios">Solo Accesorios</option>
+                            <option value="equipos">Solo Equipos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loteTipo" class="form-label">Tipo de Actualización:</label>
+                        <select class="form-control" id="loteTipo">
+                            <option value="porcentaje">Incremento/Descuento por Porcentaje</option>
+                            <option value="fijo">Incremento/Descuento Fijo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loteValor" class="form-label">Valor:</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="loteValor" step="0.01">
+                            <span class="input-group-text" id="loteUnidad">%</span>
+                        </div>
+                        <div class="form-text">Usar valores negativos para descuentos</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" onclick="aplicarActualizacionLote()">Aplicar Actualización</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Supabase + dataService -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./dataService.js"></script>
+    <script src="./accessGuard.js"></script>
+
+    <script>
+        (async function(){
+            const ok = await window.accessGuard.ensureAuth(['admin','precios']);
+            if (!ok) return;
+        })();
+        document.addEventListener('DOMContentLoaded', function(){
+            const logoutBtn = document.getElementById('btnLogout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try { await window.dataService.authSignOut(); } catch(_){}
+                    window.location.href = './login.html';
+                });
+            }
+        });
+        // ===== VARIABLES GLOBALES =====
+        const modoCentralizado = (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase());
+        let preciosElementos = {};
+        let elementoEditando = null;
+        let datosFiltrados = [];
+
+        // Categorización de elementos (desde el almacén)
+        const categoriasElementos = {
+            'insumos': [
+                'Cable 4 pin 1 m', 'Cable 4 pin 3 m', 'Cable 4 pin 5 m', 'Cable 4 pin 7 m',
+                'Cable 4 pin 15 m', 'Cable 4 pin 30 m', 'Cable 6 pin 5 m', 'Cable 2 vias', 'Cable 4 vias',
+                '"Y" 4 pines', 'Base Pollak', 'Pollak Macho ', 'Pollak Hembra', 'Cable de 1 polo',
+                'Terminal de ojillo', '7 vias liso 2m', 'Silicon', 'Cinchos grande', 'Cinta de tela', 'Cinta de aislar',
+                'Poliflex 3/8', 'Poliflex 1/4', 'Cincho mediado', 'Cincho con grapa',
+                'Pija brocante 5/16', 'Tornillo hexagonal 5/16', 'Tornillo 3/8',
+                'Tuerca 5/16', 'Tuerca 3/8', 'Rondana 5/16', 'Rondana 3/8',
+                'Espiral negro', 'Espiral verde', 'Relevador 2 pasos 2 tiros', 'Relevador 12v', 'Relevador 24v', 'Portarelevador',
+                'placa perforada', 'Gabinete 5*7*3', 'SD 128 Gb', 'SD 256 Gb', 'SD 512 Gb'
+            ],
+            'accesorios': [
+                'Alarma parlante de 3 tonos', 'Alarma parlante programable', 'Bocina', 'Microfono',
+                'Botón balancin', 'Boton de panico', 'Camara + radar', 'Camara con microfono', 'Camara de reversa', 'Camara Digital (IP)',
+                'Camara exterior mini', 'Camara lateral derecha de VPC', 'Camara lateral izquierda de VPC',
+                'Camara sideview derecho', 'Camara sideview izquierdo', 'Camara tipo clavo',
+                'Sensor magnetico chico', 'Sensor magnetico grande', 'Led de giro a la derecha', 'Led de giro a la izquierda',
+                'Sensor derecho VPC', 'Sensor izquierda VPC', 'Sideview derecho', 'Sideview izquierdo',
+                'Camara frontal', 'Camara izquierda', 'Camara derecha'
+            ],
+            'equipos': [
+                'Dashcam ad2', 'Dashcam c6', 'GV310LAU', 'GV58LAU', 'GV75LAU', 'SMOC', 
+                'MDVR 4 Ch', 'MDVR 8 Ch', 'Insider', 'Modulo sensor de cinturon seguridad', 
+                'Limitador de velocidad', 'Monitor de VPC', 'Grabador de video 4 ch'
+            ]
+        };
+
+        // Función para obtener la categoría de un elemento
+        function obtenerCategoria(elemento) {
+            for (const [categoria, elementos] of Object.entries(categoriasElementos)) {
+                if (elementos.includes(elemento)) {
+                    return categoria;
+                }
+            }
+            return 'insumos'; // Por defecto
+        }
+
+        // Función para obtener todos los elementos únicos
+        function obtenerTodosLosElementos() {
+            const todos = [];
+            Object.values(categoriasElementos).forEach(elementos => {
+                todos.push(...elementos);
+            });
+            return [...new Set(todos)];
+        }
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔄 Inicializando administrador de precios...');
+            try {
+                if (modoCentralizado) {
+                    await cargarPreciosDesdeSupabase();
+                    suscribirRealtimePrecios();
+                } else {
+                    cargarPreciosDesdeStorage();
+                    inicializarPreciosDefecto();
+                }
+                cargarTablaPrecios();
+                actualizarEstadisticas();
+                configurarEventos();
+                console.log('✅ Administrador de precios iniciado');
+            } catch (e) {
+                console.error('❌ Error inicializando precios:', e);
+                mostrarAlerta('Error inicializando precios', 'danger');
+            }
+        });
+
+        // Función para restaurar precios si se perdieron
+        async function restaurarPrecios() {
+            console.log('🔄 Restaurando precios...');
+            preciosElementos = {};
+            inicializarPreciosDefecto();
+            try {
+                if (modoCentralizado) {
+                    const tareas = [];
+                    for (const [nombre, datos] of Object.entries(preciosElementos)) {
+                        tareas.push(window.dataService.upsertPrecioElementoByNombre(nombre, {
+                            nombre,
+                            precio: datos.precio || 0,
+                            categoria: datos.categoria || obtenerCategoria(nombre),
+                            ultimaActualizacion: datos.ultimaActualizacion || new Date().toISOString().split('T')[0],
+                        }));
+                    }
+                    for (let i = 0; i < tareas.length; i += 50) {
+                        const slice = tareas.slice(i, i + 50);
+                        // eslint-disable-next-line no-await-in-loop
+                        await Promise.all(slice);
+                    }
+                    console.log('✅ Precios restaurados en Supabase');
+                }
+            } catch (e) {
+                console.warn('⚠️ No se pudieron sincronizar precios a Supabase en restauración', e);
+            }
+            cargarTablaPrecios();
+            actualizarEstadisticas();
+            console.log('✅ Precios restaurados');
+        }
+
+        // Función para limpiar elementos vacíos
+        function limpiarElementosVacios() {
+            console.log('🧹 Limpiando elementos vacíos...');
+            const elementosVacios = Object.keys(preciosElementos).filter(key => !key || key.trim() === '');
+            
+            if (elementosVacios.length > 0) {
+                console.log('🗑️ Eliminando elementos vacíos:', elementosVacios);
+                elementosVacios.forEach(key => {
+                    delete preciosElementos[key];
+                });
+                
+                // Guardar cambios
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                cargarTablaPrecios();
+                actualizarEstadisticas();
+                console.log('✅ Elementos vacíos eliminados');
+                mostrarAlerta(`${elementosVacios.length} elementos vacíos eliminados`, 'success');
+            } else {
+                console.log('✅ No hay elementos vacíos');
+                mostrarAlerta('No hay elementos vacíos para limpiar', 'info');
+            }
+        }
+
+        function configurarEventos() {
+            // Cambiar unidad según tipo de actualización
+            document.getElementById('loteTipo').addEventListener('change', function() {
+                const unidad = this.value === 'porcentaje' ? '%' : '$';
+                document.getElementById('loteUnidad').textContent = unidad;
+            });
+        }
+
+        async function cargarPreciosDesdeSupabase() {
+            try {
+                const filas = await window.dataService.fetchPreciosElementos();
+                const mapa = {};
+                (filas || []).forEach(f => {
+                    const nombre = f.nombre || f.elemento || f.id;
+                    if (!nombre) return;
+                    mapa[nombre] = {
+                        precio: typeof f.precio === 'number' ? f.precio : (f.precio ? Number(f.precio) : 0),
+                        categoria: f.categoria || obtenerCategoria(nombre),
+                        ultimaActualizacion: f.ultimaActualizacion || f.ultima_actualizacion || new Date().toISOString().split('T')[0],
+                    };
+                });
+                preciosElementos = mapa;
+                console.log(`✅ Supabase: ${Object.keys(preciosElementos).length} precios`);
+
+                // Si no hay datos en Supabase, intentar migrar desde localStorage SIEMPRE
+                if (Object.keys(preciosElementos).length === 0) {
+                    console.log('ℹ️ Supabase precios vacío. Intentando migrar desde localStorage/defecto...');
+                    let origen = null;
+                    const preciosGuardados = localStorage.getItem('precios_elementos');
+                    if (preciosGuardados) {
+                        try { origen = JSON.parse(preciosGuardados); } catch {}
+                    }
+                    if (!origen) {
+                        // generar por defecto para migrar
+                        preciosElementos = {};
+                        inicializarPreciosDefecto();
+                        origen = preciosElementos;
+                    }
+                    if (origen) {
+                        await migrarPreciosLocalASupabase(origen);
+                        return cargarPreciosDesdeSupabase();
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Error cargando precios desde Supabase:', e);
+                mostrarAlerta('No se pudo cargar precios desde Supabase', 'danger');
+            }
+        }
+
+        async function migrarPreciosLocalASupabase(mapa) {
+            try {
+                const tareas = [];
+                for (const [nombre, datos] of Object.entries(mapa)) {
+                    const payload = {
+                        nombre,
+                        precio: typeof datos.precio === 'number' ? datos.precio : (datos.precio ? Number(datos.precio) : 0),
+                        categoria: datos.categoria || obtenerCategoria(nombre),
+                        ultimaActualizacion: datos.ultimaActualizacion || new Date().toISOString().split('T')[0],
+                    };
+                    tareas.push(window.dataService.upsertPrecioElementoByNombre(nombre, payload));
+                }
+                for (let i = 0; i < tareas.length; i += 50) {
+                    const slice = tareas.slice(i, i + 50);
+                    // eslint-disable-next-line no-await-in-loop
+                    await Promise.all(slice);
+                }
+                console.log(`✅ Migración de precios completada: ${tareas.length} elementos`);
+                mostrarAlerta('Precios migrados a Supabase', 'success');
+            } catch (e) {
+                console.error('❌ Error migrando precios a Supabase:', e);
+                mostrarAlerta('Error migrando precios a Supabase', 'danger');
+            }
+        }
+
+        function cargarPreciosDesdeStorage() {
+            const preciosGuardados = localStorage.getItem('precios_elementos');
+            if (preciosGuardados) {
+                try {
+                    preciosElementos = JSON.parse(preciosGuardados);
+                    console.log('✅ Precios cargados desde localStorage');
+                } catch (error) {
+                    console.error('❌ Error parseando precios de localStorage:', error);
+                }
+            }
+        }
+
+        function inicializarPreciosDefecto() {
+            // Precios estimados realistas en pesos mexicanos
+            const preciosEstimados = {
+                // INSUMOS - Cables y conectores
+                'Cable 4 pin 1 m': 25,
+                'Cable 4 pin 3 m': 65,
+                'Cable 4 pin 5 m': 95,
+                'Cable 4 pin 7 m': 125,
+                'Cable 4 pin 15 m': 245,
+                'Cable 4 pin 30 m': 485,
+                'Cable 6 pin 5 m': 115,
+                'Cable 2 vias': 18,
+                'Cable 4 vias': 32,
+                '"Y" 4 pines': 45,
+                'Base Pollak': 85,
+                'Pollak Macho ': 65,
+                'Pollak Hembra': 65,
+                'Cable de 1 polo': 12,
+                'Terminal de ojillo': 8,
+                '7 vias liso 2m': 185,
+                
+                // INSUMOS - Materiales básicos
+                'Silicon': 35,
+                'Cinchos grande': 3,
+                'Cinta de tela': 25,
+                'Cinta de aislar': 18,
+                'Poliflex 3/8': 4,
+                'Poliflex 1/4': 3,
+                'Cincho mediado': 2,
+                'Cincho con grapa': 4,
+                'Pija brocante 5/16': 2,
+                'Tornillo hexagonal 5/16': 3,
+                'Tornillo 3/8': 4,
+                'Tuerca 5/16': 2,
+                'Tuerca 3/8': 3,
+                'Rondana 5/16': 1,
+                'Rondana 3/8': 1,
+                'Espiral negro': 25,
+                'Espiral verde': 25,
+                
+                // INSUMOS - Componentes electrónicos
+                'Relevador 2 pasos 2 tiros': 125,
+                'Relevador 12v': 85,
+                'Relevador 24v': 95,
+                'Portarelevador': 35,
+                'placa perforada': 45,
+                'Gabinete 5*7*3': 185,
+                
+                // INSUMOS - Almacenamiento
+                'SD 128 Gb': 485,
+                'SD 256 Gb': 785,
+                'SD 512 Gb': 1285,
+                
+                // ACCESORIOS - Alarmas y audio
+                'Alarma parlante de 3 tonos': 385,
+                'Alarma parlante programable': 685,
+                'Bocina': 185,
+                'Microfono': 285,
+                'Botón balancin': 125,
+                'Boton de panico': 185,
+                
+                // ACCESORIOS - Cámaras
+                'Camara + radar': 1285,
+                'Camara con microfono': 885,
+                'Camara de reversa': 485,
+                'Camara Digital (IP)': 985,
+                'Camara exterior mini': 585,
+                'Camara lateral derecha de VPC': 685,
+                'Camara lateral izquierda de VPC': 685,
+                'Camara sideview derecho': 785,
+                'Camara sideview izquierdo': 785,
+                'Camara tipo clavo': 385,
+                
+                // ACCESORIOS - Sensores
+                'Sensor magnetico chico': 185,
+                'Sensor magnetico grande': 285,
+                'Led de giro a la derecha': 125,
+                'Led de giro a la izquierda': 125,
+                'Sensor derecho VPC': 385,
+                'Sensor izquierda VPC': 385,
+                'Sideview derecho': 485,
+                'Sideview izquierdo': 485,
+                
+                // EQUIPOS
+                'Dashcam ad2': 2485,
+                'Dashcam c6': 1885,
+                'Insider': 1585,
+                'Limitador de velocidad': 1285,
+                'Modulo sensor de cinturon seguridad': 985,
+                'Monitor de VPC': 2885,
+                'Grabador de video 4 ch': 3285
+            };
+            
+            const todosElementos = obtenerTodosLosElementos();
+            
+            todosElementos.forEach(elemento => {
+                if (!preciosElementos[elemento]) {
+                    preciosElementos[elemento] = {
+                        precio: preciosEstimados[elemento] || 0,
+                        categoria: obtenerCategoria(elemento),
+                        ultimaActualizacion: new Date().toISOString().split('T')[0]
+                    };
+                }
+            });
+            
+            // Guardar los precios inicializados en localStorage
+            localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+            console.log('💾 Precios por defecto guardados en localStorage');
+        }
+
+        function cargarTablaPrecios() {
+            const tbody = document.getElementById('tablaPrecios');
+            tbody.innerHTML = '';
+
+            const elementos = Object.keys(preciosElementos).sort();
+            datosFiltrados = elementos;
+
+            elementos.forEach(elemento => {
+                const datos = preciosElementos[elemento];
+                const precio = datos.precio || 0;
+                const categoria = datos.categoria || obtenerCategoria(elemento);
+                const ultimaActualizacion = datos.ultimaActualizacion || 'No definida';
+
+                const estadoClase = precio > 0 ? 'success' : 'warning';
+                const estadoTexto = precio > 0 ? 'Con precio' : 'Sin precio';
+
+                const row = `
+                    <tr>
+                        <td><strong>${elemento}</strong></td>
+                        <td><span class="badge bg-${categoria === 'equipos' ? 'primary' : categoria === 'accesorios' ? 'info' : 'secondary'}">${categoria}</span></td>
+                        <td>
+                            <span class="currency-symbol">$${precio.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span>
+                            <small class="ms-2 badge bg-${estadoClase}">${estadoTexto}</small>
+                        </td>
+                        <td><small class="text-muted">${ultimaActualizacion}</small></td>
+                        <td>
+                            <button class="btn btn-primary btn-sm btn-editar" data-elemento="${elemento.replace(/"/g, '&quot;')}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm btn-editar-rapido" data-elemento="${elemento.replace(/"/g, '&quot;')}">
+                                <i class="bi bi-currency-dollar"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+            
+            // Agregar event listeners a los botones
+            document.querySelectorAll('.btn-editar').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const elemento = this.dataset.elemento.replace(/&quot;/g, '"');
+                    console.log('🔍 Botón editar clickeado, elemento:', elemento);
+                    editarPrecio(elemento);
+                });
+            });
+            
+            document.querySelectorAll('.btn-editar-rapido').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const elemento = this.dataset.elemento.replace(/&quot;/g, '"');
+                    console.log('🔍 Botón editar rápido clickeado, elemento:', elemento);
+                    editarPrecioRapido(elemento);
+                });
+            });
+
+            document.getElementById('resultadosFiltro').textContent = 
+                `Mostrando ${elementos.length} elementos`;
+        }
+
+        function actualizarEstadisticas() {
+            const elementos = Object.keys(preciosElementos);
+            const conPrecio = elementos.filter(e => preciosElementos[e].precio > 0);
+            const sinPrecio = elementos.filter(e => preciosElementos[e].precio === 0);
+            
+            const totalPrecios = conPrecio.reduce((sum, e) => sum + preciosElementos[e].precio, 0);
+            const promedio = conPrecio.length > 0 ? totalPrecios / conPrecio.length : 0;
+
+            const categorias = new Set(elementos.map(e => preciosElementos[e].categoria));
+
+            document.getElementById('totalElementos').textContent = conPrecio.length;
+            document.getElementById('promedioPrecios').textContent = `$${promedio.toLocaleString('es-MX', {minimumFractionDigits: 0})}`;
+            document.getElementById('totalCategorias').textContent = categorias.size;
+            document.getElementById('sinPrecio').textContent = sinPrecio.length;
+        }
+
+        function editarPrecio(elemento) {
+            // Validar que el elemento no esté vacío
+            if (!elemento || elemento.trim() === '') {
+                console.error('❌ Error: Elemento vacío, no se puede editar');
+                mostrarAlerta('Error: No se puede editar un elemento sin nombre', 'danger');
+                return;
+            }
+            
+            elementoEditando = elemento;
+            const datos = preciosElementos[elemento];
+            
+            // Si el elemento no existe, inicializarlo
+            if (!datos) {
+                preciosElementos[elemento] = {
+                    precio: 0,
+                    categoria: obtenerCategoria(elemento),
+                    ultimaActualizacion: new Date().toISOString().split('T')[0]
+                };
+            }
+            
+            document.getElementById('editElemento').value = elemento;
+            document.getElementById('editCategoria').value = preciosElementos[elemento].categoria;
+            document.getElementById('editPrecio').value = preciosElementos[elemento].precio || '';
+            
+            new bootstrap.Modal(document.getElementById('modalEditarPrecio')).show();
+        }
+
+        async function editarPrecioRapido(elemento) {
+            // Validar que el elemento no esté vacío
+            if (!elemento || elemento.trim() === '') {
+                console.error('❌ Error: Elemento vacío, no se puede editar');
+                mostrarAlerta('Error: No se puede editar un elemento sin nombre', 'danger');
+                return;
+            }
+            
+            // Si el elemento no existe, inicializarlo
+            if (!preciosElementos[elemento]) {
+                preciosElementos[elemento] = {
+                    precio: 0,
+                    categoria: obtenerCategoria(elemento),
+                    ultimaActualizacion: new Date().toISOString().split('T')[0]
+                };
+            }
+            
+            const nuevoPrecio = prompt(`Ingrese el nuevo precio para: ${elemento}`, preciosElementos[elemento].precio || '0');
+            if (nuevoPrecio !== null && !isNaN(nuevoPrecio) && nuevoPrecio >= 0) {
+                preciosElementos[elemento].precio = parseFloat(nuevoPrecio);
+                preciosElementos[elemento].ultimaActualizacion = new Date().toISOString().split('T')[0];
+                
+                // Guardar automáticamente
+                if (modoCentralizado) {
+                    await window.dataService.upsertPrecioElementoByNombre(elemento, {
+                        nombre: elemento,
+                        categoria: preciosElementos[elemento].categoria,
+                        precio: preciosElementos[elemento].precio,
+                        ultimaActualizacion: preciosElementos[elemento].ultimaActualizacion,
+                    });
+                } else {
+                    localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                }
+                
+                cargarTablaPrecios();
+                actualizarEstadisticas();
+                mostrarAlerta(`Precio actualizado y guardado para ${elemento}`, 'success');
+            }
+        }
+
+        async function guardarEdicionPrecio() {
+            if (!elementoEditando) return;
+
+            const precio = parseFloat(document.getElementById('editPrecio').value) || 0;
+            const categoria = document.getElementById('editCategoria').value;
+
+            preciosElementos[elementoEditando].precio = precio;
+            preciosElementos[elementoEditando].categoria = categoria;
+            preciosElementos[elementoEditando].ultimaActualizacion = new Date().toISOString().split('T')[0];
+
+            // Guardar automáticamente
+            if (modoCentralizado) {
+                await window.dataService.upsertPrecioElementoByNombre(elementoEditando, {
+                    nombre: elementoEditando,
+                    categoria,
+                    precio,
+                    ultimaActualizacion: preciosElementos[elementoEditando].ultimaActualizacion,
+                });
+            } else {
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+            }
+
+            cargarTablaPrecios();
+            actualizarEstadisticas();
+            
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarPrecio')).hide();
+            mostrarAlerta(`Precio actualizado y guardado para ${elementoEditando}`, 'success');
+        }
+
+        function actualizarPreciosEnLote() {
+            new bootstrap.Modal(document.getElementById('modalActualizacionLote')).show();
+        }
+
+        async function aplicarActualizacionLote() {
+            const categoria = document.getElementById('loteCategoria').value;
+            const tipo = document.getElementById('loteTipo').value;
+            const valor = parseFloat(document.getElementById('loteValor').value);
+
+            if (isNaN(valor)) {
+                mostrarAlerta('Ingrese un valor válido', 'danger');
+                return;
+            }
+
+            let elementosAfectados = 0;
+            const elementos = Object.keys(preciosElementos);
+
+            elementos.forEach(elemento => {
+                const datos = preciosElementos[elemento];
+                
+                // Filtrar por categoría si se especificó
+                if (categoria && datos.categoria !== categoria) return;
+                
+                // Solo actualizar elementos que ya tienen precio
+                if (datos.precio <= 0) return;
+
+                let nuevoPrecio;
+                if (tipo === 'porcentaje') {
+                    nuevoPrecio = datos.precio * (1 + valor / 100);
+                } else {
+                    nuevoPrecio = datos.precio + valor;
+                }
+
+                // No permitir precios negativos
+                if (nuevoPrecio >= 0) {
+                    preciosElementos[elemento].precio = nuevoPrecio;
+                    preciosElementos[elemento].ultimaActualizacion = new Date().toISOString().split('T')[0];
+                    elementosAfectados++;
+                }
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('modalActualizacionLote')).hide();
+            cargarTablaPrecios();
+            actualizarEstadisticas();
+            
+            // Persistir en lote
+            if (modoCentralizado) {
+                const tareas = [];
+                for (const elemento of Object.keys(preciosElementos)) {
+                    const d = preciosElementos[elemento];
+                    if (categoria && d.categoria !== categoria) continue;
+                    if (d.precio <= 0) continue;
+                    tareas.push(window.dataService.upsertPrecioElementoByNombre(elemento, {
+                        nombre: elemento,
+                        categoria: d.categoria,
+                        precio: d.precio,
+                        ultimaActualizacion: d.ultimaActualizacion,
+                    }));
+                }
+                for (let i = 0; i < tareas.length; i += 50) {
+                    const slice = tareas.slice(i, i + 50);
+                    // eslint-disable-next-line no-await-in-loop
+                    await Promise.all(slice);
+                }
+            } else {
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+            }
+
+            mostrarAlerta(`${elementosAfectados} elementos actualizados`, 'success');
+        }
+
+        function aplicarFiltros() {
+            const filtroCategoria = document.getElementById('filtroCategoria').value;
+            const filtroEstado = document.getElementById('filtroEstado').value;
+            const filtroRango = document.getElementById('filtroRango').value;
+            const filtroNombre = document.getElementById('filtroNombre').value.toLowerCase();
+
+            const tbody = document.getElementById('tablaPrecios');
+            const filas = tbody.querySelectorAll('tr');
+
+            let visibles = 0;
+
+            filas.forEach(fila => {
+                const elemento = fila.cells[0].textContent.toLowerCase();
+                const categoria = fila.cells[1].textContent.toLowerCase();
+                const precioTexto = fila.cells[2].textContent;
+                const precio = parseFloat(precioTexto.replace(/[^0-9.-]+/g, ""));
+
+                let mostrar = true;
+
+                // Filtro por categoría
+                if (filtroCategoria && !categoria.includes(filtroCategoria)) mostrar = false;
+
+                // Filtro por estado
+                if (filtroEstado === 'con-precio' && precio <= 0) mostrar = false;
+                if (filtroEstado === 'sin-precio' && precio > 0) mostrar = false;
+
+                // Filtro por rango de precio
+                if (filtroRango && precio > 0) {
+                    switch (filtroRango) {
+                        case '0-100':
+                            if (precio > 100) mostrar = false;
+                            break;
+                        case '100-500':
+                            if (precio < 100 || precio > 500) mostrar = false;
+                            break;
+                        case '500-1000':
+                            if (precio < 500 || precio > 1000) mostrar = false;
+                            break;
+                        case '1000+':
+                            if (precio < 1000) mostrar = false;
+                            break;
+                    }
+                }
+
+                // Filtro por nombre
+                if (filtroNombre && !elemento.includes(filtroNombre)) mostrar = false;
+
+                fila.style.display = mostrar ? '' : 'none';
+                if (mostrar) visibles++;
+            });
+
+            document.getElementById('resultadosFiltro').textContent = `Mostrando ${visibles} elementos`;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroCategoria').value = '';
+            document.getElementById('filtroEstado').value = '';
+            document.getElementById('filtroRango').value = '';
+            document.getElementById('filtroNombre').value = '';
+            cargarTablaPrecios();
+        }
+
+        function guardarCambios() {
+            if (modoCentralizado) {
+                mostrarAlerta('Los cambios se guardan automáticamente en Supabase', 'info');
+            } else {
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                mostrarAlerta('Precios guardados en el navegador', 'success');
+            }
+        }
+
+        function exportarPrecios() {
+            const dataStr = JSON.stringify(preciosElementos, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'precios_elementos.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            mostrarAlerta('Precios exportados correctamente', 'success');
+        }
+
+        function importarPrecios(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const preciosImportados = JSON.parse(e.target.result);
+                    preciosElementos = { ...preciosElementos, ...preciosImportados };
+                    
+                    cargarTablaPrecios();
+                    actualizarEstadisticas();
+                    
+                    mostrarAlerta('Precios importados correctamente', 'success');
+                } catch (error) {
+                    mostrarAlerta('Error al importar el archivo', 'danger');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        function suscribirRealtimePrecios() {
+            if (!modoCentralizado) return;
+            window.dataService.subscribePreciosElementos(async (payload) => {
+                try {
+                    await cargarPreciosDesdeSupabase();
+                    cargarTablaPrecios();
+                    actualizarEstadisticas();
+                } catch (e) {
+                    console.warn('Realtime precios refresco fallido', e);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
