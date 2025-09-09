@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZendA - Workflow Manager | Cotizaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
+        }
+        .btn {
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+        .estado-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .estado-borrador { background-color: #f3f4f6; color: #374151; }
+        .estado-enviada { background-color: #dbeafe; color: #1e40af; }
+        .estado-aceptada { background-color: #d1fae5; color: #065f46; }
+        .estado-finalizada { background-color: #e0e7ff; color: #3730a3; }
+        .estado-rechazada { background-color: #fee2e2; color: #dc2626; }
+        .estado-revisando { background-color: #fef3c7; color: #92400e; }
+        .estado-autorizada { background-color: #d1fae5; color: #065f46; }
+        
+        /* Colores personalizados de la empresa */
+        .bg-primary { background-color: #fb930c !important; }
+        .btn-primary { background-color: #fb930c; border-color: #fb930c; }
+        .btn-primary:hover { background-color: #e67e22; border-color: #e67e22; }
+        .text-primary { color: #fb930c !important; }
+        .border-primary { border-color: #fb930c !important; }
+        
+        .unidad-item {
+            border: 2px dashed #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        }
+        .solucion-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff, #fafbff);
+            border-left: 6px solid #fb930c;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <img src="./LOGO_ZENDA.svg" alt="ZendA - Workflow Manager" height="40" class="me-3">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    ZendA - Cotizaciones
+                </a>
+            </div>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="./administrar-almacen.html" target="_blank">
+                    <i class="bi bi-warehouse me-1"></i>Administrar Almacén
+                </a>
+                <a class="nav-link" href="./administrar-precios.html" target="_blank">
+                    <i class="bi bi-currency-dollar me-1"></i>Administrar Precios
+                </a>
+                <a class="nav-link" href="./modulo-despacho.html" target="_blank">
+                    <i class="bi bi-truck me-1"></i>Módulo Despacho
+                </a>
+                <a class="nav-link" href="./instalaciones_modulo.html" target="_blank">
+                    <i class="bi bi-tools me-1"></i>Módulo Instalaciones
+                </a>
+                <a class="nav-link" href="./modulo-soporte.html" target="_blank">
+                    <i class="bi bi-hdd-network me-1"></i>Módulo Soporte
+                </a>
+                <button class="btn btn-outline-light btn-sm ms-2" id="btnLogout">
+                    <i class="bi bi-box-arrow-right"></i> Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-6 fw-bold text-dark">
+                            <i class="bi bi-briefcase me-2 text-primary"></i>
+                            Gestión de Cotizaciones
+                        </h1>
+                        <p class="text-muted lead">Crear y gestionar cotizaciones del sistema empresarial</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary btn-lg" onclick="abrirWizard()">
+                            <i class="bi bi-magic me-2"></i>Nueva Cotización
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertas"></div>
+
+        <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="lista-tab" data-bs-toggle="tab" data-bs-target="#lista" type="button" role="tab">
+                    <i class="bi bi-table me-2"></i>Lista de Cotizaciones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pipeline-tab" data-bs-toggle="tab" data-bs-target="#pipeline" type="button" role="tab">
+                    <i class="bi bi-kanban me-2"></i>Pipeline de Ventas
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="lista" role="tabpanel">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-ul me-2"></i>
+                            Lista de Cotizaciones
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Folio</th>
+                                        <th>Cliente</th>
+                                        <th>Tipo Cliente</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                        <th>Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaCotizaciones">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pipeline" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Pipeline de Cotizaciones</h5>
+                        <p>Vista de pipeline en desarrollo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Cotización -->
+    <div class="modal fade" id="modalNuevaCotizacion" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Nueva Cotización
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNuevaCotizacion">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    Información del Cliente
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold" for="cliente_nombre">Cliente *</label>
+                                        <input type="text" class="form-control" id="cliente_nombre" placeholder="Nombre del cliente" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold" for="tipo_cliente">Tipo de Cliente</label>
+                                        <select class="form-select" id="tipo_cliente" onchange="actualizarDescuento()">
+                                            <option value="">Seleccionar tipo</option>
+                                            <option value="Distribuidor A">Distribuidor A (25% desc.)</option>
+                                            <option value="Distribuidor B">Distribuidor B (20% desc.)</option>
+                                            <option value="Distribuidor C">Distribuidor C (15% desc.)</option>
+                                            <option value="Cliente final A">Cliente final A (10% desc.)</option>
+                                            <option value="Cliente final B">Cliente final B (5% desc.)</option>
+                                            <option value="Cliente final C">Cliente final C (0% desc.)</option>
+                                            <option value="Cliente corporativo A">Cliente corporativo A (30% desc.)</option>
+                                            <option value="Cliente corporativo B">Cliente corporativo B (20% desc.)</option>
+                                            <option value="Cliente corporativo C">Cliente corporativo C (10% desc.)</option>
+                                            <option value="Integrador A">Integrador A (25% desc.)</option>
+                                            <option value="Integrador B">Integrador B (20% desc.)</option>
+                                            <option value="Integrador C">Integrador C (15% desc.)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold" for="descuento">Descuento (%)</label>
+                                        <input type="number" class="form-control" id="descuento" min="0" max="100" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold" for="fecha_vencimiento">Fecha Vencimiento</label>
+                                        <input type="date" class="form-control" id="fecha_vencimiento">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" for="observaciones">Observaciones</label>
+                                    <textarea class="form-control" id="observaciones" rows="3" placeholder="Observaciones adicionales"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-box me-2"></i>Unidades
+                                    </h6>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarUnidad()">
+                                        <i class="bi bi-plus me-1"></i>Agregar Unidad
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="unidades-container">
+                                    <p class="text-muted text-center py-4">
+                                        No hay unidades agregadas. Haz clic en "Agregar Unidad" para comenzar.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-gear me-2"></i>Soluciones
+                                    </h6>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="agregarSolucion()">
+                                        <i class="bi bi-plus me-1"></i>Agregar Solución
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="soluciones-container">
+                                    <p class="text-muted text-center py-4">
+                                        No hay soluciones agregadas. Haz clic en "Agregar Solución" para comenzar.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="limpiarFormulario()">Limpiar</button>
+                    <button type="button" class="btn btn-primary" onclick="crearCotizacion()">Crear Cotización</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./dataService.js"></script>
+    <script src="./accessGuard.js"></script>
+    <script>
+        (async function(){
+            const ok = await window.accessGuard.ensureAuth(['admin','ventas']);
+            if (!ok) return;
+            // Logout handler
+            const logoutBtn = document.getElementById('btnLogout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try { await window.dataService.authSignOut(); } catch(_){}
+                    window.location.href = './login.html';
+                });
+            }
+        })();
+    </script>
+    <script>
+        let cotizaciones = [];
+        const modoCentralizado = (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase());
+
+        const descuentosPorCliente = {
+            "Distribuidor A": 25,
+            "Distribuidor B": 20,
+            "Distribuidor C": 15,
+            "Cliente final A": 10,
+            "Cliente final B": 5,
+            "Cliente final C": 0,
+            "Cliente corporativo A": 30,
+            "Cliente corporativo B": 20,
+            "Cliente corporativo C": 10,
+            "Integrador A": 25,
+            "Integrador B": 20,
+            "Integrador C": 15
+        };
+
+        let unidadIdCounter = 1;
+        let solucionIdCounter = 1;
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            await cargarCotizaciones();
+            suscribirRealtimeCotizaciones();
+        });
+
+        async function cargarCotizaciones() {
+            try {
+                if (modoCentralizado) {
+                    const res = await window.dataService.fetchCotizaciones();
+                    if (Array.isArray(res) && res.length > 0) {
+                        cotizaciones = res;
+                    } else {
+                        // Migración automática desde localStorage si hay datos y aún no migrado
+                        const yaMigrado = localStorage.getItem('cotizaciones_migradas_supabase') === 'true';
+                        const locales = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');
+                        if (!yaMigrado && locales.length > 0) {
+                            console.log('ℹ️ Supabase vacío. Migrando cotizaciones locales...');
+                            for (const c of locales) {
+                                // Asegurar compatibilidad de campos
+                                try { await window.dataService.upsertCotizacion(c); } catch (e) { console.warn('No se pudo migrar cotización', c.folio, e); }
+                            }
+                            localStorage.setItem('cotizaciones_migradas_supabase', 'true');
+                            const rec = await window.dataService.fetchCotizaciones();
+                            cotizaciones = Array.isArray(rec) ? rec : [];
+                        } else {
+                            cotizaciones = [];
+                        }
+                    }
+                } else {
+                    cotizaciones = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');
+                }
+            } catch (e) {
+                console.warn('⚠️ Error cargando cotizaciones. Usando localStorage.', e);
+                cotizaciones = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');
+            }
+
+            console.log('📋 Cargando cotizaciones:', cotizaciones.length, 'cotizaciones encontradas');
+            cotizaciones.forEach(cot => { console.log(`  - ${cot.folio}: ${cot.estado}`); });
+            renderTablaCotizaciones();
+        }
+
+        function renderTablaCotizaciones() {
+            const tbody = document.getElementById("tablaCotizaciones");
+            tbody.innerHTML = "";
+            cotizaciones.forEach(cotizacion => {
+                const row = document.createElement("tr");
+                const fecha = cotizacion.fecha_cotizacion ? new Date(cotizacion.fecha_cotizacion).toLocaleDateString('es-ES') : '';
+                const total = Number(cotizacion.total || 0);
+                const idAttr = String(cotizacion.id || cotizacion.folio || '');
+                row.innerHTML = `
+                    <td><strong class="text-primary">${cotizacion.folio || ('COT-' + (cotizacion.id || 'N/A'))}</strong></td>
+                    <td><strong>${cotizacion.cliente_nombre || ''}</strong></td>
+                    <td><span class="badge bg-light text-dark">${cotizacion.tipo_cliente || ''}</span></td>
+                    <td>${getEstadoBadge(cotizacion.estado)}</td>
+                    <td><small class="text-muted">${fecha}</small></td>
+                    <td><strong class="text-success">$${total.toLocaleString()}</strong></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-info" data-action="ver" data-id="${idAttr}">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" data-action="editar" data-id="${idAttr}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-success" data-action="estado" data-id="${idAttr}" title="Cambiar Estado">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-action="eliminar" data-id="${idAttr}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Delegación de eventos para evitar problemas con IDs string
+            tbody.onclick = (ev) => {
+                const btn = ev.target.closest('button[data-action]');
+                if (!btn) return;
+                const id = btn.getAttribute('data-id');
+                const action = btn.getAttribute('data-action');
+                if (!id) return;
+                // Buscar por id o por folio
+                switch (action) {
+                    case 'ver':
+                        verCotizacion(id);
+                        break;
+                    case 'editar':
+                        editarCotizacion(id);
+                        break;
+                    case 'estado':
+                        cambiarEstadoCotizacion(id);
+                        break;
+                    case 'eliminar':
+                        eliminarCotizacion(id);
+                        break;
+                }
+            };
+        }
+
+        function suscribirRealtimeCotizaciones() {
+            if (!modoCentralizado) return;
+            window.dataService.subscribeCotizaciones(async () => {
+                await cargarCotizaciones();
+            });
+        }
+
+        function getEstadoBadge(estado) {
+            const estados = {
+                "borrador": {class: "estado-borrador", text: "Borrador"},
+                "enviada": {class: "estado-enviada", text: "Enviada"},
+                "aceptada": {class: "estado-aceptada", text: "Aceptada"},
+                "finalizada": {class: "estado-finalizada", text: "Finalizada"},
+                "rechazada": {class: "estado-rechazada", text: "Rechazada"},
+                "revisando": {class: "estado-revisando", text: "En Revisión"},
+                "autorizada": {class: "estado-autorizada", text: "Autorizada"}
+            };
+            
+            const estadoInfo = estados[estado] || estados["borrador"];
+            console.log(`🏷️ Generando badge para estado: "${estado}" → "${estadoInfo.text}"`);
+            return `<span class="estado-badge ${estadoInfo.class}">${estadoInfo.text}</span>`;
+        }
+
+        function abrirModal() {
+            limpiarFormulario();
+            const modal = new bootstrap.Modal(document.getElementById("modalNuevaCotizacion"));
+            modal.show();
+        }
+
+        function actualizarDescuento() {
+            const tipoCliente = document.getElementById("tipo_cliente").value;
+            const descuento = descuentosPorCliente[tipoCliente] || 0;
+            document.getElementById("descuento").value = descuento;
+        }
+
+        function agregarUnidad() {
+            const container = document.getElementById("unidades-container");
+            
+            const noUnidadesMsg = container.querySelector('.text-muted.text-center');
+            if (noUnidadesMsg) {
+                noUnidadesMsg.remove();
+            }
+            
+            const unidadDiv = document.createElement("div");
+            unidadDiv.className = "unidad-item";
+            unidadDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="text-primary">Unidad #${unidadIdCounter}</h6>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarUnidad(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Tipo de Unidad</label>
+                        <select class="form-select" name="unidad_tipo_${unidadIdCounter}">
+                            <option value="">Seleccionar...</option>
+                            <option value="UPS">UPS</option>
+                            <option value="Batería">Batería</option>
+                            <option value="Accesorio">Accesorio</option>
+                            <option value="Regulador">Regulador</option>
+                            <option value="PDU">PDU</option>
+                            <option value="Software">Software</option>
+                            <option value="Inversor">Inversor</option>
+                            <option value="Estabilizador">Estabilizador</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Marca</label>
+                        <select class="form-select" name="unidad_marca_${unidadIdCounter}">
+                            <option value="">Seleccionar...</option>
+                            <option value="APC">APC</option>
+                            <option value="Schneider Electric">Schneider Electric</option>
+                            <option value="Eaton">Eaton</option>
+                            <option value="Vertiv">Vertiv</option>
+                            <option value="Tripp Lite">Tripp Lite</option>
+                            <option value="CyberPower">CyberPower</option>
+                            <option value="Liebert">Liebert</option>
+                            <option value="Delta">Delta</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Modelo</label>
+                        <input type="text" class="form-control" name="unidad_modelo_${unidadIdCounter}" placeholder="Modelo">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Cantidad</label>
+                        <input type="number" class="form-control" name="unidad_cantidad_${unidadIdCounter}" value="1" min="1">
+                    </div>
+                </div>
+            `;
+            container.appendChild(unidadDiv);
+            unidadIdCounter++;
+        }
+
+        function agregarSolucion() {
+            const container = document.getElementById("soluciones-container");
+            
+            const noSolucionesMsg = container.querySelector('.text-muted.text-center');
+            if (noSolucionesMsg) {
+                noSolucionesMsg.remove();
+            }
+            
+            const solucionDiv = document.createElement("div");
+            solucionDiv.className = "solucion-item";
+            solucionDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="text-success">Solución #${solucionIdCounter}</h6>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarSolucion(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Tipo de Solución</label>
+                        <select class="form-select" name="solucion_tipo_${solucionIdCounter}">
+                            <option value="">Seleccionar...</option>
+                            <option value="Instalación">Instalación</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                            <option value="Capacitación">Capacitación</option>
+                            <option value="Soporte">Soporte Técnico</option>
+                            <option value="Consultoría">Consultoría</option>
+                            <option value="Garantía Extendida">Garantía Extendida</option>
+                            <option value="Monitoreo Remoto">Monitoreo Remoto</option>
+                            <option value="Configuración">Configuración</option>
+                            <option value="Migración">Migración</option>
+                            <option value="Auditoría">Auditoría</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <input type="text" class="form-control" name="solucion_descripcion_${solucionIdCounter}" placeholder="Descripción de la solución">
+                    </div>
+                </div>
+            `;
+            container.appendChild(solucionDiv);
+            solucionIdCounter++;
+        }
+
+        function eliminarUnidad(button) {
+            button.closest(".unidad-item").remove();
+        }
+
+        function eliminarSolucion(button) {
+            button.closest(".solucion-item").remove();
+        }
+
+        function limpiarFormulario() {
+            document.getElementById("formNuevaCotizacion").reset();
+            document.getElementById("descuento").value = "";
+            
+            document.getElementById("unidades-container").innerHTML = `
+                <p class="text-muted text-center py-4">
+                    No hay unidades agregadas. Haz clic en "Agregar Unidad" para comenzar.
+                </p>
+            `;
+            
+            document.getElementById("soluciones-container").innerHTML = `
+                <p class="text-muted text-center py-4">
+                    No hay soluciones agregadas. Haz clic en "Agregar Solución" para comenzar.
+                </p>
+            `;
+            
+            unidadIdCounter = 1;
+            solucionIdCounter = 1;
+        }
+
+        async function crearCotizacion() {
+            const cliente = document.getElementById("cliente_nombre").value.trim();
+            
+            if (!cliente) {
+                mostrarAlerta("El nombre del cliente es obligatorio", "danger");
+                return;
+            }
+
+            const nuevaCotizacion = {
+                id: cotizaciones.length + 1,
+                folio: `COT-2025-${String(cotizaciones.length + 1).padStart(3, "0")}`,
+                cliente_nombre: cliente,
+                tipo_cliente: document.getElementById("tipo_cliente").value,
+                estado: "borrador",
+                fecha_cotizacion: new Date().toISOString().split("T")[0],
+                total: 0,
+                unidades: [],
+                soluciones: []
+            };
+
+            try {
+                if (modoCentralizado) {
+                    // No forzar id en Supabase; usar folio como conflicto
+                    const payload = Object.assign({}, nuevaCotizacion);
+                    delete payload.id;
+                    await window.dataService.upsertCotizacion(payload);
+                    await cargarCotizaciones();
+                } else {
+                    cotizaciones.push(nuevaCotizacion);
+                    localStorage.setItem('cotizaciones_guardadas', JSON.stringify(cotizaciones));
+                    renderTablaCotizaciones();
+                }
+                const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevaCotizacion"));
+                modal.hide();
+                mostrarAlerta(`Cotización creada exitosamente: ${nuevaCotizacion.folio}`, "success");
+                limpiarFormulario();
+            } catch (e) {
+                console.error('❌ Error creando cotización:', e);
+                mostrarAlerta('No se pudo crear la cotización', 'danger');
+            }
+        }
+
+        function verCotizacion(id) {
+            const cotizacion = cotizaciones.find(c => String(c.id) === String(id) || String(c.folio) === String(id));
+            if (!cotizacion) return;
+
+            // Crear HTML para unidades y soluciones - manejo de diferentes estructuras
+            let unidadesHtml = '';
+            const unidades = cotizacion.unidades || [];
+            const cantidadLote = cotizacion.cantidadLote;
+            
+            if (unidades.length > 0) {
+                // Detectar si es lote con unidades idénticas
+                const esLoteIdentico = cantidadLote && cantidadLote > 1;
+                
+                if (esLoteIdentico) {
+                    // Mostrar formato compacto para lotes
+                    const unidadModelo = unidades[0];
+                    unidadesHtml = `
+                        <h6><i class="bi bi-layers me-2"></i>Cotización en Lote</h6>
+                        <div class="alert alert-success">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="text-success mb-2"><i class="bi bi-truck me-1"></i>Cantidad: ${cantidadLote} unidades idénticas</h6>
+                                    <p class="mb-1"><strong>Modelo:</strong> ${unidadModelo.marca || 'No especificada'} ${unidadModelo.tipo_unidad || unidadModelo.tipo || 'No especificado'} ${unidadModelo.modelo || 'No especificado'} ${unidadModelo.anio || unidadModelo.año || ''}</p>
+                                    <p class="mb-0"><strong>Especificaciones:</strong> ${unidadModelo.combustible || 'No especificado'} - ${unidadModelo.voltaje || 'No especificado'}</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-primary fs-5">${cantidadLote}x</span>
+                                </div>
+                            </div>
+                            ${unidadModelo.soluciones && unidadModelo.soluciones.length > 0 ? `
+                                <hr class="my-2">
+                                <div class="mt-2">
+                                    <strong class="text-success"><i class="bi bi-gear me-1"></i>Soluciones aplicadas a cada unidad:</strong>
+                                    <div class="mt-2">
+                                        ${unidadModelo.soluciones.map(sol => {
+                                            let solucionHtml = `<div class="mb-2 p-2 bg-white rounded border-start border-success border-3">
+                                                <span class="badge bg-secondary me-1 mb-1">${sol.tipo_solucion || sol.tipo || 'Sin especificar'}</span>`;
+                                            
+                                            // Mostrar configuraciones si las hay
+                                            if (sol.configuraciones && Object.keys(sol.configuraciones).length > 0) {
+                                                const configuracionesFormateadas = Object.keys(sol.configuraciones)
+                                                    .filter(key => sol.configuraciones[key])
+                                                    .map(key => {
+                                                        const value = sol.configuraciones[key];
+                                                        
+                                                        // Formatear nombres de configuraciones
+                                                        let formattedKey = key.replace(/_/g, ' ')
+                                                                 .replace(/\b\w/g, l => l.toUpperCase())
+                                                                 .replace('Camara', 'Cámara')
+                                                                 .replace('Transmision', 'Transmisión')
+                                                                 .replace('Grabacion', 'Grabación')
+                                                                 .replace('Sensor Vpc', 'Sensor VPC')
+                                                                 .replace(' Vpc', ' VPC')
+                                                                 .replace('Jammer', 'Jammer')
+                                                                 .replace('Ip67', 'IP67')
+                                                                 .replace('Canal Ip', 'Canal IP');
+                                                        
+                                                        // Si es boolean y true, solo mostrar el nombre
+                                                        if (typeof value === 'boolean' && value) {
+                                                            return formattedKey;
+                                                        }
+                                                        // Si tiene valor específico, mostrarlo
+                                                        else if (typeof value === 'string' && value !== 'true') {
+                                                            return `${formattedKey}: ${value}`;
+                                                        }
+                                                        // Si es número, mostrarlo
+                                                        else if (typeof value === 'number') {
+                                                            return `${formattedKey}: ${value}`;
+                                                        }
+                                                        
+                                                        return null;
+                                                    })
+                                                    .filter(item => item !== null);
+                                                
+                                                if (configuracionesFormateadas.length > 0) {
+                                                    solucionHtml += `<br><div class="ms-3 mt-1">
+                                                        <small class="text-info">
+                                                            <strong>Configuraciones:</strong><br>
+                                                            ${configuracionesFormateadas.map(conf => `• ${conf}`).join('<br>')}
+                                                        </small>
+                                                    </div>`;
+                                                }
+                                            }
+                                            
+                                            solucionHtml += '</div>';
+                                            return solucionHtml;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // Mostrar formato detallado para unidades individuales
+                    unidadesHtml = `
+                        <h6><i class="bi bi-box me-2"></i>Unidades (${unidades.length})</h6>
+                        ${unidades.map((unidad, index) => `
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <h6>Unidad ${index + 1}</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Marca:</strong> ${unidad.marca || 'No especificada'}<br>
+                                            <strong>Tipo:</strong> ${unidad.tipo_unidad || unidad.tipo || 'No especificado'}<br>
+                                            <strong>Modelo:</strong> ${unidad.modelo || 'No especificado'}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Año:</strong> ${unidad.anio || unidad.año || 'No especificado'}<br>
+                                            <strong>Combustible:</strong> ${unidad.combustible || 'No especificado'}<br>
+                                            <strong>Voltaje:</strong> ${unidad.voltaje || 'No especificado'}
+                                            ${unidad.cantidad ? `<br><strong>Cantidad:</strong> ${unidad.cantidad}` : ''}
+                                        </div>
+                                    </div>
+                                    ${unidad.soluciones && unidad.soluciones.length > 0 ? `
+                                        <hr>
+                                        <strong>Soluciones:</strong><br>
+                                        ${unidad.soluciones.map(sol => {
+                                            let solucionHtml = `<span class="badge bg-secondary me-1 mb-1">${sol.tipo_solucion || sol.tipo || 'Sin especificar'}</span>`;
+                                            
+                                            // Mostrar configuraciones si las hay
+                                            if (sol.configuraciones && Object.keys(sol.configuraciones).length > 0) {
+                                                const configuracionesFormateadas = Object.keys(sol.configuraciones)
+                                                    .filter(key => sol.configuraciones[key])
+                                                    .map(key => {
+                                                        const value = sol.configuraciones[key];
+                                                        
+                                                        // Formatear nombres de configuraciones
+                                                        let formattedKey = key.replace(/_/g, ' ')
+                                                                 .replace(/\b\w/g, l => l.toUpperCase())
+                                                                 .replace('Camara', 'Cámara')
+                                                                 .replace('Transmision', 'Transmisión')
+                                                                 .replace('Grabacion', 'Grabación')
+                                                                 .replace('Sensor Vpc', 'Sensor VPC')
+                                                                 .replace(' Vpc', ' VPC')
+                                                                 .replace('Jammer', 'Jammer')
+                                                                 .replace('Ip67', 'IP67')
+                                                                 .replace('Canal Ip', 'Canal IP');
+                                                        
+                                                        // Si es boolean y true, solo mostrar el nombre
+                                                        if (typeof value === 'boolean' && value) {
+                                                            return formattedKey;
+                                                        }
+                                                        // Si tiene valor específico, mostrarlo
+                                                        else if (typeof value === 'string' && value !== 'true') {
+                                                            return `${formattedKey}: ${value}`;
+                                                        }
+                                                        // Si es número, mostrarlo
+                                                        else if (typeof value === 'number') {
+                                                            return `${formattedKey}: ${value}`;
+                                                        }
+                                                        
+                                                        return null;
+                                                    })
+                                                    .filter(item => item !== null);
+                                                
+                                                if (configuracionesFormateadas.length > 0) {
+                                                    solucionHtml += `<br><div class="ms-3 mt-1">
+                                                        <small class="text-info">
+                                                            <strong>Configuraciones:</strong><br>
+                                                            ${configuracionesFormateadas.map(conf => `• ${conf}`).join('<br>')}
+                                                        </small>
+                                                    </div>`;
+                                                }
+                                            }
+                                            
+                                            return `<div class="mb-2">${solucionHtml}</div>`;
+                                        }).join('')}
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                }
+            } else {
+                unidadesHtml = '<h6><i class="bi bi-box me-2"></i>Unidades</h6><p class="text-muted">No hay unidades registradas</p>';
+            }
+
+            // Soluciones globales (si no están por unidad)
+            let solucionesGlobalesHtml = '';
+            const solucionesGlobales = cotizacion.soluciones || [];
+            if (solucionesGlobales.length > 0 && !unidades.some(u => u.soluciones && u.soluciones.length > 0)) {
+                solucionesGlobalesHtml = `
+                    <hr>
+                    <h6><i class="bi bi-gear me-2"></i>Soluciones (${solucionesGlobales.length})</h6>
+                    ${solucionesGlobales.map(s => `
+                        <div class="solucion-item mb-2">
+                            <strong>${s.tipo || s.tipo_solucion || 'Tipo no especificado'}</strong>
+                            ${s.descripcion ? ` - ${s.descripcion}` : ''}
+                        </div>
+                    `).join('')}
+                `;
+            }
+
+            // Insumos, accesorios y servicios
+            let extrasHtml = '';
+            if ((cotizacion.insumos && cotizacion.insumos.length > 0) || 
+                (cotizacion.accesorios && cotizacion.accesorios.length > 0) || 
+                (cotizacion.servicios && cotizacion.servicios.length > 0)) {
+                
+                extrasHtml = '<hr><div class="row">';
+                
+                if (cotizacion.insumos && cotizacion.insumos.length > 0) {
+                    extrasHtml += `
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-primary">📦 Insumos</h6>
+                            ${cotizacion.insumos.map(insumo => `<span class="badge bg-warning text-dark me-1 mb-1">${insumo}</span>`).join('')}
+                        </div>
+                    `;
+                }
+                
+                if (cotizacion.accesorios && cotizacion.accesorios.length > 0) {
+                    extrasHtml += `
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-primary">🔌 Accesorios</h6>
+                            ${cotizacion.accesorios.map(acc => `<span class="badge bg-info me-1 mb-1">${acc}</span>`).join('')}
+                        </div>
+                    `;
+                }
+                
+                if (cotizacion.servicios && cotizacion.servicios.length > 0) {
+                    extrasHtml += `
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-primary">🛠️ Servicios</h6>
+                            ${cotizacion.servicios.map(serv => `<span class="badge bg-success me-1 mb-1">${serv}</span>`).join('')}
+                        </div>
+                    `;
+                }
+                
+                extrasHtml += '</div>';
+            }
+
+            const modalBody = `
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-eye me-2"></i>
+                            Detalles de Cotización: ${cotizacion.folio}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Cliente:</strong> ${cotizacion.cliente_nombre}<br>
+                                <strong>Tipo Cliente:</strong> ${cotizacion.tipo_cliente}<br>
+                                <strong>Estado:</strong> ${getEstadoBadge(cotizacion.estado)}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Fecha:</strong> ${cotizacion.fecha_cotizacion ? new Date(cotizacion.fecha_cotizacion).toLocaleDateString('es-ES') : 'No especificada'}<br>
+                                <strong>Fecha Vencimiento:</strong> ${cotizacion.fecha_vencimiento || 'No especificada'}<br>
+                                <strong>Total:</strong> <span class="text-success fw-bold">$${cotizacion.total ? cotizacion.total.toLocaleString() : '0.00'}</span>
+                            </div>
+                        </div>
+                        <hr>
+                        ${unidadesHtml}
+                        ${solucionesGlobalesHtml}
+                        ${extrasHtml}
+                        ${cotizacion.observaciones ? `
+                            <hr>
+                            <h6><i class="bi bi-chat-text me-2"></i>Observaciones</h6>
+                            <p>${cotizacion.observaciones}</p>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            // Crear modal dinámico
+            const modalHtml = `
+                <div class="modal fade" id="modalVerDetalles" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ver Cotización</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${modalBody}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="button" class="btn btn-primary" onclick="imprimirCotizacion()">
+                                    <i class="bi bi-printer me-1"></i>Imprimir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Remover modal anterior si existe
+            const modalExistente = document.getElementById("modalVerDetalles");
+            if (modalExistente) {
+                modalExistente.remove();
+            }
+
+            // Agregar nuevo modal
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Guardar datos de la cotización en el modal para impresión
+            document.getElementById("modalVerDetalles").dataset.cotizacion = JSON.stringify(cotizacion);
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById("modalVerDetalles"));
+            modal.show();
+        }
+
+        function editarCotizacion(id) {
+            const cotizacion = cotizaciones.find(c => String(c.id) === String(id) || String(c.folio) === String(id));
+            if (!cotizacion) return;
+
+            // Llenar el formulario de nueva cotización con los datos existentes
+            document.getElementById("cliente_nombre").value = cotizacion.cliente_nombre || '';
+            document.getElementById("tipo_cliente").value = cotizacion.tipo_cliente || '';
+            document.getElementById("descuento").value = cotizacion.descuento || '';
+            document.getElementById("fecha_vencimiento").value = cotizacion.fecha_vencimiento || '';
+            document.getElementById("observaciones").value = cotizacion.observaciones || '';
+            
+            // Limpiar unidades y soluciones existentes
+            // Redirigir al wizard para edición completa
+            localStorage.setItem('cotizacion_editar', JSON.stringify(cotizacion));
+            mostrarAlerta('Redirigiendo al wizard para editar...', 'info');
+            
+            setTimeout(() => {
+                window.location.href = 'cotizaciones-wizard-corregido.html?editar=' + id;
+            }, 1000);
+            return;
+            document.getElementById("solucionesContainer").innerHTML = '';
+            
+            // Cargar unidades con sus soluciones
+            if (cotizacion.unidades && cotizacion.unidades.length > 0) {
+                cotizacion.unidades.forEach(unidad => {
+                    agregarUnidad();
+                    const ultimaUnidad = document.getElementById("unidadesContainer").lastElementChild;
+                    
+                    // Llenar datos de la unidad
+                    ultimaUnidad.querySelector('.unidad-marca').value = unidad.marca || '';
+                    ultimaUnidad.querySelector('.unidad-tipo').value = unidad.tipo_unidad || unidad.tipo || '';
+                    ultimaUnidad.querySelector('.unidad-modelo').value = unidad.modelo || '';
+                    ultimaUnidad.querySelector('.unidad-anio').value = unidad.anio || unidad.año || '';
+                    ultimaUnidad.querySelector('.unidad-combustible').value = unidad.combustible || '';
+                    ultimaUnidad.querySelector('.unidad-voltaje').value = unidad.voltaje || '';
+                    
+                    // Cargar soluciones de esta unidad
+                    if (unidad.soluciones && unidad.soluciones.length > 0) {
+                        unidad.soluciones.forEach(solucion => {
+                            agregarSolucion();
+                            const ultimaSolucion = document.getElementById("solucionesContainer").lastElementChild;
+                            ultimaSolucion.querySelector('.solucion-tipo').value = solucion.tipo_solucion || solucion.tipo || '';
+                        });
+                    }
+                });
+            }
+            
+            // Si no hay unidades pero hay soluciones globales, cargarlas
+            if ((!cotizacion.unidades || cotizacion.unidades.length === 0) && cotizacion.soluciones && cotizacion.soluciones.length > 0) {
+                cotizacion.soluciones.forEach(solucion => {
+                    agregarSolucion();
+                    const ultimaSolucion = document.getElementById("solucionesContainer").lastElementChild;
+                    ultimaSolucion.querySelector('.solucion-tipo').value = solucion.tipo_solucion || solucion.tipo || '';
+                });
+            }
+            
+            actualizarDescuento();
+            
+            // Cambiar el título y botón del modal
+            document.querySelector("#modalNuevaCotizacion .modal-title").innerHTML = `
+                <i class="bi bi-pencil me-2"></i>Editar Cotización: ${cotizacion.folio}
+            `;
+            
+            // Cambiar el botón de crear por actualizar
+            const btnCrear = document.getElementById("btnCrear") || document.querySelector("#modalNuevaCotizacion .btn-primary");
+            if (btnCrear) {
+                btnCrear.innerHTML = '<i class="bi bi-check-circle me-1"></i>Actualizar Cotización';
+                btnCrear.onclick = () => actualizarCotizacion(id);
+            }
+
+            // Abrir el modal
+            const modal = new bootstrap.Modal(document.getElementById("modalNuevaCotizacion"));
+            modal.show();
+        }
+
+        function cambiarEstadoCotizacion(id) {
+            // Buscar la cotización por id o folio
+            const cotizacion = cotizaciones.find(c => String(c.id) === String(id) || String(c.folio) === String(id));
+            if (!cotizacion) {
+                alert('Cotización no encontrada');
+                return;
+            }
+
+            const estadosNombres = {
+                'borrador': 'Borrador',
+                'enviada': 'Enviada',
+                'aceptada': 'Aceptada',
+                'finalizada': 'Finalizada',
+                'rechazada': 'Rechazada'
+            };
+
+            // Mostrar modal de selección de estado
+            const estadoActual = cotizacion.estado || 'borrador';
+            
+            // Crear modal dinámicamente
+            const modalHtml = `
+                <div class="modal fade" id="modalCambiarEstado" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-arrow-repeat me-2"></i>Cambiar Estado de Cotización
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info">
+                                    <strong>Cotización:</strong> ${cotizacion.folio}<br>
+                                    <strong>Cliente:</strong> ${cotizacion.cliente_nombre}<br>
+                                    <strong>Estado actual:</strong> <span class="badge bg-secondary">${estadosNombres[estadoActual]}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" for="selectNuevoEstado">Nuevo Estado:</label>
+                                    <select class="form-select" id="selectNuevoEstado">
+                                        <option value="borrador" ${estadoActual === 'borrador' ? 'selected' : ''}>📝 Borrador</option>
+                                        <option value="enviada" ${estadoActual === 'enviada' ? 'selected' : ''}>📤 Enviada</option>
+                                        <option value="aceptada" ${estadoActual === 'aceptada' ? 'selected' : ''}>✅ Aceptada</option>
+                                        <option value="finalizada" ${estadoActual === 'finalizada' ? 'selected' : ''}>🏁 Finalizada</option>
+                                        <option value="rechazada" ${estadoActual === 'rechazada' ? 'selected' : ''}>❌ Rechazada</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="btnConfirmarCambioEstado" data-id="${String(id)}">
+                                    <i class="bi bi-check-circle me-1"></i>Cambiar Estado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insertar modal en el DOM
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalCambiarEstado'));
+            modal.show();
+
+            // Vincular acción del botón (evita inline y problemas con folios tipo COT-...)
+            const btnConfirm = document.getElementById('btnConfirmarCambioEstado');
+            if (btnConfirm) {
+                btnConfirm.addEventListener('click', () => {
+                    const key = btnConfirm.getAttribute('data-id');
+                    confirmarCambioEstado(key);
+                });
+            }
+            
+            // Limpiar modal cuando se cierre
+            modal._element.addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }
+
+        async function confirmarCambioEstado(id) {
+            const cotizacion = cotizaciones.find(c => String(c.id) === String(id) || String(c.folio) === String(id));
+            const estadoSeleccionado = document.getElementById('selectNuevoEstado').value;
+            const estadosNombres = {
+                'borrador': 'Borrador',
+                'enviada': 'Enviada',
+                'aceptada': 'Aceptada',
+                'finalizada': 'Finalizada',
+                'rechazada': 'Rechazada'
+            };
+            const estadoActual = cotizacion.estado || 'borrador';
+            
+            console.log('🔄 Cambiando estado:', {
+                id: id,
+                estadoActual: estadoActual,
+                estadoSeleccionado: estadoSeleccionado,
+                cotizacion: cotizacion
+            });
+                
+            if (estadoSeleccionado && estadoSeleccionado !== estadoActual) {
+                // Actualizar el estado
+                cotizacion.estado = estadoSeleccionado;
+                cotizacion.fecha_actualizacion = new Date().toISOString().split('T')[0];
+                try {
+                    if (modoCentralizado) {
+                        await window.dataService.patchCotizacionById(cotizacion.folio || id, {
+                            estado: estadoSeleccionado,
+                            fecha_actualizacion: cotizacion.fecha_actualizacion
+                        });
+                        // Auto-enviar a despacho cuando pasa a Aceptada (evitar duplicados)
+                        if (estadoSeleccionado === 'aceptada') {
+                            try {
+                                const claveBusqueda = (cotizacion.id && String(cotizacion.id).trim() !== '') ? cotizacion.id : (cotizacion.folio || id);
+                                const yaExiste = await window.dataService.findSolicitudByCotizacionId(String(claveBusqueda));
+                                if (!yaExiste) {
+                                    const solicitud = (function buildSolicitud(c) {
+                                        const elementosNecesarios = {};
+                                        const equiposNecesarios = {};
+                                        const solucionesLista = [];
+                                        // Unidades y soluciones
+                                        (c.unidades || []).forEach(unidad => {
+                                            if (unidad && Array.isArray(unidad.soluciones)) {
+                                                unidad.soluciones.forEach(sol => {
+                                                    if (sol && (sol.nombre || sol.tipo_solucion)) {
+                                                        solucionesLista.push(sol.nombre || sol.tipo_solucion);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                        // Insumos sugeridos globales
+                                        if (Array.isArray(c.insumosSugeridos)) {
+                                            c.insumosSugeridos.forEach(item => {
+                                                if (item && item.nombre && item.cantidad > 0) {
+                                                    elementosNecesarios[item.nombre] = (elementosNecesarios[item.nombre] || 0) + item.cantidad;
+                                                }
+                                            });
+                                        }
+                                        // Accesorios sugeridos globales
+                                        if (Array.isArray(c.accesoriosSugeridos)) {
+                                            c.accesoriosSugeridos.forEach(item => {
+                                                if (item && item.nombre && item.cantidad > 0) {
+                                                    elementosNecesarios[item.nombre] = (elementosNecesarios[item.nombre] || 0) + item.cantidad;
+                                                }
+                                            });
+                                        }
+                                        // Equipos automáticos globales
+                                        if (c.equiposAutomaticos) {
+                                            Object.entries(c.equiposAutomaticos).forEach(([equipo, datos]) => {
+                                                if (datos && datos.cantidad > 0) {
+                                                    const mult = c.cantidadLote || 1;
+                                                    equiposNecesarios[equipo] = (equiposNecesarios[equipo] || 0) + (datos.cantidad * mult);
+                                                }
+                                            });
+                                        }
+                                        const tipoUnidades = (c.unidades || []).map(u => u.tipo || u.tipo_unidad || '').filter(Boolean).join(', ');
+                                        return {
+                                            id: `DESP-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                                            cotizacionId: String(claveBusqueda),
+                                            cliente: c.cliente_nombre || c.nombre_cliente || 'Cliente no especificado',
+                                            fecha: new Date().toISOString().split('T')[0],
+                                            fechaRequerida: c.fecha_vencimiento || null,
+                                            urgencia: c.urgente || 'baja',
+                                            estado: 'pendiente',
+                                            cantidadUnidades: c.cantidadLote || (c.unidades ? c.unidades.length : 1),
+                                            tipoUnidades,
+                                            insumos: elementosNecesarios,
+                                            equipos: equiposNecesarios,
+                                            observaciones: `Solicitud generada automáticamente para cotización ${c.folio || c.id}`,
+                                            fechaCreacion: new Date().toISOString(),
+                                            soluciones: [...new Set(solucionesLista)],
+                                            tipoVenta: c.tipoVenta || 'instalacion'
+                                        };
+                                    })(cotizacion);
+                                    const ok = await window.dataService.insertSolicitudDespacho(solicitud);
+                                    if (!ok) console.warn('No se pudo insertar la solicitud de despacho en Supabase');
+                                } else {
+                                    console.log('Solicitud de despacho ya existe para esta cotización, no se duplica.');
+                                }
+                            } catch (ee) {
+                                console.warn('No fue posible generar la solicitud automática a despacho (esto es esperado si la tabla usa JSONB y no columnas de clave foránea):', ee);
+                            }
+                        }
+                        // refrescar lista desde Supabase
+                        await cargarCotizaciones();
+                    } else {
+                        const indexLocal = cotizaciones.findIndex(c => c.id == id);
+                        if (indexLocal !== -1) cotizaciones[indexLocal] = cotizacion;
+                        localStorage.setItem('cotizaciones_guardadas', JSON.stringify(cotizaciones));
+                        localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+                        // En modo local, delega al módulo de despacho vía su escaneo periódico
+                    }
+                    console.log('💾 Estado guardado:', { id, nuevoEstado: estadoSeleccionado });
+                } catch (e) {
+                    console.error('❌ Error actualizando estado:', e);
+                    mostrarAlerta('No se pudo actualizar el estado', 'danger');
+                    return;
+                }
+                    
+                // Cerrar modal primero
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalCambiarEstado'));
+                modal.hide();
+                
+                // Recargar la lista después de cerrar el modal
+                setTimeout(() => {
+                    renderTablaCotizaciones();
+                    mostrarAlerta(`Estado cambiado exitosamente a: ${estadosNombres[estadoSeleccionado]}`, 'success');
+                }, 300);
+            } else if (estadoSeleccionado === estadoActual) {
+                mostrarAlerta('El estado seleccionado es el mismo que el actual', 'warning');
+            } else {
+                mostrarAlerta('Opción no válida', 'danger');
+            }
+        }
+
+        function actualizarCotizacion(id) {
+            const cliente = document.getElementById("cliente_nombre").value.trim();
+            
+            if (!cliente) {
+                mostrarAlerta("El nombre del cliente es obligatorio", "danger");
+                return;
+            }
+
+            // Encontrar y actualizar la cotización
+            const index = cotizaciones.findIndex(c => c.id === id);
+            if (index !== -1) {
+                cotizaciones[index].cliente_nombre = cliente;
+                cotizaciones[index].tipo_cliente = document.getElementById("tipo_cliente").value;
+                
+                // Recargar la tabla
+                cargarCotizaciones();
+                
+                // Cerrar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevaCotizacion"));
+                modal.hide();
+                
+                // Restaurar el modal a su estado original
+                restaurarModalNuevo();
+                
+                mostrarAlerta(`Cotización ${cotizaciones[index].folio} actualizada exitosamente`, "success");
+            }
+        }
+
+        function restaurarModalNuevo() {
+            // Restaurar título
+            document.querySelector("#modalNuevaCotizacion .modal-title").innerHTML = `
+                <i class="bi bi-plus-circle me-2"></i>Nueva Cotización
+            `;
+            
+            // Restaurar botón
+            const btnCrear = document.querySelector("#modalNuevaCotizacion .btn-primary");
+            if (btnCrear) {
+                btnCrear.innerHTML = '<i class="bi bi-check-circle me-1"></i>Crear Cotización';
+                btnCrear.onclick = crearCotizacion;
+            }
+            
+            // Limpiar formulario
+            limpiarFormulario();
+        }
+
+        function imprimirCotizacion() {
+            // Crear ventana de impresión con formato profesional
+            const cotizacionActual = JSON.parse(document.getElementById('modalVerDetalles').dataset.cotizacion || '{}');
+            
+            const ventanaImpresion = window.open('', '_blank');
+            ventanaImpresion.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Cotización ${cotizacionActual.folio || 'N/A'}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+                        .header { text-align: center; border-bottom: 3px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
+                        .header h1 { color: #007bff; margin-bottom: 5px; }
+                        .header p { color: #666; margin: 0; }
+                        .info-section { margin-bottom: 25px; }
+                        .info-section h3 { background: #f8f9fa; padding: 10px; margin-bottom: 15px; border-left: 4px solid #007bff; }
+                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+                        .info-item { margin-bottom: 8px; }
+                        .info-item strong { color: #007bff; }
+                        .unidades-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        .unidades-table th, .unidades-table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+                        .unidades-table th { background: #007bff; color: white; }
+                        .unidades-table tr:nth-child(even) { background: #f8f9fa; }
+                        .soluciones-list { margin-top: 8px; }
+                        .solucion-item { background: #e3f2fd; padding: 5px 10px; margin: 3px 0; border-radius: 3px; font-size: 0.9em; }
+                        .configuraciones { color: #1976d2; font-size: 0.85em; margin-left: 15px; }
+                        .totales { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; }
+                        .footer { margin-top: 30px; text-align: center; color: #666; font-size: 0.9em; border-top: 1px solid #dee2e6; padding-top: 20px; }
+                        @media print { 
+                            body { margin: 0; } 
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>COTIZACIÓN</h1>
+                        <p>Folio: <strong>${cotizacionActual.folio || 'N/A'}</strong></p>
+                        <p>Fecha: ${new Date(cotizacionActual.fecha_cotizacion || new Date()).toLocaleDateString('es-ES')}</p>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>📋 Información del Cliente</h3>
+                        <div class="info-grid">
+                            <div>
+                                <div class="info-item"><strong>Cliente:</strong> ${cotizacionActual.cliente_nombre || 'No especificado'}</div>
+                                <div class="info-item"><strong>Empresa:</strong> ${cotizacionActual.empresa || 'No especificado'}</div>
+                                <div class="info-item"><strong>Tipo de Cliente:</strong> ${cotizacionActual.tipo_cliente || 'No especificado'}</div>
+                            </div>
+                            <div>
+                                <div class="info-item"><strong>Descuento:</strong> ${cotizacionActual.descuento || 0}%</div>
+                                <div class="info-item"><strong>Válida hasta:</strong> ${cotizacionActual.fecha_vencimiento ? new Date(cotizacionActual.fecha_vencimiento).toLocaleDateString('es-ES') : 'No especificado'}</div>
+                                <div class="info-item"><strong>Estado:</strong> ${(cotizacionActual.estado || 'borrador').toUpperCase()}</div>
+                            </div>
+                        </div>
+                        ${cotizacionActual.observaciones ? `<div class="info-item"><strong>Observaciones:</strong> ${cotizacionActual.observaciones}</div>` : ''}
+                    </div>
+
+                    <div class="info-section">
+                        <h3>🚛 Unidades y Soluciones</h3>
+                        ${cotizacionActual.unidades && cotizacionActual.unidades.length > 0 ? (() => {
+                            // Detectar si es un lote (cantidad > 1 y unidades idénticas)
+                            const cantidadLote = cotizacionActual.cantidadLote || 1;
+                            const esLote = cantidadLote > 1;
+                            
+                            if (esLote) {
+                                // Mostrar formato compacto para lotes
+                                const unidadModelo = cotizacionActual.unidades[0];
+                                return `
+                                    <div class="alert alert-success" style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; padding: 15px;">
+                                        <h4 style="color: #155724; margin-bottom: 15px;">📦 Cotización en Lote - ${cantidadLote} Unidades Idénticas</h4>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                            <div>
+                                                <h5 style="color: #155724;">Especificaciones de la Unidad</h5>
+                                                <strong>Marca:</strong> ${unidadModelo.marca || 'N/A'}<br>
+                                                <strong>Tipo:</strong> ${unidadModelo.tipo_unidad || unidadModelo.tipo || 'N/A'}<br>
+                                                <strong>Modelo:</strong> ${unidadModelo.modelo || 'N/A'} (${unidadModelo.anio || unidadModelo.año || 'N/A'})<br>
+                                                <strong>Combustible:</strong> ${unidadModelo.combustible || 'N/A'}<br>
+                                                <strong>Voltaje:</strong> ${unidadModelo.voltaje || 'N/A'}
+                                            </div>
+                                            <div>
+                                                <h5 style="color: #155724;">Soluciones por Unidad</h5>
+                                                ${unidadModelo.soluciones && unidadModelo.soluciones.length > 0 ? 
+                                                    unidadModelo.soluciones.map(sol => {
+                                                        let solucionHtml = `<div class="solucion-item">${sol.tipo_solucion || sol.tipo || 'Sin especificar'}</div>`;
+                                                        
+                                                        if (sol.configuraciones && Object.keys(sol.configuraciones).length > 0) {
+                                                            const configs = Object.keys(sol.configuraciones)
+                                                                .filter(key => sol.configuraciones[key])
+                                                                .map(key => key.replace(/_/g, ' ')
+                                                                              .replace(/\b\w/g, l => l.toUpperCase())
+                                                                              .replace('Sensor Vpc', 'Sensor VPC')
+                                                                              .replace(' Vpc', ' VPC'));
+                                                            
+                                                            if (configs.length > 0) {
+                                                                solucionHtml += `<div class="configuraciones">• ${configs.join(', ')}</div>`;
+                                                            }
+                                                        }
+                                                        
+                                                        return solucionHtml;
+                                                    }).join('')
+                                                    : '<em>Sin soluciones</em>'
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                // Mostrar formato detallado para cotizaciones individuales
+                                return `
+                                    <table class="unidades-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Unidad</th>
+                                                <th>Especificaciones</th>
+                                                <th>Soluciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${cotizacionActual.unidades.map((unidad, index) => `
+                                                <tr>
+                                                    <td><strong>Unidad ${index + 1}</strong></td>
+                                                    <td>
+                                                        <strong>Marca:</strong> ${unidad.marca || 'N/A'}<br>
+                                                        <strong>Tipo:</strong> ${unidad.tipo_unidad || unidad.tipo || 'N/A'}<br>
+                                                        <strong>Modelo:</strong> ${unidad.modelo || 'N/A'} (${unidad.anio || unidad.año || 'N/A'})<br>
+                                                        <strong>Combustible:</strong> ${unidad.combustible || 'N/A'}<br>
+                                                        <strong>Voltaje:</strong> ${unidad.voltaje || 'N/A'}
+                                                    </td>
+                                                    <td>
+                                                        ${unidad.soluciones && unidad.soluciones.length > 0 ? 
+                                                            unidad.soluciones.map(sol => {
+                                                                let solucionHtml = `<div class="solucion-item">${sol.tipo_solucion || sol.tipo || 'Sin especificar'}</div>`;
+                                                                
+                                                                if (sol.configuraciones && Object.keys(sol.configuraciones).length > 0) {
+                                                                    const configs = Object.keys(sol.configuraciones)
+                                                                        .filter(key => sol.configuraciones[key])
+                                                                        .map(key => key.replace(/_/g, ' ')
+                                                                                      .replace(/\b\w/g, l => l.toUpperCase())
+                                                                                      .replace('Sensor Vpc', 'Sensor VPC')
+                                                                                      .replace(' Vpc', ' VPC'));
+                                                                    
+                                                                    if (configs.length > 0) {
+                                                                        solucionHtml += `<div class="configuraciones">• ${configs.join(', ')}</div>`;
+                                                                    }
+                                                                }
+                                                                
+                                                                return solucionHtml;
+                                                            }).join('')
+                                                            : '<em>Sin soluciones</em>'
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                `;
+                            }
+                        })() : '<p><em>No hay unidades registradas</em></p>'}
+                    </div>
+
+                    ${(cotizacionActual.insumos && cotizacionActual.insumos.length > 0) || 
+                      (cotizacionActual.servicios && cotizacionActual.servicios.length > 0) || 
+                      (cotizacionActual.accesorios && cotizacionActual.accesorios.length > 0) ? `
+                        <div class="info-section">
+                            <h3>📦 Insumos, Servicios y Accesorios</h3>
+                            <div class="info-grid">
+                                ${cotizacionActual.insumos && cotizacionActual.insumos.length > 0 ? `
+                                    <div>
+                                        <strong>Insumos:</strong>
+                                        <ul>${cotizacionActual.insumos.map(item => `<li>${item}</li>`).join('')}</ul>
+                                    </div>
+                                ` : ''}
+                                ${cotizacionActual.servicios && cotizacionActual.servicios.length > 0 ? `
+                                    <div>
+                                        <strong>Servicios:</strong>
+                                        <ul>${cotizacionActual.servicios.map(item => `<li>${item}</li>`).join('')}</ul>
+                                    </div>
+                                ` : ''}
+                                ${cotizacionActual.accesorios && cotizacionActual.accesorios.length > 0 ? `
+                                    <div>
+                                        <strong>Accesorios:</strong>
+                                        <ul>${cotizacionActual.accesorios.map(item => `<li>${item}</li>`).join('')}</ul>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="totales">
+                        <h3>💰 Información Comercial</h3>
+                        <div class="info-grid">
+                            <div>
+                                <div class="info-item"><strong>Total de Unidades:</strong> ${cotizacionActual.unidades ? cotizacionActual.unidades.length : 0}</div>
+                                ${cotizacionActual.cantidadLote ? `<div class="info-item"><strong>Cantidad Lote:</strong> ${cotizacionActual.cantidadLote}</div>` : ''}
+                            </div>
+                            <div>
+                                <div class="info-item"><strong>Descuento:</strong> ${cotizacionActual.descuento || 0}%</div>
+                                <div class="info-item"><strong>Total:</strong> $${(cotizacionActual.total || 0).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        <p>Documento generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}</p>
+                        <p><em>Esta cotización es válida hasta la fecha indicada y está sujeta a términos y condiciones.</em></p>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            ventanaImpresion.document.close();
+            
+            // Esperar a que cargue y luego imprimir
+            setTimeout(() => {
+                ventanaImpresion.print();
+            }, 500);
+        }
+
+        async function eliminarCotizacion(id) {
+            const cotizacion = cotizaciones.find(c => String(c.id) === String(id) || String(c.folio) === String(id));
+            if (!cotizacion) return;
+
+            if (confirm(`¿Estás seguro de que deseas eliminar la cotización ${cotizacion.folio}?`)) {
+                try {
+                    if (modoCentralizado) {
+                        await window.dataService.deleteCotizacionCascade(cotizacion.folio || id);
+                        await cargarCotizaciones();
+                    } else {
+                        const index = cotizaciones.findIndex(c => c.id === id);
+                        if (index !== -1) cotizaciones.splice(index, 1);
+                        localStorage.setItem('cotizaciones_guardadas', JSON.stringify(cotizaciones));
+                        renderTablaCotizaciones();
+                    }
+                    mostrarAlerta(`Cotización ${cotizacion.folio} eliminada exitosamente`, "success");
+                } catch (e) {
+                    console.error('❌ Error eliminando cotización:', e);
+                    mostrarAlerta('No se pudo eliminar la cotización', 'danger');
+                }
+            }
+        }
+
+        function abrirWizard() {
+            // Al crear nueva, limpiar cualquier progreso de borrador para no precargarlo
+            localStorage.removeItem('cotizacion_progreso');
+            localStorage.removeItem('cotizacion_progreso_id');
+            window.location.href = 'cotizaciones-wizard-corregido.html';
+        }
+
+
+
+        function mostrarAlerta(mensaje, tipo) {
+            const alertasDiv = document.getElementById("alertas");
+            const alerta = document.createElement("div");
+            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alerta.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertasDiv.appendChild(alerta);
+
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
