@@ -1,0 +1,87 @@
+<svg width="280" height="100" viewBox="0 0 280 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo con gradiente sutil -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradiente para el texto principal -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ff8c42;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff6b35;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradiente para la línea de flujo -->
+    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e3a8a;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Sombra suave -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  
+  <!-- Fondo redondeado -->
+  <rect x="5" y="5" width="270" height="90" rx="20" ry="20" fill="url(#bgGradient)" stroke="#dee2e6" stroke-width="1"/>
+  
+  <!-- Línea de flujo curva principal (A → Z) -->
+  <path d="M 250 60 Q 200 20 50 60" 
+        stroke="url(#flowGradient)" 
+        stroke-width="4" 
+        fill="none" 
+        stroke-linecap="round"
+        filter="url(#shadow)"/>
+  
+  <!-- Flecha que sale de la Z (inicio) -->
+  <path d="M 50 60 L 45 55 M 50 60 L 45 65" 
+        stroke="url(#flowGradient)" 
+        stroke-width="4" 
+        fill="none" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        filter="url(#shadow)"/>
+  
+  <!-- Flecha que entra a la A (final) -->
+  <path d="M 250 60 L 255 55 M 250 60 L 255 65" 
+        stroke="url(#flowGradient)" 
+        stroke-width="4" 
+        fill="none" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        filter="url(#shadow)"/>
+  
+  <!-- Letra Z (inicio) -->
+  <text x="30" y="70" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="url(#textGradient)" filter="url(#shadow)">
+    Z
+  </text>
+  
+  <!-- Letra e (sobre la línea) -->
+  <text x="80" y="45" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#textGradient)" filter="url(#shadow)">
+    e
+  </text>
+  
+  <!-- Letra n (sobre la línea) -->
+  <text x="120" y="45" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#textGradient)" filter="url(#shadow)">
+    n
+  </text>
+  
+  <!-- Letra d (sobre la línea) -->
+  <text x="160" y="45" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#textGradient)" filter="url(#shadow)">
+    d
+  </text>
+  
+  <!-- Letra A (final) -->
+  <text x="230" y="70" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="url(#textGradient)" filter="url(#shadow)">
+    A
+  </text>
+  
+  <!-- Texto descriptivo -->
+  <text x="140" y="90" font-family="Arial, sans-serif" font-size="12" fill="#6c757d" text-anchor="middle" font-weight="500">
+    Workflow Manager
+  </text>
+</svg>
