@@ -1303,7 +1303,6 @@
                                                 <th>Línea CSV</th>
                                                 <th>Existente</th>
                                                 <th>Nuevo</th>
-                                                <th>Acción</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1319,11 +1318,6 @@
                                                         <span class="badge bg-primary">${dup.categoriaNueva}</span>
                                                         <br><small>$${dup.precioNuevo.toLocaleString('es-MX', {minimumFractionDigits: 2})}</small>
                                                     </td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-primary" onclick="editarPrecio('${dup.elemento.replace(/'/g, "\\'")}')">
-                                                            <i class="bi bi-pencil"></i> Editar
-                                                        </button>
-                                                    </td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -1331,7 +1325,7 @@
                                 </div>
                                 <div class="alert alert-info mt-3">
                                     <i class="bi bi-lightbulb me-2"></i>
-                                    <strong>Sugerencia:</strong> Para actualizar estos elementos, usa el botón "Editar" en la tabla principal o modifica el CSV eliminando los elementos duplicados.
+                                    <strong>Sugerencia:</strong> Para actualizar estos elementos, cierra este modal y usa el botón "Editar" (lápiz) en la tabla principal de precios, o modifica el CSV eliminando los elementos duplicados antes de importar.
                                 </div>
                             </div>
                             <div class="modal-footer">
