@@ -654,7 +654,7 @@
             const fechaVencimientoInput = document.getElementById('fecha_vencimiento');
             if (fechaVencimientoInput && !fechaVencimientoInput.value) {
                 const fechaActual = new Date();
-                fechaActual.setMonth(fechaActual.getMonth() + 1);
+                fechaActual.setDate(fechaActual.getDate() + 15);
                 const fechaVencimiento = fechaActual.toISOString().split('T')[0];
                 fechaVencimientoInput.value = fechaVencimiento;
             }
@@ -3190,9 +3190,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 });
             }
             
-            // Generar fecha de vencimiento automática (30 días desde hoy)
+            // Generar fecha de vencimiento automática (15 días desde hoy)
             const fechaVencimiento = new Date();
-            fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+            fechaVencimiento.setDate(fechaVencimiento.getDate() + 15);
             document.getElementById('fecha_vencimiento').value = fechaVencimiento.toISOString().split('T')[0];
             
             // Verificar si estamos en modo edición
