@@ -1557,9 +1557,17 @@
                             try {
                                 const requiereSoporte = (() => {
                                     const equipos = solicitud.equipos || {};
+                                    console.log('🔍 DEBUG SOPORTE - Equipos en solicitud:', equipos);
+                                    console.log('🔍 DEBUG SOPORTE - Claves de equipos:', Object.keys(equipos));
+                                    
                                     const tieneMDVR = Object.keys(equipos).some(k => /(MDVR|MVR|Grabador de video)/i.test(k));
                                     const tieneGPS = Object.keys(equipos).some(k => /(GPS|GV310|GV58|GV75|SMOC|GV|GPS.*GV)/i.test(k));
                                     const tieneDashcam = Object.keys(equipos).some(k => /(Dashcam\s*ad2|Dashcam\s*c6)/i.test(k));
+                                    
+                                    console.log('🔍 DEBUG SOPORTE - Tiene MDVR:', tieneMDVR);
+                                    console.log('🔍 DEBUG SOPORTE - Tiene GPS:', tieneGPS);
+                                    console.log('🔍 DEBUG SOPORTE - Tiene Dashcam:', tieneDashcam);
+                                    
                                     if (tieneMDVR || tieneGPS || tieneDashcam) return true;
                                     const det = (notificacionInstalaciones.solucionesDetalladas && notificacionInstalaciones.solucionesDetalladas.length)
                                       ? notificacionInstalaciones.solucionesDetalladas
@@ -1571,19 +1579,36 @@
                                         return grab && (sol.includes('vpc') || sol.includes('sideview') || sol.includes('encadenamiento'));
                                     });
                                 })();
+                                console.log('🔍 DEBUG SOPORTE - Requiere soporte:', requiereSoporte);
+                                
                                 if (requiereSoporte) {
+                                    console.log('✅ DEBUG SOPORTE - Creando notificación para soporte...');
                                     const notifSoporte = Object.assign({}, notificacionInstalaciones, {
                                         id: `SOP-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
                                         modulo: 'soporte',
                                         estado: 'pendiente',
                                         fechaCreacion: new Date().toISOString(),
                                     });
+                                    console.log('✅ DEBUG SOPORTE - Notificación creada:', notifSoporte);
+                                    
                                     await window.dataService.findNotificacionSoporteBySolicitudId(solicitud.id).then(async (exSoporte) => {
+                                        console.log('🔍 DEBUG SOPORTE - Verificando si ya existe notificación:', exSoporte);
                                         if (!exSoporte || !exSoporte.id) {
+                                            console.log('✅ DEBUG SOPORTE - Insertando nueva notificación...');
                                             await window.dataService.insertNotificacionSoporte(notifSoporte)
-                                              .then(ok => { if (!ok) console.warn('No se pudo enviar a soporte'); });
+                                              .then(ok => { 
+                                                if (ok) {
+                                                    console.log('✅ DEBUG SOPORTE - Notificación enviada exitosamente');
+                                                } else {
+                                                    console.warn('❌ DEBUG SOPORTE - No se pudo enviar a soporte');
+                                                }
+                                              });
+                                        } else {
+                                            console.log('ℹ️ DEBUG SOPORTE - Ya existe notificación para esta solicitud');
                                         }
                                     });
+                                } else {
+                                    console.log('ℹ️ DEBUG SOPORTE - No requiere soporte, no se envía notificación');
                                 }
                             } catch(e) { console.warn('Hook soporte fallo:', e); }
                             cargarListaSolicitudes();
