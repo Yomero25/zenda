@@ -413,13 +413,11 @@
             console.log('✅ Estadísticas actualizadas:', { totalElementos, elementosConPrecio, elementosSinPrecio, precioPromedio });
         }
 
-        // Función para cargar la tabla de precios - VERSIÓN ACTUALIZADA
+        // Función para cargar la tabla de precios - VERSIÓN FUNCIONAL
         function cargarTablaPrecios() {
             console.log('🔄 Cargando tabla de precios...');
             console.log('preciosElementos:', preciosElementos);
             console.log('Total elementos en preciosElementos:', Object.keys(preciosElementos).length);
-            console.log('🔍 DEBUG: Iniciando cargarTablaPrecios - versión actualizada');
-            console.log('🚀 FORZANDO ACTUALIZACIÓN - VERSIÓN 2.0');
             
             const tbody = document.getElementById('tablaPrecios');
             if (!tbody) {
@@ -427,29 +425,71 @@
                 return;
             }
 
+            // Limpiar tabla
             tbody.innerHTML = '';
+            console.log('🧹 Tabla limpiada');
 
-            Object.entries(preciosElementos).forEach(([elemento, datos]) => {
-                console.log(`Procesando elemento: ${elemento}`, datos);
+            // Procesar cada elemento
+            const elementos = Object.keys(preciosElementos).sort();
+            console.log('📋 Elementos a procesar:', elementos.length);
+            
+            elementos.forEach((elemento, index) => {
+                const datos = preciosElementos[elemento];
+                console.log(`Procesando elemento ${index + 1}/${elementos.length}: ${elemento}`, datos);
+                
+                const precio = datos.precio || 0;
+                const categoria = datos.categoria || 'insumos';
+                const fechaActualizacion = datos.fecha_actualizacion || datos.ultimaActualizacion || 'N/A';
+                
+                // Determinar color del badge según categoría
+                let badgeClass = 'bg-secondary';
+                if (categoria.toLowerCase() === 'equipo') badgeClass = 'bg-primary';
+                else if (categoria.toLowerCase() === 'accesorio') badgeClass = 'bg-info';
+                else if (categoria.toLowerCase() === 'insumo') badgeClass = 'bg-secondary';
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${elemento}</strong></td>
-                    <td><span class="badge bg-secondary">${datos.categoria || 'insumos'}</span></td>
-                    <td class="currency-symbol">$${datos.precio || 0}</td>
-                    <td>${datos.fecha_actualizacion ? new Date(datos.fecha_actualizacion).toLocaleDateString() : 'N/A'}</td>
+                    <td><span class="badge ${badgeClass}">${categoria}</span></td>
+                    <td class="currency-symbol">$${precio.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                    <td><small class="text-muted">${fechaActualizacion}</small></td>
                     <td>
-                        <button class="btn btn-sm btn-primary me-1" onclick="editarPrecio('${elemento}')">
+                        <button class="btn btn-sm btn-primary me-1" onclick="editarPrecio('${elemento.replace(/'/g, "\\'")}')" title="Editar">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="btn btn-sm btn-success" onclick="actualizarPrecio('${elemento}')">
-                            <i class="bi bi-currency-dollar"></i>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarPrecio('${elemento.replace(/'/g, "\\'")}')" title="Eliminar">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
             
-            console.log('✅ Tabla cargada con', Object.keys(preciosElementos).length, 'elementos');
+            console.log('✅ Tabla cargada exitosamente con', elementos.length, 'elementos');
+        }
+
+        // Función para eliminar un precio
+        function eliminarPrecio(elemento) {
+            if (confirm(`¿Estás seguro de que quieres eliminar "${elemento}"?`)) {
+                console.log('🗑️ Eliminando elemento:', elemento);
+                
+                // Eliminar de preciosElementos
+                delete preciosElementos[elemento];
+                
+                // Guardar en localStorage
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                
+                // Guardar en Supabase si está disponible
+                if (window.dataService && window.dataService.deletePrecioElemento) {
+                    window.dataService.deletePrecioElemento(elemento);
+                }
+                
+                // Recargar tabla
+                cargarTablaPrecios();
+                actualizarEstadisticas();
+                
+                console.log('✅ Elemento eliminado:', elemento);
+            }
         }
 
         // Función para restaurar precios si se perdieron
