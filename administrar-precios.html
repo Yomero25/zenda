@@ -396,12 +396,19 @@
 
         // Función para cargar la tabla de precios
         function cargarTablaPrecios() {
+            console.log('🔄 Cargando tabla de precios...');
+            console.log('preciosElementos:', preciosElementos);
+            
             const tbody = document.getElementById('tablaPrecios');
-            if (!tbody) return;
+            if (!tbody) {
+                console.error('❌ No se encontró tbody con id="tablaPrecios"');
+                return;
+            }
 
             tbody.innerHTML = '';
 
             Object.entries(preciosElementos).forEach(([elemento, datos]) => {
+                console.log(`Procesando elemento: ${elemento}`, datos);
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${elemento}</strong></td>
@@ -419,6 +426,8 @@
                 `;
                 tbody.appendChild(row);
             });
+            
+            console.log('✅ Tabla cargada con', Object.keys(preciosElementos).length, 'elementos');
         }
 
         // Función para restaurar precios si se perdieron
@@ -1201,8 +1210,13 @@
                 fecha_actualizacion: new Date().toISOString()
             };
 
+            console.log('Guardando en preciosElementos:', { elemento, nuevoElemento });
+            console.log('preciosElementos antes:', preciosElementos);
+
             // Agregar al objeto local
             preciosElementos[elemento] = nuevoElemento;
+            
+            console.log('preciosElementos después:', preciosElementos);
 
             // Guardar en Supabase si está disponible
             if (modoCentralizado) {
