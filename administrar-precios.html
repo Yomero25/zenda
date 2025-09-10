@@ -407,8 +407,8 @@
             tbody.innerHTML = '';
             console.log('🧹 Tabla limpiada');
 
-            // Procesar cada elemento
-            const elementos = Object.keys(preciosElementos).sort();
+            // Procesar cada elemento (ordenamiento alfabético case-insensitive)
+            const elementos = Object.keys(preciosElementos).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
             console.log('📋 Elementos a procesar:', elementos.length);
             
             elementos.forEach((elemento, index) => {
