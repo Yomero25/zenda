@@ -444,8 +444,8 @@
                 
                 // Determinar color del badge según categoría
                 let badgeClass = 'bg-secondary';
-                if (categoria.toLowerCase() === 'equipo') badgeClass = 'bg-primary';
-                else if (categoria.toLowerCase() === 'accesorio') badgeClass = 'bg-info';
+                if (categoria.toLowerCase() === 'equipo') badgeClass = 'bg-success';
+                else if (categoria.toLowerCase() === 'accesorio') badgeClass = 'bg-primary';
                 else if (categoria.toLowerCase() === 'insumo') badgeClass = 'bg-secondary';
                 
                 const row = document.createElement('tr');
@@ -469,27 +469,41 @@
             console.log('✅ Tabla cargada exitosamente con', elementos.length, 'elementos');
         }
 
+        // Variable global para almacenar el elemento a eliminar
+        let elementoAEliminar = null;
+
         // Función para eliminar un precio
         function eliminarPrecio(elemento) {
-            if (confirm(`¿Estás seguro de que quieres eliminar "${elemento}"?`)) {
-                console.log('🗑️ Eliminando elemento:', elemento);
+            elementoAEliminar = elemento;
+            document.getElementById('elementoAEliminar').textContent = elemento;
+            new bootstrap.Modal(document.getElementById('modalConfirmarEliminar')).show();
+        }
+
+        // Función para confirmar eliminación
+        function confirmarEliminacion() {
+            if (elementoAEliminar) {
+                console.log('🗑️ Eliminando elemento:', elementoAEliminar);
                 
                 // Eliminar de preciosElementos
-                delete preciosElementos[elemento];
+                delete preciosElementos[elementoAEliminar];
                 
                 // Guardar en localStorage
                 localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
                 
                 // Guardar en Supabase si está disponible
                 if (window.dataService && window.dataService.deletePrecioElemento) {
-                    window.dataService.deletePrecioElemento(elemento);
+                    window.dataService.deletePrecioElemento(elementoAEliminar);
                 }
                 
                 // Recargar tabla
                 cargarTablaPrecios();
                 actualizarEstadisticas();
                 
-                console.log('✅ Elemento eliminado:', elemento);
+                console.log('✅ Elemento eliminado:', elementoAEliminar);
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
+                elementoAEliminar = null;
             }
         }
 
@@ -1366,6 +1380,26 @@
                     <button type="button" class="btn btn-primary" id="btnProcesarCSV" onclick="procesarArchivoCSV()" disabled>
                         <i class="bi bi-upload me-1"></i>Importar
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Confirmar Eliminación -->
+    <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que quieres eliminar el elemento <strong id="elementoAEliminar"></strong>?</p>
+                    <p class="text-muted">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
                 </div>
             </div>
         </div>
