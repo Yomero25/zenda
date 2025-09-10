@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
+<title>ZendA - Workflow Manager | Login</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,9 +19,9 @@
     if (window.dataService) return true;
     // candidatos según desde dónde se abra el login
     const candidates = [
+      './dataService.js',                          // login está en sistema-trazabilidad-new/
       'sistema-trazabilidad-new/dataService.js',   // si login está en Distribucion/
-      './dataService.js',                          // si login está en sistema-trazabilidad-new/
-      '../sistema-trazabilidad-new/dataService.js' // si hay otra estructura
+      '../sistema-trazabilidad-new/dataService.js' // otras estructuras
     ];
     for (const path of candidates){
       try {
@@ -40,9 +40,12 @@
   }
   // Fallback si el archivo anterior no existe por la ruta
   if (!window.dataService){
-    // Si estamos dentro de sistema-trazabilidad-new/login.html, la ruta válida es './dataService.js'
-    loadScript('./sistema-trazabilidad-new/dataService.js', function(){}, function(){
-      loadScript('./dataService.js');
+    // Intentar primero la ruta local
+    loadScript('./dataService.js', function(){}, function(){
+      // Alternativas por si se abre desde otro nivel de carpetas
+      loadScript('sistema-trazabilidad-new/dataService.js', function(){}, function(){
+        loadScript('../sistema-trazabilidad-new/dataService.js');
+      });
     });
   }
   window.__ensureDataService = function(cb){
@@ -58,13 +61,16 @@
 })();
 </script>
 </head>
-<body class="bg-light d-flex align-items-center" style="min-height:100vh;">
+<body class="d-flex align-items-center" style="min-height:100vh; background: linear-gradient(135deg, #fff7ec 0%, #ffe8cf 100%);">
   <div class="container">
     <div class="row justify-content-center">
+      <div class="col-12 text-center mb-4">
+        <img src="./LOGO_ZENDA.svg" alt="ZendA - Workflow Manager" height="120" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));">
+      </div>
       <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="bi bi-box-arrow-in-right me-2"></i>Acceso</h5>
+        <div class="card shadow-sm" style="border: 1px solid #ffd6a6;">
+          <div class="card-header text-white text-center" style="background-color:#fb930c;">
+            <h5 class="mb-0">Acceso</h5>
           </div>
           <div class="card-body">
             <div class="mb-3">
@@ -76,7 +82,9 @@
               <input type="password" id="password" class="form-control" placeholder="••••••••">
             </div>
             <div class="d-grid">
-              <button id="btnLogin" class="btn btn-primary"><i class="bi bi-unlock me-1"></i> Entrar</button>
+              <button id="btnLogin" class="btn text-white" style="background-color:#fb930c;border-color:#fb930c;">
+                <i class="bi bi-unlock me-1"></i> Entrar
+              </button>
             </div>
             <div id="msg" class="mt-3 small text-danger"></div>
           </div>
@@ -100,22 +108,22 @@
       if (!email || !password) throw new Error('Ingresa email y contraseña');
       await window.dataService.authSignIn(email, password);
       const rol = await window.dataService.getUserRole();
-      // Redirección según rol
-      switch(rol){
-        case 'admin':
-        case 'ventas':
-          window.location.href = 'cotizaciones-completo.html'; break;
-        case 'despacho':
-          window.location.href = 'sistema-trazabilidad-new/modulo-despacho.html'; break;
-        case 'instalaciones':
-          window.location.href = 'sistema-trazabilidad-new/instalaciones_modulo.html'; break;
-        case 'almacen':
-          window.location.href = 'sistema-trazabilidad-new/administrar-almacen.html'; break;
-        case 'precios':
-          window.location.href = 'sistema-trazabilidad-new/administrar-precios.html'; break;
-        default:
-          window.location.href = 'cotizaciones-completo.html';
+      // Redirección según rol (todas relativas a este directorio)
+      const rutasPorRol = {
+        admin: 'cotizaciones-completo.html',
+        ventas: 'cotizaciones-completo.html',
+        despacho: 'modulo-despacho.html',
+        instalaciones: 'instalaciones_modulo.html',
+        almacen: 'administrar-almacen.html',
+        precios: 'administrar-precios.html',
+        soporte: 'modulo-soporte.html'
+      };
+      if (!rol || !rutasPorRol[rol]){
+        msg.textContent = 'Tu usuario no tiene un rol asignado. Contacta al administrador.';
+        try { await window.dataService.authSignOut(); } catch(_){}
+        return;
       }
+      window.location.href = rutasPorRol[rol];
     } catch(e){
       msg.textContent = e.message || 'Error de acceso';
     } finally {
