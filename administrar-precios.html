@@ -76,13 +76,6 @@
                     <i class="bi bi-upload"></i> Importar CSV
                 </button>
                 
-                <button class="btn btn-warning" onclick="restaurarPrecios()">
-                    <i class="bi bi-arrow-clockwise"></i> Restaurar Precios
-                </button>
-                
-                <button class="btn btn-danger" onclick="limpiarElementosVacios()">
-                    <i class="bi bi-trash"></i> Limpiar Elementos Vacíos
-                </button>
 
                 
                 <div class="mt-4">
@@ -444,9 +437,9 @@
                 
                 // Determinar color del badge según categoría
                 let badgeClass = 'bg-secondary';
-                if (categoria.toLowerCase() === 'equipo') badgeClass = 'bg-success';
-                else if (categoria.toLowerCase() === 'accesorio') badgeClass = 'bg-primary';
-                else if (categoria.toLowerCase() === 'insumo') badgeClass = 'bg-secondary';
+                if (categoria.toLowerCase() === 'equipo' || categoria.toLowerCase() === 'equipos') badgeClass = 'bg-success';
+                else if (categoria.toLowerCase() === 'accesorio' || categoria.toLowerCase() === 'accesorios') badgeClass = 'bg-primary';
+                else if (categoria.toLowerCase() === 'insumo' || categoria.toLowerCase() === 'insumos') badgeClass = 'bg-secondary';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
