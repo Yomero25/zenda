@@ -1217,7 +1217,12 @@
 
             // Guardar en Supabase si está disponible
             if (modoCentralizado) {
-                window.dataService.upsertPrecioElementoByNombre(elemento, categoria, precio)
+                const record = {
+                    precio: precio,
+                    categoria: categoria,
+                    ultimaActualizacion: new Date().toISOString().split('T')[0]
+                };
+                window.dataService.upsertPrecioElementoByNombre(elemento, record)
                     .then(() => {
                         if (mostrarMensaje) {
                             mostrarAlerta('Elemento agregado correctamente', 'success');
