@@ -1109,7 +1109,7 @@
                 if (!file) return;
 
                 // Mostrar nombre del archivo
-                document.getElementById('nombreArchivo').textContent = file.name;
+                document.getElementById('nombreArchivo').value = file.name;
                 document.getElementById('btnProcesarCSV').disabled = false;
 
                 // Leer archivo
