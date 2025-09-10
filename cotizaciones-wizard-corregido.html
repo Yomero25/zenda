@@ -3162,6 +3162,26 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             cargarAccesorios();
             cargarProgreso();
             
+            // Suscribirse a cambios en tiempo real de precios
+            if (modoCentralizado && window.dataService && window.dataService.subscribePreciosElementos) {
+                console.log('🔄 Suscribiéndose a cambios de precios en tiempo real...');
+                window.dataService.subscribePreciosElementos((payload) => {
+                    console.log('💲 Cambio en precios detectado:', payload);
+                    // Recargar precios cuando hay cambios
+                    cargarPreciosCache().then(() => {
+                        console.log('✅ Precios actualizados en tiempo real');
+                        // Recalcular total si estamos en una cotización
+                        if (typeof calcularTotalCotizacion === 'function') {
+                            const unidades = document.getElementById('unidades')?.value || 1;
+                            const cotizacionData = obtenerDatosCotizacion();
+                            if (cotizacionData) {
+                                calcularTotalCotizacion(unidades, cotizacionData);
+                            }
+                        }
+                    });
+                });
+            }
+            
             // Generar fecha de vencimiento automática (30 días desde hoy)
             const fechaVencimiento = new Date();
             fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);

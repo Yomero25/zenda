@@ -322,6 +322,15 @@
         document.addEventListener("DOMContentLoaded", async function() {
             await cargarCotizaciones();
             suscribirRealtimeCotizaciones();
+            
+            // Suscribirse a cambios en tiempo real de precios
+            if (window.dataService && window.dataService.subscribePreciosElementos) {
+                console.log('🔄 Suscribiéndose a cambios de precios en tiempo real...');
+                window.dataService.subscribePreciosElementos((payload) => {
+                    console.log('💲 Cambio en precios detectado:', payload);
+                    console.log('✅ Precios actualizados en tiempo real - las cotizaciones usarán los nuevos precios');
+                });
+            }
         });
 
         async function cargarCotizaciones() {
