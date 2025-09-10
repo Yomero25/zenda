@@ -1607,11 +1607,14 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             }
                             
                             if (todosLosInsumos[key]) {
-                                // Si ya existe, sumar cantidades (si son numéricas)
-                                if (!isNaN(todosLosInsumos[key].cantidad) && !isNaN(insumo.cantidad)) {
-                                    todosLosInsumos[key].cantidad = parseFloat(todosLosInsumos[key].cantidad) + parseFloat(insumo.cantidad);
+                                // Si ya existe, sumar cantidades (convertir a número si es posible)
+                                const cantidadAnterior = parseFloat(todosLosInsumos[key].cantidad) || 0;
+                                const cantidadNueva = parseFloat(insumo.cantidad) || 0;
+                                
+                                if (!isNaN(cantidadAnterior) && !isNaN(cantidadNueva)) {
+                                    todosLosInsumos[key].cantidad = cantidadAnterior + cantidadNueva;
                                 } else {
-                                    // Si no son numéricas, mantener como string y agregar nota
+                                    // Si no se pueden convertir a números, mantener como string
                                     todosLosInsumos[key].cantidad = `${todosLosInsumos[key].cantidad} + ${insumo.cantidad}`;
                                 }
                                 todosLosInsumos[key].unidades.push(`Unidad ${unidadIndex + 1} (${tipoSolucion})`);
@@ -3044,12 +3047,17 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         insumosSugeridos.forEach(insumo => {
                             const key = insumo.nombre;
                             if (todosLosInsumos[key]) {
-                                const cantidadAnterior = todosLosInsumos[key].cantidad;
-                                if (!isNaN(cantidadAnterior) && !isNaN(insumo.cantidad)) {
-                                    todosLosInsumos[key].cantidad = parseFloat(cantidadAnterior) + parseFloat(insumo.cantidad);
+                                const cantidadAnterior = parseFloat(todosLosInsumos[key].cantidad) || 0;
+                                const cantidadNueva = parseFloat(insumo.cantidad) || 0;
+                                
+                                if (!isNaN(cantidadAnterior) && !isNaN(cantidadNueva)) {
+                                    todosLosInsumos[key].cantidad = cantidadAnterior + cantidadNueva;
+                                } else {
+                                    // Si no se pueden convertir a números, mantener como string
+                                    todosLosInsumos[key].cantidad = `${todosLosInsumos[key].cantidad} + ${insumo.cantidad}`;
                                 }
                                 todosLosInsumos[key].unidades.push(`Unidad ${unidadIndex + 1} (${tipoSolucion})`);
-                                console.log(`      ✓ SUMA: ${key} = ${cantidadAnterior} + ${insumo.cantidad} = ${todosLosInsumos[key].cantidad}`);
+                                console.log(`      ✓ SUMA: ${key} = ${cantidadAnterior} + ${cantidadNueva} = ${todosLosInsumos[key].cantidad}`);
                             } else {
                                 todosLosInsumos[key] = {
                                     nombre: insumo.nombre,
