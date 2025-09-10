@@ -394,6 +394,33 @@
             }
         });
 
+        // Función para cargar la tabla de precios
+        function cargarTablaPrecios() {
+            const tbody = document.getElementById('tablaPrecios');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            Object.entries(preciosElementos).forEach(([elemento, datos]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${elemento}</strong></td>
+                    <td><span class="badge bg-secondary">${datos.categoria || 'insumos'}</span></td>
+                    <td class="currency-symbol">$${datos.precio || 0}</td>
+                    <td>${datos.fecha_actualizacion ? new Date(datos.fecha_actualizacion).toLocaleDateString() : 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" onclick="editarPrecio('${elemento}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="actualizarPrecio('${elemento}')">
+                            <i class="bi bi-currency-dollar"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         // Función para restaurar precios si se perdieron
         async function restaurarPrecios() {
             console.log('🔄 Restaurando precios...');
