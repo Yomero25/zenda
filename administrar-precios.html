@@ -77,11 +77,6 @@
                 
 
                 
-                <div class="mt-4">
-                    <a href="./cotizaciones-completo.html" class="btn btn-outline-light">
-                        <i class="bi bi-arrow-left"></i> Volver al Sistema Principal
-                    </a>
-                </div>
             </div>
             
             <div class="col-md-9">
@@ -1153,6 +1148,7 @@
                 let elementosProcesados = 0;
                 let elementosExitosos = 0;
                 let elementosConError = [];
+                let elementosDuplicados = [];
 
                 // Procesar cada línea de datos
                 for (let i = 1; i < lines.length; i++) {
@@ -1175,6 +1171,19 @@
                         continue;
                     }
 
+                    // Verificar si el elemento ya existe
+                    if (preciosElementos[elemento]) {
+                        elementosDuplicados.push({
+                            elemento: elemento,
+                            linea: i + 1,
+                            categoriaExistente: preciosElementos[elemento].categoria,
+                            precioExistente: preciosElementos[elemento].precio,
+                            categoriaNueva: categoria,
+                            precioNuevo: precio
+                        });
+                        continue;
+                    }
+
                     elementosProcesados++;
                     guardarElemento(elemento, categoria, precio, false);
                     elementosExitosos++;
@@ -1186,8 +1195,17 @@
                     mensaje += `\nErrores: ${elementosConError.length}`;
                     console.warn('Errores en CSV:', elementosConError);
                 }
+                if (elementosDuplicados.length > 0) {
+                    mensaje += `\nDuplicados: ${elementosDuplicados.length}`;
+                    console.warn('Elementos duplicados en CSV:', elementosDuplicados);
+                }
 
-                mostrarAlerta(mensaje, elementosConError.length > 0 ? 'warning' : 'success');
+                // Mostrar modal de duplicados si los hay
+                if (elementosDuplicados.length > 0) {
+                    mostrarModalDuplicados(elementosDuplicados);
+                }
+
+                mostrarAlerta(mensaje, (elementosConError.length > 0 || elementosDuplicados.length > 0) ? 'warning' : 'success');
                 
                 // Actualizar la tabla
                 cargarTablaPrecios();
@@ -1258,6 +1276,84 @@
                     alertDiv.parentNode.removeChild(alertDiv);
                 }
             }, 5000);
+        }
+
+        function mostrarModalDuplicados(elementosDuplicados) {
+            // Crear el modal dinámicamente
+            const modalHtml = `
+                <div class="modal fade" id="modalDuplicados" tabindex="-1" aria-labelledby="modalDuplicadosLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-title" id="modalDuplicadosLabel">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>Elementos Duplicados Detectados
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Los siguientes elementos ya existen en la lista de precios:</strong>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Elemento</th>
+                                                <th>Línea CSV</th>
+                                                <th>Existente</th>
+                                                <th>Nuevo</th>
+                                                <th>Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${elementosDuplicados.map(dup => `
+                                                <tr>
+                                                    <td><strong>${dup.elemento}</strong></td>
+                                                    <td>${dup.linea}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${dup.categoriaExistente}</span>
+                                                        <br><small>$${dup.precioExistente.toLocaleString('es-MX', {minimumFractionDigits: 2})}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-primary">${dup.categoriaNueva}</span>
+                                                        <br><small>$${dup.precioNuevo.toLocaleString('es-MX', {minimumFractionDigits: 2})}</small>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary" onclick="editarPrecio('${dup.elemento.replace(/'/g, "\\'")}')">
+                                                            <i class="bi bi-pencil"></i> Editar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="alert alert-info mt-3">
+                                    <i class="bi bi-lightbulb me-2"></i>
+                                    <strong>Sugerencia:</strong> Para actualizar estos elementos, usa el botón "Editar" en la tabla principal o modifica el CSV eliminando los elementos duplicados.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal existente si hay uno
+            const modalExistente = document.getElementById('modalDuplicados');
+            if (modalExistente) {
+                modalExistente.remove();
+            }
+            
+            // Agregar el nuevo modal al DOM
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('modalDuplicados'));
+            modal.show();
         }
 
         function suscribirRealtimePrecios() {
