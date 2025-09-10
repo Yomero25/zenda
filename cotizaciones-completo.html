@@ -1172,7 +1172,22 @@
                                                 }
                                             });
                                         }
+                                        // Equipos seleccionados manualmente
+                                        if (c.equipos) {
+                                            Object.entries(c.equipos).forEach(([equipo, datos]) => {
+                                                if (datos && datos.cantidad > 0) {
+                                                    const mult = c.cantidadLote || 1;
+                                                    equiposNecesarios[equipo] = (equiposNecesarios[equipo] || 0) + (datos.cantidad * mult);
+                                                }
+                                            });
+                                        }
                                         const tipoUnidades = (c.unidades || []).map(u => u.tipo || u.tipo_unidad || '').filter(Boolean).join(', ');
+                                        
+                                        console.log('🔍 DEBUG CREACION SOLICITUD - Cotización:', c.folio || c.id);
+                                        console.log('🔍 DEBUG CREACION SOLICITUD - equiposAutomaticos:', c.equiposAutomaticos);
+                                        console.log('🔍 DEBUG CREACION SOLICITUD - equipos:', c.equipos);
+                                        console.log('🔍 DEBUG CREACION SOLICITUD - equiposNecesarios final:', equiposNecesarios);
+                                        
                                         return {
                                             id: `DESP-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                                             cotizacionId: String(claveBusqueda),
