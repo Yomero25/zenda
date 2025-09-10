@@ -744,18 +744,6 @@
         }
 
         // Función duplicada eliminada - usando la versión principal
-            
-            document.querySelectorAll('.btn-editar-rapido').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const elemento = this.dataset.elemento.replace(/&quot;/g, '"');
-                    console.log('🔍 Botón editar rápido clickeado, elemento:', elemento);
-                    editarPrecioRapido(elemento);
-                });
-            });
-
-            document.getElementById('resultadosFiltro').textContent = 
-                `Mostrando ${elementos.length} elementos`;
-        }
 
         function actualizarEstadisticas() {
             const elementos = Object.keys(preciosElementos);
