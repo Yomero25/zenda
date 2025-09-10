@@ -802,45 +802,6 @@
             new bootstrap.Modal(document.getElementById('modalEditarPrecio')).show();
         }
 
-        async function editarPrecioRapido(elemento) {
-            // Validar que el elemento no esté vacío
-            if (!elemento || elemento.trim() === '') {
-                console.error('❌ Error: Elemento vacío, no se puede editar');
-                mostrarAlerta('Error: No se puede editar un elemento sin nombre', 'danger');
-                return;
-            }
-            
-            // Si el elemento no existe, inicializarlo
-            if (!preciosElementos[elemento]) {
-                preciosElementos[elemento] = {
-                    precio: 0,
-                    categoria: obtenerCategoria(elemento),
-                    ultimaActualizacion: new Date().toISOString().split('T')[0]
-                };
-            }
-            
-            const nuevoPrecio = prompt(`Ingrese el nuevo precio para: ${elemento}`, preciosElementos[elemento].precio || '0');
-            if (nuevoPrecio !== null && !isNaN(nuevoPrecio) && nuevoPrecio >= 0) {
-                preciosElementos[elemento].precio = parseFloat(nuevoPrecio);
-                preciosElementos[elemento].ultimaActualizacion = new Date().toISOString().split('T')[0];
-                
-                // Guardar automáticamente
-                if (modoCentralizado) {
-                    await window.dataService.upsertPrecioElementoByNombre(elemento, {
-                        nombre: elemento,
-                        categoria: preciosElementos[elemento].categoria,
-                        precio: preciosElementos[elemento].precio,
-                        ultimaActualizacion: preciosElementos[elemento].ultimaActualizacion,
-                    });
-                } else {
-                    localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
-                }
-                
-                cargarTablaPrecios();
-                actualizarEstadisticas();
-                mostrarAlerta(`Precio actualizado y guardado para ${elemento}`, 'success');
-            }
-        }
 
         async function guardarEdicionPrecio() {
             if (!elementoEditando) return;
