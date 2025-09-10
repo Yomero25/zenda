@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Almacén - Sistema de Trazabilidad</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .dashboard-card h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .dashboard-card p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .bg-gradient-purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .bg-gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .bg-gradient-green { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%); }
+        .bg-gradient-orange { background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%); }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .sidebar .btn {
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <h3 class="text-white mb-4">
+                    <i class="bi bi-gear"></i> Panel de Control
+                </h3>
+                
+                <button class="btn btn-success" onclick="agregarNuevaCombinacion()">
+                    <i class="bi bi-plus-circle"></i> Nueva Combinación
+                </button>
+                
+                <button class="btn btn-primary" onclick="exportarAlmacen()">
+                    <i class="bi bi-download"></i> Exportar Almacén
+                </button>
+                
+                <button class="btn btn-info" onclick="document.getElementById('importFile').click()">
+                    <i class="bi bi-upload"></i> Importar Almacén
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importarAlmacen(event)">
+                
+                <button class="btn btn-warning" onclick="resetearAlmacen()">
+                    <i class="bi bi-arrow-clockwise"></i> Resetear a Default
+                </button>
+                
+                <button class="btn btn-secondary" onclick="guardarCambios()">
+                    <i class="bi bi-save"></i> Guardar Cambios
+                </button>
+                
+                <div class="mt-4">
+                    <a href="../cotizaciones-completo.html" class="btn btn-outline-light">
+                        <i class="bi bi-arrow-left"></i> Volver al Sistema Principal
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Header -->
+                <nav class="navbar navbar-dark bg-dark">
+                    <div class="container-fluid">
+                        <span class="navbar-brand mb-0 h1">
+                            <i class="bi bi-boxes"></i> Sistema de Trazabilidad
+                        </span>
+                        <a href="../cotizaciones-completo.html" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-left"></i> Volver al Sistema Principal
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- Dashboard -->
+                <div class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-purple">
+                                <h2 id="totalCombinaciones">0</h2>
+                                <p>Combinaciones</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-blue">
+                                <h2 id="totalInsumos">0</h2>
+                                <p>Insumos Únicos</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="totalTiposUnidad">0</h2>
+                                <p>Tipos de Unidad</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-orange">
+                                <h2 id="totalTiposSolucion">0</h2>
+                                <p>Tipos de Solución</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filter-section">
+                        <h5><i class="bi bi-funnel"></i> Filtros</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="filtroTipoUnidad" class="form-label">Tipo de Unidad:</label>
+                                <select class="form-select" id="filtroTipoUnidad" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="filtroTipoSolucion" class="form-label">Tipo de Solución:</label>
+                                <select class="form-select" id="filtroTipoSolucion" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="filtroInsumo" class="form-label">Buscar Insumo:</label>
+                                <input type="text" class="form-control" id="filtroInsumo" placeholder="Escriba para buscar..." onkeyup="aplicarFiltros()">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()">
+                                    <i class="bi bi-x-circle"></i> Limpiar Filtros
+                                </button>
+                                <span class="badge bg-info ms-2" id="resultadosFiltro">Mostrando todas las combinaciones</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Matriz -->
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h4><i class="bi bi-grid-3x3-gap"></i> Matriz de Insumos</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th>Tipo Unidad</th>
+                                            <th>Tipo Solución</th>
+                                            <th>Insumos</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaAlmacen">
+                                        <!-- Se llena dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Combinación -->
+    <div class="modal fade" id="modalEditarCombinacion" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Combinación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="editTipoUnidad" class="form-label">Tipo de Unidad:</label>
+                            <input type="text" class="form-control" id="editTipoUnidad" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editTipoSolucion" class="form-label">Tipo de Solución:</label>
+                            <input type="text" class="form-control" id="editTipoSolucion" readonly>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Insumos y Cantidades:</label>
+                        <div id="editInsumos">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarEdicionCombinacion()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ===== VARIABLES GLOBALES =====
+        let almacenInsumos = {};
+        let combinacionEditando = null;
+        let datosFiltrados = [];
+
+        // Lista completa de insumos posibles
+        const listaInsumos = [
+            // Cables y conectores
+            'Cable 4 pin 1 m', 'Cable 4 pin 3 m', 'Cable 4 pin 5 m', 'Cable 4 pin 7 m',
+            'Cable 4 pin 15 m', 'Cable 4 pin 30 m', 'Cable 6 pin 5 m', 'Cable 2 vias', 'Cable 4 vias',
+            '"Y" 4 pines', 'Base Pollak', 'Pollak Macho ', 'Pollak Hembra', 'Cable de 1 polo',
+            'Terminal de ojillo', '7 vias liso 2m',
+            
+            // Materiales básicos
+            'Silicon', 'Cinchos grande', 'Guia de meta', 'Cinta de tela', 'Cinta de aislar',
+            'Poliflex 3/8', 'Poliflex 1/4', 'Cincho mediado', 'Cincho con grapa',
+            'Pija brocante 5/16', 'Tornillo hexagonal 5/16', 'Tornillo 3/8',
+            'Tuerca 5/16', 'Tuerca 3/8', 'Rondana 5/16', 'Rondana 3/8',
+            'Espiral negro', 'Espiral verde',
+            
+            // Componentes electrónicos
+            'Relevador 2 pasos 2 tiros', 'Relevador 12v', 'Relevador 24v', 'Portarelevador',
+            'placa perforada', 'Gabinete 5*7*3',
+            
+            // Almacenamiento
+            'SD 128 Gb', 'SD 256 Gb', 'SD 512 Gb',
+            
+            // Alarmas y audio
+            'Alarma parlante de 3 tonos', 'Alarma parlante programable', 'Bocina', 'Microfono',
+            
+            // Controles
+            'Botón balancin', 'Boton de panico',
+            
+            // Cámaras
+            'Camara + radar', 'Camara con microfono', 'Camara de reversa', 'Camara Digital (IP)',
+            'Camara exterior mini', 'Camara lateral derecha de VPC', 'Camara lateral izquierda de VPC',
+            'Camara sideview derecho', 'Camara sideview izquierdo', 'Camara tipo clavo',
+            
+            // Dashcams
+            'Dashcam ad2', 'Dashcam c6',
+            
+            // Sensores y accesorios
+            'Sensor magnetico chico', 'Sensor magnetico grande', 'Insider',
+            'Led de giro a la derecha', 'Led de giro a la izquierda', 'Limitador de velocidad',
+            'Modulo sensor de cinturon seguridad',
+            
+            // Equipos principales
+            'Monitor de VPC', 'Grabador de video 4 ch',
+            
+            // Sensores VPC
+            'Sensor derecho VPC', 'Sensor izquierda VPC', 'Sideview derecho', 'Sideview izquierdo'
+        ];
+
+        // ===== MATRIZ COMPLETA DEL CSV =====
+        function cargarMatrizCompletaCSV() {
+            // CARGAMOS DESDE EL ARCHIVO JSON TEMPORAL
+            return fetch('matriz_temp.json')
+                .then(response => response.json())
+                .catch(error => {
+                    console.error('Error cargando matriz:', error);
+                    return {}; // Retorna objeto vacío en caso de error
+                });
+        }
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔄 Inicializando almacén con matriz completa del CSV...');
+            
+            try {
+                almacenInsumos = await cargarMatrizCompletaCSV();
+                console.log(`✅ Matriz cargada: ${Object.keys(almacenInsumos).length} tipos de unidad`);
+                
+                cargarAlmacenDesdeStorage();
+                cargarFiltros();
+                cargarTablaAlmacen();
+                actualizarEstadisticas();
+                
+            } catch (error) {
+                console.error('❌ Error al cargar matriz:', error);
+                mostrarAlerta('Error al cargar la matriz del CSV', 'danger');
+            }
+        });
+
+        // ===== FUNCIONES PRINCIPALES =====
+        
+        function cargarAlmacenDesdeStorage() {
+            const almacenGuardado = localStorage.getItem('almacen_insumos');
+            if (almacenGuardado) {
+                try {
+                    const almacenParsed = JSON.parse(almacenGuardado);
+                    // Fusionar con la matriz CSV (prioridad a localStorage)
+                    almacenInsumos = { ...almacenInsumos, ...almacenParsed };
+                    console.log('✅ Almacén cargado desde localStorage');
+                } catch (error) {
+                    console.error('❌ Error parseando almacén de localStorage:', error);
+                }
+            }
+        }
+
+        function cargarFiltros() {
+            const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
+            const tiposSolucion = [...new Set(
+                Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
+            )].sort();
+
+            // Cargar filtro de tipos de unidad
+            const selectUnidad = document.getElementById('filtroTipoUnidad');
+            selectUnidad.innerHTML = '<option value="">Todos</option>';
+            tiposUnidad.forEach(tipo => {
+                selectUnidad.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+            });
+
+            // Cargar filtro de tipos de solución
+            const selectSolucion = document.getElementById('filtroTipoSolucion');
+            selectSolucion.innerHTML = '<option value="">Todos</option>';
+            tiposSolucion.forEach(tipo => {
+                selectSolucion.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+            });
+        }
+
+        function cargarTablaAlmacen() {
+            const tbody = document.getElementById('tablaAlmacen');
+            tbody.innerHTML = '';
+
+            let combinaciones = [];
+            
+            for (const [tipoUnidad, soluciones] of Object.entries(almacenInsumos)) {
+                for (const [tipoSolucion, insumos] of Object.entries(soluciones)) {
+                    combinaciones.push({
+                        tipoUnidad,
+                        tipoSolucion,
+                        insumos: Object.keys(insumos).length > 0 ? insumos : {}
+                    });
+                }
+            }
+
+            datosFiltrados = combinaciones;
+            mostrarCombinaciones(combinaciones);
+        }
+
+        function mostrarCombinaciones(combinaciones) {
+            const tbody = document.getElementById('tablaAlmacen');
+            tbody.innerHTML = '';
+
+            combinaciones.forEach((combo, index) => {
+                const insumosTexto = Object.keys(combo.insumos).length > 0 
+                    ? Object.entries(combo.insumos)
+                        .map(([insumo, cantidad]) => `${insumo} (${cantidad})`)
+                        .join(', ')
+                    : 'Sin insumos';
+
+                const row = `
+                    <tr>
+                        <td><strong>${combo.tipoUnidad}</strong></td>
+                        <td><span class="badge bg-secondary">${combo.tipoSolucion}</span></td>
+                        <td style="max-width: 300px; word-wrap: break-word;">${insumosTexto}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="editarCombinacion('${combo.tipoUnidad}', '${combo.tipoSolucion}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarCombinacion('${combo.tipoUnidad}', '${combo.tipoSolucion}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            document.getElementById('resultadosFiltro').textContent = 
+                `Mostrando ${combinaciones.length} combinaciones`;
+        }
+
+        function actualizarEstadisticas() {
+            const totalCombinaciones = Object.values(almacenInsumos)
+                .reduce((total, soluciones) => total + Object.keys(soluciones).length, 0);
+            
+            const insumosUnicos = new Set();
+            Object.values(almacenInsumos).forEach(soluciones => {
+                Object.values(soluciones).forEach(insumos => {
+                    Object.keys(insumos).forEach(insumo => insumosUnicos.add(insumo));
+                });
+            });
+
+            const tiposSolucionUnicos = new Set();
+            Object.values(almacenInsumos).forEach(soluciones => {
+                Object.keys(soluciones).forEach(tipo => tiposSolucionUnicos.add(tipo));
+            });
+
+            document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
+            document.getElementById('totalInsumos').textContent = insumosUnicos.size;
+            document.getElementById('totalTiposUnidad').textContent = Object.keys(almacenInsumos).length;
+            document.getElementById('totalTiposSolucion').textContent = tiposSolucionUnicos.size;
+        }
+
+        function aplicarFiltros() {
+            const filtroUnidad = document.getElementById('filtroTipoUnidad').value;
+            const filtroSolucion = document.getElementById('filtroTipoSolucion').value;
+            const filtroInsumo = document.getElementById('filtroInsumo').value.toLowerCase();
+
+            let combinacionesFiltradas = [];
+            
+            for (const [tipoUnidad, soluciones] of Object.entries(almacenInsumos)) {
+                for (const [tipoSolucion, insumos] of Object.entries(soluciones)) {
+                    let coincide = true;
+
+                    if (filtroUnidad && tipoUnidad !== filtroUnidad) coincide = false;
+                    if (filtroSolucion && tipoSolucion !== filtroSolucion) coincide = false;
+                    if (filtroInsumo) {
+                        const tieneInsumo = Object.keys(insumos).some(insumo => 
+                            insumo.toLowerCase().includes(filtroInsumo)
+                        );
+                        if (!tieneInsumo) coincide = false;
+                    }
+
+                    if (coincide) {
+                        combinacionesFiltradas.push({
+                            tipoUnidad,
+                            tipoSolucion,
+                            insumos
+                        });
+                    }
+                }
+            }
+
+            mostrarCombinaciones(combinacionesFiltradas);
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroTipoUnidad').value = '';
+            document.getElementById('filtroTipoSolucion').value = '';
+            document.getElementById('filtroInsumo').value = '';
+            cargarTablaAlmacen();
+        }
+
+        function editarCombinacion(tipoUnidad, tipoSolucion) {
+            combinacionEditando = { tipoUnidad, tipoSolucion };
+            
+            document.getElementById('editTipoUnidad').value = tipoUnidad;
+            document.getElementById('editTipoSolucion').value = tipoSolucion;
+            
+            const insumos = almacenInsumos[tipoUnidad][tipoSolucion] || {};
+            const contenedor = document.getElementById('editInsumos');
+            contenedor.innerHTML = '';
+
+            // Mostrar insumos existentes
+            Object.entries(insumos).forEach(([insumo, cantidad]) => {
+                const div = document.createElement('div');
+                div.className = 'row mb-2';
+                div.innerHTML = `
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="${insumo}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" value="${cantidad}" data-insumo="${insumo}">
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+
+            // Botón para agregar nuevo insumo
+            const divAgregar = document.createElement('div');
+            divAgregar.className = 'row mt-3';
+            divAgregar.innerHTML = `
+                <div class="col-md-12">
+                    <button class="btn btn-success btn-sm" onclick="agregarInsumoAEdicion()">
+                        <i class="bi bi-plus"></i> Agregar Insumo
+                    </button>
+                </div>
+            `;
+            contenedor.appendChild(divAgregar);
+
+            new bootstrap.Modal(document.getElementById('modalEditarCombinacion')).show();
+        }
+
+        function agregarInsumoAEdicion() {
+            const contenedor = document.getElementById('editInsumos');
+            const div = document.createElement('div');
+            div.className = 'row mb-2';
+            div.innerHTML = `
+                <div class="col-md-8">
+                    <select class="form-control">
+                        <option value="">Seleccionar insumo...</option>
+                        ${listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Cantidad">
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            contenedor.insertBefore(div, contenedor.lastElementChild);
+        }
+
+        function guardarEdicionCombinacion() {
+            if (!combinacionEditando) return;
+
+            const { tipoUnidad, tipoSolucion } = combinacionEditando;
+            const contenedor = document.getElementById('editInsumos');
+            const nuevosInsumos = {};
+
+            // Recopilar insumos del modal
+            const rows = contenedor.querySelectorAll('.row:not(:last-child)');
+            rows.forEach(row => {
+                const insumo = row.querySelector('input[readonly]')?.value || 
+                              row.querySelector('select')?.value;
+                const cantidad = row.querySelector('input:not([readonly])')?.value;
+                
+                if (insumo && cantidad) {
+                    nuevosInsumos[insumo] = cantidad;
+                }
+            });
+
+            // Actualizar almacén
+            almacenInsumos[tipoUnidad][tipoSolucion] = nuevosInsumos;
+            
+            // Actualizar tabla y estadísticas
+            cargarTablaAlmacen();
+            actualizarEstadisticas();
+            
+            // Cerrar modal
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarCombinacion')).hide();
+            
+            mostrarAlerta(`Combinación ${tipoUnidad} - ${tipoSolucion} actualizada`, 'success');
+        }
+
+        function eliminarCombinacion(tipoUnidad, tipoSolucion) {
+            if (confirm(`¿Está seguro de eliminar la combinación ${tipoUnidad} - ${tipoSolucion}?`)) {
+                delete almacenInsumos[tipoUnidad][tipoSolucion];
+                
+                // Si no quedan soluciones para este tipo de unidad, eliminar el tipo
+                if (Object.keys(almacenInsumos[tipoUnidad]).length === 0) {
+                    delete almacenInsumos[tipoUnidad];
+                }
+                
+                cargarFiltros();
+                cargarTablaAlmacen();
+                actualizarEstadisticas();
+                
+                mostrarAlerta(`Combinación eliminada`, 'success');
+            }
+        }
+
+        function guardarCambios() {
+            localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
+            mostrarAlerta('Cambios guardados en el navegador', 'success');
+        }
+
+        function exportarAlmacen() {
+            const dataStr = JSON.stringify(almacenInsumos, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'almacen_insumos.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            mostrarAlerta('Almacén exportado correctamente', 'success');
+        }
+
+        function importarAlmacen(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const almacenImportado = JSON.parse(e.target.result);
+                    almacenInsumos = almacenImportado;
+                    
+                    cargarFiltros();
+                    cargarTablaAlmacen();
+                    actualizarEstadisticas();
+                    
+                    mostrarAlerta('Almacén importado correctamente', 'success');
+                } catch (error) {
+                    mostrarAlerta('Error al importar el archivo', 'danger');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetearAlmacen() {
+            if (confirm('¿Está seguro de resetear el almacén a los valores por defecto del CSV?')) {
+                localStorage.removeItem('almacen_insumos');
+                cargarMatrizCompletaCSV().then(matriz => {
+                    almacenInsumos = matriz;
+                    cargarFiltros();
+                    cargarTablaAlmacen();
+                    actualizarEstadisticas();
+                    mostrarAlerta('Almacén reseteado a valores del CSV', 'success');
+                });
+            }
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
