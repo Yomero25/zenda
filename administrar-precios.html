@@ -702,52 +702,7 @@
             console.log('💾 Precios por defecto guardados en localStorage');
         }
 
-        function cargarTablaPrecios() {
-            const tbody = document.getElementById('tablaPrecios');
-            tbody.innerHTML = '';
-
-            const elementos = Object.keys(preciosElementos).sort();
-            datosFiltrados = elementos;
-
-            elementos.forEach(elemento => {
-                const datos = preciosElementos[elemento];
-                const precio = datos.precio || 0;
-                const categoria = datos.categoria || obtenerCategoria(elemento);
-                const ultimaActualizacion = datos.ultimaActualizacion || 'No definida';
-
-                const estadoClase = precio > 0 ? 'success' : 'warning';
-                const estadoTexto = precio > 0 ? 'Con precio' : 'Sin precio';
-
-                const row = `
-                    <tr>
-                        <td><strong>${elemento}</strong></td>
-                        <td><span class="badge bg-${categoria === 'equipos' ? 'primary' : categoria === 'accesorios' ? 'info' : 'secondary'}">${categoria}</span></td>
-                        <td>
-                            <span class="currency-symbol">$${precio.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span>
-                            <small class="ms-2 badge bg-${estadoClase}">${estadoTexto}</small>
-                        </td>
-                        <td><small class="text-muted">${ultimaActualizacion}</small></td>
-                        <td>
-                            <button class="btn btn-primary btn-sm btn-editar" data-elemento="${elemento.replace(/"/g, '&quot;')}">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-success btn-sm btn-editar-rapido" data-elemento="${elemento.replace(/"/g, '&quot;')}">
-                                <i class="bi bi-currency-dollar"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
-            
-            // Agregar event listeners a los botones
-            document.querySelectorAll('.btn-editar').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const elemento = this.dataset.elemento.replace(/&quot;/g, '"');
-                    console.log('🔍 Botón editar clickeado, elemento:', elemento);
-                    editarPrecio(elemento);
-                });
-            });
+        // Función duplicada eliminada - usando la versión principal
             
             document.querySelectorAll('.btn-editar-rapido').forEach(btn => {
                 btn.addEventListener('click', function() {
