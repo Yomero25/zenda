@@ -941,13 +941,25 @@
         }
         try { await client.from('solicitudes_despacho').delete().eq('data->>cotizacionId', k); } catch(_){}
         // Notificaciones por cotizacion (instalaciones y soporte)
-        try { await client.from('notificaciones_instalaciones').delete().eq('data->>cotizacionId', k); } catch(_){}
-        try { await client.from('notificaciones_soporte').delete().eq('data->>cotizacionId', k); } catch(_){}
+        try { 
+          const result1 = await client.from('notificaciones_instalaciones').delete().eq('data->>cotizacionId', k);
+          console.log(`🗑️ Eliminadas notificaciones instalaciones para cotización ${k}:`, result1);
+        } catch(e){ console.warn('Error eliminando notificaciones instalaciones:', e); }
+        try { 
+          const result2 = await client.from('notificaciones_soporte').delete().eq('data->>cotizacionId', k);
+          console.log(`🗑️ Eliminadas notificaciones soporte para cotización ${k}:`, result2);
+        } catch(e){ console.warn('Error eliminando notificaciones soporte:', e); }
       }
       // Notificaciones por solicitudDespachoId
       for (const despId of despIds) {
-        try { await client.from('notificaciones_instalaciones').delete().eq('data->>solicitudDespachoId', despId); } catch(_){}
-        try { await client.from('notificaciones_soporte').delete().eq('data->>solicitudDespachoId', despId); } catch(_){}
+        try { 
+          const result3 = await client.from('notificaciones_instalaciones').delete().eq('data->>solicitudDespachoId', despId);
+          console.log(`🗑️ Eliminadas notificaciones instalaciones para solicitud ${despId}:`, result3);
+        } catch(e){ console.warn('Error eliminando notificaciones instalaciones por solicitud:', e); }
+        try { 
+          const result4 = await client.from('notificaciones_soporte').delete().eq('data->>solicitudDespachoId', despId);
+          console.log(`🗑️ Eliminadas notificaciones soporte para solicitud ${despId}:`, result4);
+        } catch(e){ console.warn('Error eliminando notificaciones soporte por solicitud:', e); }
       }
       // Eliminar la cotización
       try { await deleteCotizacionByIdOrFolio(idOrFolio); } catch(_){}

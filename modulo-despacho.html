@@ -1558,7 +1558,7 @@
                                 const requiereSoporte = (() => {
                                     const equipos = solicitud.equipos || {};
                                     const tieneMDVR = Object.keys(equipos).some(k => /(MDVR|MVR|Grabador de video)/i.test(k));
-                                    const tieneGPS = Object.keys(equipos).some(k => /(GV310|GV58|GV75|SMOC)/i.test(k));
+                                    const tieneGPS = Object.keys(equipos).some(k => /(GPS|GV310|GV58|GV75|SMOC|GV|GPS.*GV)/i.test(k));
                                     const tieneDashcam = Object.keys(equipos).some(k => /(Dashcam\s*ad2|Dashcam\s*c6)/i.test(k));
                                     if (tieneMDVR || tieneGPS || tieneDashcam) return true;
                                     const det = (notificacionInstalaciones.solucionesDetalladas && notificacionInstalaciones.solucionesDetalladas.length)
