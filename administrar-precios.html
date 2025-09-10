@@ -992,20 +992,33 @@
         }
 
         function agregarNuevoPrecio() {
-            const nombre = prompt('Ingresa el nombre del elemento:');
-            if (!nombre || nombre.trim() === '') {
+            // Limpiar formulario
+            document.getElementById('nuevoElemento').value = '';
+            document.getElementById('nuevaCategoria').value = '';
+            document.getElementById('nuevoPrecio').value = '';
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalNuevoPrecio'));
+            modal.show();
+        }
+
+        function guardarNuevoPrecio() {
+            const nombre = document.getElementById('nuevoElemento').value.trim();
+            const categoria = document.getElementById('nuevaCategoria').value;
+            const precioTexto = document.getElementById('nuevoPrecio').value.trim();
+
+            // Validaciones
+            if (!nombre) {
                 mostrarAlerta('Debes ingresar un nombre válido', 'warning');
                 return;
             }
 
-            const categoria = prompt('Ingresa la categoría (Equipo, Accesorio, Insumo):');
-            if (!categoria || categoria.trim() === '') {
-                mostrarAlerta('Debes ingresar una categoría válida', 'warning');
+            if (!categoria) {
+                mostrarAlerta('Debes seleccionar una categoría', 'warning');
                 return;
             }
 
-            const precioTexto = prompt('Ingresa el precio (solo números):');
-            if (!precioTexto || precioTexto.trim() === '') {
+            if (!precioTexto) {
                 mostrarAlerta('Debes ingresar un precio válido', 'warning');
                 return;
             }
@@ -1016,14 +1029,21 @@
                 return;
             }
 
-            guardarElemento(nombre.trim(), categoria.trim(), precio);
+            // Guardar elemento
+            guardarElemento(nombre, categoria, precio);
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoPrecio'));
+            modal.hide();
         }
 
         function importarElementosLote() {
-            // Mostrar información sobre el formato
-            const confirmar = confirm('Formato CSV requerido:\n\nEncabezados: Elemento, Categoría, Precio\n\n¿Deseas continuar?');
-            if (!confirmar) return;
+            // Mostrar modal de importación
+            const modal = new bootstrap.Modal(document.getElementById('modalImportarCSV'));
+            modal.show();
+        }
 
+        function seleccionarArchivoCSV() {
             // Crear input de archivo
             const input = document.createElement('input');
             input.type = 'file';
@@ -1034,9 +1054,14 @@
                 const file = event.target.files[0];
                 if (!file) return;
 
+                // Mostrar nombre del archivo
+                document.getElementById('nombreArchivo').textContent = file.name;
+                document.getElementById('btnProcesarCSV').disabled = false;
+
+                // Leer archivo
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    procesarCSV(e.target.result);
+                    window.archivoCSV = e.target.result;
                 };
                 reader.readAsText(file);
             };
@@ -1044,6 +1069,19 @@
             document.body.appendChild(input);
             input.click();
             document.body.removeChild(input);
+        }
+
+        function procesarArchivoCSV() {
+            if (!window.archivoCSV) {
+                mostrarAlerta('Debes seleccionar un archivo CSV', 'warning');
+                return;
+            }
+
+            procesarCSV(window.archivoCSV);
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalImportarCSV'));
+            modal.hide();
         }
 
         function procesarCSV(csvContent) {
@@ -1182,7 +1220,88 @@
             });
         }
     </script>
+
+    <!-- Modal para Nuevo Precio -->
+    <div class="modal fade" id="modalNuevoPrecio" tabindex="-1" aria-labelledby="modalNuevoPrecioLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNuevoPrecioLabel">
+                        <i class="bi bi-plus-circle me-2"></i>Nuevo Elemento
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nuevoElemento" class="form-label">Nombre del Elemento</label>
+                        <input type="text" class="form-control" id="nuevoElemento" placeholder="Ej: GPS GV310LAU">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevaCategoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="nuevaCategoria">
+                            <option value="">Selecciona una categoría</option>
+                            <option value="Equipo">Equipo</option>
+                            <option value="Accesorio">Accesorio</option>
+                            <option value="Insumo">Insumo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevoPrecio" class="form-label">Precio Unitario</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="nuevoPrecio" placeholder="0.00" step="0.01" min="0">
+                            <span class="input-group-text">MXN</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarNuevoPrecio()">
+                        <i class="bi bi-check-circle me-1"></i>Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Importar CSV -->
+    <div class="modal fade" id="modalImportarCSV" tabindex="-1" aria-labelledby="modalImportarCSVLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalImportarCSVLabel">
+                        <i class="bi bi-upload me-2"></i>Importar desde CSV
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Formato requerido:</strong><br>
+                        Encabezados: <code>Elemento, Categoría, Precio</code><br>
+                        Ejemplo: <code>GPS GV310LAU, Equipo, 1500</code>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar archivo CSV</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="nombreArchivo" placeholder="Ningún archivo seleccionado" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="seleccionarArchivoCSV()">
+                                <i class="bi bi-folder2-open me-1"></i>Seleccionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnProcesarCSV" onclick="procesarArchivoCSV()" disabled>
+                        <i class="bi bi-upload me-1"></i>Importar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
-< ! - -   F o r z a r   a c t u a l i z a c i � n   G i t H u b   P a g e s   - - >  
+< ! - -   F o r z a r   a c t u a l i z a c i � n   G i t H u b   P a g e s   - - > 
+ 
  
