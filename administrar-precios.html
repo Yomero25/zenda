@@ -1007,6 +1007,8 @@
             const categoria = document.getElementById('nuevaCategoria').value;
             const precioTexto = document.getElementById('nuevoPrecio').value.trim();
 
+            console.log('Datos del formulario:', { nombre, categoria, precioTexto });
+
             // Validaciones
             if (!nombre) {
                 mostrarAlerta('Debes ingresar un nombre válido', 'warning');
@@ -1024,13 +1026,21 @@
             }
 
             const precio = parseFloat(precioTexto.replace(/[^0-9.-]+/g, ""));
+            console.log('Precio parseado:', precio);
+            
             if (isNaN(precio) || precio < 0) {
                 mostrarAlerta('El precio debe ser un número válido', 'warning');
                 return;
             }
 
+            console.log('Guardando elemento:', { nombre, categoria, precio });
+
             // Guardar elemento
             guardarElemento(nombre, categoria, precio);
+            
+            // Actualizar tabla y estadísticas
+            cargarTablaPrecios();
+            actualizarEstadisticas();
             
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoPrecio'));
