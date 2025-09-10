@@ -479,10 +479,15 @@
                 
                 try {
                     // Eliminar de Supabase PRIMERO
-                    if (window.dataService && window.dataService.deletePrecioElemento) {
+                    if (window.dataService && window.dataService.deletePrecioElementoByNombre) {
                         console.log('📡 Eliminando de Supabase:', elementoAEliminar);
-                        await window.dataService.deletePrecioElemento(elementoAEliminar);
-                        console.log('✅ Eliminado de Supabase correctamente');
+                        const resultado = await window.dataService.deletePrecioElementoByNombre(elementoAEliminar);
+                        if (resultado) {
+                            console.log('✅ Eliminado de Supabase correctamente');
+                        } else {
+                            console.error('❌ Error al eliminar de Supabase');
+                            throw new Error('No se pudo eliminar de Supabase');
+                        }
                     }
                     
                     // Solo después eliminar de memoria local
