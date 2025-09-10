@@ -473,30 +473,38 @@
         }
 
         // Función para confirmar eliminación
-        function confirmarEliminacion() {
+        async function confirmarEliminacion() {
             if (elementoAEliminar) {
                 console.log('🗑️ Eliminando elemento:', elementoAEliminar);
                 
-                // Eliminar de preciosElementos
-                delete preciosElementos[elementoAEliminar];
-                
-                // Guardar en localStorage
-                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
-                
-                // Guardar en Supabase si está disponible
-                if (window.dataService && window.dataService.deletePrecioElemento) {
-                    window.dataService.deletePrecioElemento(elementoAEliminar);
+                try {
+                    // Eliminar de Supabase PRIMERO
+                    if (window.dataService && window.dataService.deletePrecioElemento) {
+                        console.log('📡 Eliminando de Supabase:', elementoAEliminar);
+                        await window.dataService.deletePrecioElemento(elementoAEliminar);
+                        console.log('✅ Eliminado de Supabase correctamente');
+                    }
+                    
+                    // Solo después eliminar de memoria local
+                    delete preciosElementos[elementoAEliminar];
+                    
+                    // Guardar en localStorage
+                    localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                    
+                    // Recargar tabla
+                    cargarTablaPrecios();
+                    actualizarEstadisticas();
+                    
+                    console.log('✅ Elemento eliminado completamente:', elementoAEliminar);
+                    
+                    // Cerrar modal
+                    bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
+                    elementoAEliminar = null;
+                    
+                } catch (error) {
+                    console.error('❌ Error al eliminar elemento:', error);
+                    alert('Error al eliminar el elemento. Por favor, inténtelo de nuevo.');
                 }
-                
-                // Recargar tabla
-                cargarTablaPrecios();
-                actualizarEstadisticas();
-                
-                console.log('✅ Elemento eliminado:', elementoAEliminar);
-                
-                // Cerrar modal
-                bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
-                elementoAEliminar = null;
             }
         }
 
