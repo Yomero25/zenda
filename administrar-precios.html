@@ -394,6 +394,25 @@
             }
         });
 
+        // Función para actualizar estadísticas
+        function actualizarEstadisticas() {
+            console.log('🔄 Actualizando estadísticas...');
+            const totalElementos = Object.keys(preciosElementos).length;
+            const elementosConPrecio = Object.values(preciosElementos).filter(e => e.precio > 0).length;
+            const elementosSinPrecio = totalElementos - elementosConPrecio;
+            const precioPromedio = elementosConPrecio > 0 ? 
+                Object.values(preciosElementos).reduce((sum, e) => sum + (e.precio || 0), 0) / elementosConPrecio : 0;
+            
+            // Actualizar contadores en la UI
+            const contadores = document.querySelectorAll('.dashboard-card h2');
+            if (contadores[0]) contadores[0].textContent = elementosConPrecio;
+            if (contadores[1]) contadores[1].textContent = `$${precioPromedio.toFixed(0)}`;
+            if (contadores[2]) contadores[2].textContent = Object.keys(preciosElementos).length;
+            if (contadores[3]) contadores[3].textContent = elementosSinPrecio;
+            
+            console.log('✅ Estadísticas actualizadas:', { totalElementos, elementosConPrecio, elementosSinPrecio, precioPromedio });
+        }
+
         // Función para cargar la tabla de precios
         function cargarTablaPrecios() {
             console.log('🔄 Cargando tabla de precios...');
@@ -1075,7 +1094,9 @@
             guardarElemento(nombre, categoria, precio);
             
             // Actualizar tabla y estadísticas
+            console.log('🔄 Llamando a cargarTablaPrecios...');
             cargarTablaPrecios();
+            console.log('🔄 Llamando a actualizarEstadisticas...');
             actualizarEstadisticas();
             
             // Cerrar modal
