@@ -705,22 +705,47 @@
 
   async function deletePrecioElementoByNombre(nombre) {
     if (!client) return false;
-    // Intento 1: esquema columnas
+    console.log('🔍 Buscando elemento para eliminar:', nombre);
+    
     try {
-      const found = await client.from('precios_elementos').select('id').eq('elemento', nombre).limit(1).maybeSingle();
-      if (!found.error && found.data && found.data.id) {
-        const { error } = await client.from('precios_elementos').delete().eq('id', found.data.id);
-        if (error) { console.error('❌ Supabase deletePrecioElementoByNombre(columns):', error); return false; }
-        return true;
+      // Buscar por elemento
+      const { data: found, error: searchError } = await client
+        .from('precios_elementos')
+        .select('id, elemento')
+        .eq('elemento', nombre)
+        .limit(1)
+        .maybeSingle();
+      
+      if (searchError) {
+        console.error('❌ Error al buscar elemento:', searchError);
+        return false;
       }
-    } catch (e) { /* caer a data */ }
-
-    // Intento 2: esquema data
-    const row = await getRowByDataId('precios_elementos', nombre);
-    if (!row) return true;
-    const { error } = await client.from('precios_elementos').delete().eq('id', row.id);
-    if (error) { console.error('❌ Supabase deletePrecioElementoByNombre:', error); return false; }
-    return true;
+      
+      if (!found || !found.id) {
+        console.log('⚠️ Elemento no encontrado en Supabase:', nombre);
+        return true; // No existe, consideramos éxito
+      }
+      
+      console.log('✅ Elemento encontrado, eliminando ID:', found.id);
+      
+      // Eliminar por ID
+      const { error: deleteError } = await client
+        .from('precios_elementos')
+        .delete()
+        .eq('id', found.id);
+      
+      if (deleteError) {
+        console.error('❌ Error al eliminar elemento:', deleteError);
+        return false;
+      }
+      
+      console.log('✅ Elemento eliminado correctamente de Supabase');
+      return true;
+      
+    } catch (e) {
+      console.error('❌ Error general en deletePrecioElementoByNombre:', e);
+      return false;
+    }
   }
 
   function subscribePreciosElementos(callback) {
