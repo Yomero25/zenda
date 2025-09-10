@@ -705,34 +705,14 @@
 
   async function deletePrecioElementoByNombre(nombre) {
     if (!client) return false;
-    console.log('🔍 Buscando elemento para eliminar:', nombre);
+    console.log('🔍 Eliminando elemento por nombre:', nombre);
     
     try {
-      // Buscar por elemento
-      const { data: found, error: searchError } = await client
-        .from('precios_elementos')
-        .select('id, elemento')
-        .eq('elemento', nombre)
-        .limit(1)
-        .maybeSingle();
-      
-      if (searchError) {
-        console.error('❌ Error al buscar elemento:', searchError);
-        return false;
-      }
-      
-      if (!found || !found.id) {
-        console.log('⚠️ Elemento no encontrado en Supabase:', nombre);
-        return true; // No existe, consideramos éxito
-      }
-      
-      console.log('✅ Elemento encontrado, eliminando ID:', found.id);
-      
-      // Eliminar por ID
+      // Eliminar directamente por elemento (que es la clave primaria)
       const { error: deleteError } = await client
         .from('precios_elementos')
         .delete()
-        .eq('id', found.id);
+        .eq('elemento', nombre);
       
       if (deleteError) {
         console.error('❌ Error al eliminar elemento:', deleteError);
