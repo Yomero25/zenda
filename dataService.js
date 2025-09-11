@@ -4,12 +4,17 @@
 (function () {
   const SUPABASE_URL = 'https://lsmhcpsvjcbduqovbatj.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzbWhjcHN2amNiZHVxb3ZiYXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMTM4MzgsImV4cCI6MjA3MjU4OTgzOH0.I7dEer-R2ZaiMvU-Hmve6Ms0wk82U1e7C67e8fYWIEw';
+  const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzbWhjcHN2amNiZHVxb3ZiYXRqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzAxMzgzOCwiZXhwIjoyMDcyNTg5ODM4fQ.DLRwIywQBS4U6V5zhwUiBPBsHCa-ULO2v_55HO1uqqg';
 
   /** @type {import('@supabase/supabase-js').SupabaseClient | null} */
   let client = null;
+  /** @type {import('@supabase/supabase-js').SupabaseClient | null} */
+  let serviceClient = null;
+  
   try {
     if (window && window.supabase && typeof window.supabase.createClient === 'function') {
       client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      serviceClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
       console.log('✅ Supabase inicializado');
     } else {
       console.warn('⚠️ Supabase CDN no encontrado; se usará fallback de localStorage');
@@ -955,7 +960,9 @@
           console.log(`🔍 DEBUG: Notificaciones soporte existentes para cotización ${k}:`, notifExistentes);
           if (errorCheck) console.warn('Error verificando notificaciones soporte:', errorCheck);
           
-          const result2 = await client.from('notificaciones_soporte').delete().eq('data->>cotizacionId', k);
+          // Usar serviceClient para eliminación (tiene permisos completos)
+          const clientToUse = serviceClient || client;
+          const result2 = await clientToUse.from('notificaciones_soporte').delete().eq('data->>cotizacionId', k);
           console.log(`🗑️ Eliminadas notificaciones soporte para cotización ${k}:`, result2);
         } catch(e){ console.warn('Error eliminando notificaciones soporte:', e); }
       }
@@ -966,7 +973,9 @@
           console.log(`🗑️ Eliminadas notificaciones instalaciones para solicitud ${despId}:`, result3);
         } catch(e){ console.warn('Error eliminando notificaciones instalaciones por solicitud:', e); }
         try { 
-          const result4 = await client.from('notificaciones_soporte').delete().eq('data->>solicitudDespachoId', despId);
+          // Usar serviceClient para eliminación (tiene permisos completos)
+          const clientToUse = serviceClient || client;
+          const result4 = await clientToUse.from('notificaciones_soporte').delete().eq('data->>solicitudDespachoId', despId);
           console.log(`🗑️ Eliminadas notificaciones soporte para solicitud ${despId}:`, result4);
         } catch(e){ console.warn('Error eliminando notificaciones soporte por solicitud:', e); }
       }
