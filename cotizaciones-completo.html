@@ -1661,6 +1661,11 @@
         function calcularProgreso(cotizacion) {
             let progreso = 0;
 
+            // Rechazada = 0% (barra roja) - PRIORIDAD MÁXIMA
+            if (cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo) {
+                return 0;
+            }
+
             // Enviada = 25%
             if (cotizacion.estado === 'enviada' || cotizacion.fecha_envio) {
                 progreso = 25;
@@ -1676,18 +1681,15 @@
                 progreso = 50;
             }
 
-            // Rechazada = 0% (barra roja)
-            if (cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo) {
-                progreso = 0;
-            }
-
-            // Facturada = +25% (75% total)
+            // Facturada = +25% (75% total) - Solo si está aceptada
             if (cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion)) {
                 progreso = 75;
             }
 
-            // Instalada = 100%
-            if (cotizacion.fecha_instalacion) {
+            // Instalada = +25% (100% total) - Solo si está aceptada Y facturada
+            if (cotizacion.fecha_instalacion && 
+                (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion) && 
+                cotizacion.facturada) {
                 progreso = 100;
             }
 
@@ -1700,8 +1702,8 @@
                 case 'seguimiento': return requiereSeguimiento(cotizacion);
                 case 'aceptada': return cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion;
                 case 'rechazada': return cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo;
-                case 'instalada': return cotizacion.fecha_instalacion;
-                case 'facturada': return cotizacion.facturada;
+                case 'instalada': return cotizacion.fecha_instalacion && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
+                case 'facturada': return cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
                 case 'finalizada': return esFinalizada(cotizacion);
                 default: return false;
             }
