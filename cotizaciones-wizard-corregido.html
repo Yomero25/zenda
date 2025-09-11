@@ -3602,6 +3602,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 accesorios: data.accesorios || [],
                 insumosSugeridos: data.insumosSugeridos || [],
                 accesoriosSugeridos: data.accesoriosSugeridos || [],
+                equiposAutomaticos: data.equiposAutomaticos || {},
+                equipos: data.equipos || {},
                 total: Number(total) || 0
             };
             return draft;
@@ -4512,8 +4514,13 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     // Datos generados automáticamente
                     insumosSugeridos: cotizacionData.insumosSugeridos || [],
                     accesoriosSugeridos: cotizacionData.accesoriosSugeridos || [],
-                    equiposAutomaticos: cotizacionData.equiposAutomaticos || {}
+                    equiposAutomaticos: cotizacionData.equiposAutomaticos || {},
+                    equipos: cotizacionData.equipos || {}
                 };
+                
+                console.log('🔍 DEBUG COTIZACION FINAL - equiposAutomaticos:', cotizacionData.equiposAutomaticos);
+                console.log('🔍 DEBUG COTIZACION FINAL - equipos:', cotizacionData.equipos);
+                console.log('🔍 DEBUG COTIZACION FINAL - cotizacionFinal completa:', cotizacionFinal);
                 
                 // Guardar en Supabase o localStorage
                 try {
