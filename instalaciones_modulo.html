@@ -321,6 +321,47 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación de Instalación -->
+    <div class="modal fade" id="modalConfirmarInstalacion" tabindex="-1" aria-labelledby="modalConfirmarInstalacionLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalConfirmarInstalacionLabel">
+                        <i class="bi bi-tools me-2"></i>Confirmar Instalación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>¿Estás seguro de marcar esta solicitud como instalada?</strong>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ID Solicitud:</label>
+                        <input type="text" class="form-control" id="confirmarInstalacionId" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cliente:</label>
+                        <input type="text" class="form-control" id="confirmarInstalacionCliente" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Observaciones (opcional):</label>
+                        <textarea class="form-control" id="confirmarInstalacionObservaciones" rows="3" 
+                                placeholder="Observaciones sobre la instalación..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-arrow-left me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="confirmarInstalacion()">
+                        <i class="bi bi-tools me-1"></i>Confirmar Instalación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Supabase CDN + DataService -->
@@ -1497,30 +1538,58 @@
             }, 5000);
         }
 
-        // Función para marcar como instalada
-        async function marcarComoInstalada(notificacionId) {
+        // Variables para el modal de instalación
+        let notificacionInstalacionId = null;
+
+        // Función para mostrar modal de confirmación de instalación
+        function marcarComoInstalada(notificacionId) {
+            const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+            if (!notificacion) {
+                mostrarAlerta('Solicitud no encontrada', 'danger');
+                return;
+            }
+
+            // Llenar datos del modal
+            notificacionInstalacionId = notificacionId;
+            document.getElementById('confirmarInstalacionId').value = notificacion.id;
+            document.getElementById('confirmarInstalacionCliente').value = notificacion.cliente;
+            document.getElementById('confirmarInstalacionObservaciones').value = '';
+
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalConfirmarInstalacion'));
+            modal.show();
+        }
+
+        // Función para confirmar instalación
+        async function confirmarInstalacion() {
             try {
-                const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+                const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
                 if (!notificacion) {
                     mostrarAlerta('Solicitud no encontrada', 'danger');
                     return;
                 }
 
-                // Confirmar acción
-                if (!confirm('¿Estás seguro de marcar esta solicitud como instalada?')) {
-                    return;
-                }
+                // Obtener observaciones del modal
+                const observaciones = document.getElementById('confirmarInstalacionObservaciones').value.trim();
 
                 // Actualizar estado localmente
                 notificacion.estado = 'instalada';
                 notificacion.fecha_instalacion = new Date().toISOString();
+                if (observaciones) {
+                    notificacion.observaciones_instalacion = observaciones;
+                }
 
                 // Actualizar en Supabase si está disponible
                 if (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
-                    await window.dataService.actualizarNotificacionInstalaciones(notificacionId, {
+                    const datosActualizacion = {
                         estado: 'instalada',
                         fecha_instalacion: notificacion.fecha_instalacion
-                    });
+                    };
+                    if (observaciones) {
+                        datosActualizacion.observaciones_instalacion = observaciones;
+                    }
+
+                    await window.dataService.actualizarNotificacionInstalaciones(notificacionInstalacionId, datosActualizacion);
 
                     // Actualizar la cotización correspondiente
                     await window.dataService.actualizarCotizacion(notificacion.cotizacionId, {
@@ -1528,8 +1597,13 @@
                     });
                 }
 
+                // Cerrar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarInstalacion'));
+                modal.hide();
+
                 // Re-renderizar la lista
-                renderSolicitudes();
+                cargarListaSolicitudes();
+                actualizarEstadisticas();
                 mostrarAlerta('Solicitud marcada como instalada exitosamente', 'success');
             } catch (error) {
                 console.error('Error marcando como instalada:', error);
