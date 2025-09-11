@@ -145,6 +145,7 @@
                                         <th>Cliente</th>
                                         <th>Tipo Cliente</th>
                                         <th>Estado</th>
+                                        <th>Progreso</th>
                                         <th>Fecha</th>
                                         <th>Total</th>
                                         <th>Acciones</th>
@@ -378,11 +379,18 @@
                 const fecha = cotizacion.fecha_cotizacion ? new Date(cotizacion.fecha_cotizacion).toLocaleDateString('es-ES') : '';
                 const total = Number(cotizacion.total || 0);
                 const idAttr = String(cotizacion.id || cotizacion.folio || '');
+                
+                // Aplicar sombreado naranja si requiere seguimiento
+                if (requiereSeguimiento(cotizacion)) {
+                    row.style.backgroundColor = '#fff3cd';
+                    row.style.borderLeft = '4px solid #ffc107';
+                }
                 row.innerHTML = `
                     <td><strong class="text-primary">${cotizacion.folio || ('COT-' + (cotizacion.id || 'N/A'))}</strong></td>
                     <td><strong>${cotizacion.cliente_nombre || ''}</strong></td>
                     <td><span class="badge bg-light text-dark">${cotizacion.tipo_cliente || ''}</span></td>
                     <td>${getEstadoBadge(cotizacion.estado)}</td>
+                    <td>${generarBarraProgreso(cotizacion)}</td>
                     <td><small class="text-muted">${fecha}</small></td>
                     <td><strong class="text-success">$${total.toLocaleString()}</strong></td>
                     <td>
@@ -1561,6 +1569,100 @@
                     alerta.remove();
                 }
             }, 5000);
+        }
+
+        // =====================
+        // FUNCIONES DE PROGRESO DE VENTAS
+        // =====================
+
+        function generarBarraProgreso(cotizacion) {
+            const estados = [
+                { key: 'enviada', label: 'Enviada', icon: 'bi-send' },
+                { key: 'seguimiento', label: 'En Seguimiento', icon: 'bi-clock' },
+                { key: 'aceptada', label: 'Aceptada', icon: 'bi-check-circle' },
+                { key: 'rechazada', label: 'Rechazada', icon: 'bi-x-circle' },
+                { key: 'instalada', label: 'Instalada', icon: 'bi-tools' },
+                { key: 'facturada', label: 'Facturada', icon: 'bi-receipt' },
+                { key: 'finalizada', label: 'Finalizada', icon: 'bi-flag-fill' }
+            ];
+
+            let html = '<div class="d-flex align-items-center" style="min-width: 200px;">';
+            
+            // Barra de progreso
+            html += '<div class="progress flex-grow-1 me-2" style="height: 8px;">';
+            html += '<div class="progress-bar" style="width: ' + calcularProgreso(cotizacion) + '%; background-color: #fb930c;"></div>';
+            html += '</div>';
+
+            // Círculos de estados
+            html += '<div class="d-flex">';
+            estados.forEach((estado, index) => {
+                const activo = esEstadoActivo(cotizacion, estado.key);
+                const color = obtenerColorEstado(cotizacion, estado.key);
+                html += `<div class="me-1" title="${estado.label}">
+                    <i class="bi ${estado.icon} ${activo ? 'text-' + color : 'text-muted'}" 
+                       style="font-size: 12px; ${activo ? 'color: #fb930c !important;' : ''}"></i>
+                </div>`;
+            });
+            html += '</div>';
+
+            html += '</div>';
+            return html;
+        }
+
+        function calcularProgreso(cotizacion) {
+            let progreso = 0;
+            const estadosCompletados = 0;
+
+            if (cotizacion.estado === 'enviada' || cotizacion.fecha_envio) progreso += 14.3;
+            if (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion) progreso += 14.3;
+            if (cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo) progreso += 14.3;
+            if (cotizacion.fecha_instalacion) progreso += 14.3;
+            if (cotizacion.facturada) progreso += 14.3;
+            if (esFinalizada(cotizacion)) progreso += 14.3;
+
+            return Math.min(progreso, 100);
+        }
+
+        function esEstadoActivo(cotizacion, estadoKey) {
+            switch(estadoKey) {
+                case 'enviada': return cotizacion.estado === 'enviada' || cotizacion.fecha_envio;
+                case 'seguimiento': return requiereSeguimiento(cotizacion);
+                case 'aceptada': return cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion;
+                case 'rechazada': return cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo;
+                case 'instalada': return cotizacion.fecha_instalacion;
+                case 'facturada': return cotizacion.facturada;
+                case 'finalizada': return esFinalizada(cotizacion);
+                default: return false;
+            }
+        }
+
+        function obtenerColorEstado(cotizacion, estadoKey) {
+            if (estadoKey === 'rechazada' && (cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo)) {
+                return 'danger';
+            }
+            if (estadoKey === 'finalizada' && esFinalizada(cotizacion)) {
+                return 'success';
+            }
+            return 'primary';
+        }
+
+        function requiereSeguimiento(cotizacion) {
+            if (!cotizacion.fecha_envio || cotizacion.estado === 'aceptada' || cotizacion.estado === 'rechazada') {
+                return false;
+            }
+
+            const diasSeguimiento = parseInt(cotizacion.dias_seguimiento || '7');
+            const fechaEnvio = new Date(cotizacion.fecha_envio);
+            const fechaLimite = new Date(fechaEnvio);
+            fechaLimite.setDate(fechaLimite.getDate() + diasSeguimiento);
+            
+            return new Date() >= fechaLimite;
+        }
+
+        function esFinalizada(cotizacion) {
+            return (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion) && 
+                   cotizacion.fecha_instalacion && 
+                   cotizacion.facturada;
         }
     </script>
 </body>

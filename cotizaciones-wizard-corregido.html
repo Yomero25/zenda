@@ -278,6 +278,22 @@
                                         </div>
                                     </div>
                                     <div class="mb-3">
+                                        <label class="form-label fw-bold" for="dias_seguimiento">Días de Seguimiento</label>
+                                        <select class="form-select" id="dias_seguimiento">
+                                            <option value="">Seleccionar días (opcional)</option>
+                                            <option value="1">1 día</option>
+                                            <option value="2">2 días</option>
+                                            <option value="3">3 días</option>
+                                            <option value="4">4 días</option>
+                                            <option value="5">5 días</option>
+                                            <option value="6">6 días</option>
+                                            <option value="7" selected>7 días (por defecto)</option>
+                                        </select>
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i> Días después de enviar la cotización para dar seguimiento
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
                                         <label class="form-label fw-bold" for="observaciones">Observaciones</label>
                                         <textarea class="form-control" id="observaciones" rows="3" placeholder="Observaciones adicionales"></textarea>
                                     </div>
@@ -2787,6 +2803,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     const descuento = document.getElementById('descuento');
                     const fechaVencimiento = document.getElementById('fecha_vencimiento');
                     const urgente = document.getElementById('urgente');
+                    const diasSeguimiento = document.getElementById('dias_seguimiento');
                     const observaciones = document.getElementById('observaciones');
                     
                     if (cotizacion.cliente_nombre && clienteNombre) {
@@ -3302,6 +3319,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         descuento: document.getElementById('descuento').value,
                         fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
                         urgente: document.getElementById('urgente').value,
+                        dias_seguimiento: document.getElementById('dias_seguimiento').value || '7',
                         observaciones: document.getElementById('observaciones').value
                     };
                     break;
@@ -3471,6 +3489,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 if (el('descuento') && c.descuento !== undefined && c.descuento !== null) el('descuento').value = c.descuento;
                 if (el('fecha_vencimiento')) el('fecha_vencimiento').value = c.fecha_vencimiento || '';
                 if (el('urgente')) el('urgente').value = c.urgente || 'baja';
+                if (el('dias_seguimiento')) el('dias_seguimiento').value = c.dias_seguimiento || '7';
                 if (el('observaciones')) el('observaciones').value = c.observaciones || '';
             }
 
@@ -3592,6 +3611,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 descuento: cliente.descuento || 0,
                 fecha_vencimiento: cliente.fecha_vencimiento || '',
                 urgente: cliente.urgente || 'baja',
+                dias_seguimiento: cliente.dias_seguimiento || '7',
                 observaciones: cliente.observaciones || '',
                 tipoVenta: data.tipoVenta || 'instalacion',
                 cantidadLote: data.cantidadLote || null,
@@ -3604,6 +3624,15 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 accesoriosSugeridos: data.accesoriosSugeridos || [],
                 equiposAutomaticos: data.equiposAutomaticos || {},
                 equipos: data.equipos || {},
+                // Campos de progreso de ventas
+                fecha_envio: null,
+                fecha_seguimiento: null,
+                fecha_aceptacion: null,
+                fecha_rechazo: null,
+                fecha_instalacion: null,
+                fecha_facturacion: null,
+                observaciones_rechazo: null,
+                facturada: false,
                 total: Number(total) || 0
             };
             return draft;
@@ -4515,7 +4544,17 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     insumosSugeridos: cotizacionData.insumosSugeridos || [],
                     accesoriosSugeridos: cotizacionData.accesoriosSugeridos || [],
                     equiposAutomaticos: cotizacionData.equiposAutomaticos || {},
-                    equipos: cotizacionData.equipos || {}
+                    equipos: cotizacionData.equipos || {},
+                    // Campos de progreso de ventas
+                    dias_seguimiento: cotizacionData.cliente?.dias_seguimiento || '7',
+                    fecha_envio: null,
+                    fecha_seguimiento: null,
+                    fecha_aceptacion: null,
+                    fecha_rechazo: null,
+                    fecha_instalacion: null,
+                    fecha_facturacion: null,
+                    observaciones_rechazo: null,
+                    facturada: false
                 };
                 
                 console.log('🔍 DEBUG COTIZACION FINAL - equiposAutomaticos:', cotizacionData.equiposAutomaticos);
