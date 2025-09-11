@@ -1032,6 +1032,86 @@
     return channel;
   }
 
+  // Función para actualizar cotización
+  async function actualizarCotizacion(idOrFolio, datos) {
+    try {
+      if (!client) {
+        console.warn('⚠️ Supabase no disponible, actualizando localStorage');
+        // Actualizar localStorage si no hay Supabase
+        const cotizaciones = JSON.parse(localStorage.getItem('cotizaciones') || '[]');
+        const index = cotizaciones.findIndex(c => String(c.id) === String(idOrFolio) || String(c.folio) === String(idOrFolio));
+        if (index !== -1) {
+          cotizaciones[index] = { ...cotizaciones[index], ...datos };
+          localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+        }
+        return { success: true };
+      }
+
+      // Buscar la cotización por ID o folio
+      const found = await getCotizacionRowByIdOrFolio(idOrFolio);
+      if (!found) {
+        throw new Error('Cotización no encontrada');
+      }
+
+      // Actualizar en Supabase
+      if (found.kind === 'rows') {
+        // Estructura JSONB
+        const { data, error } = await client
+          .from('cotizaciones')
+          .update({ data: { ...found.row.data, ...datos } })
+          .eq('id', found.row.id);
+        
+        if (error) throw error;
+        console.log('✅ Cotización actualizada en Supabase (JSONB):', idOrFolio);
+      } else {
+        // Estructura por columnas
+        const { data, error } = await client
+          .from('cotizaciones')
+          .update(datos)
+          .eq('id', found.row.id);
+        
+        if (error) throw error;
+        console.log('✅ Cotización actualizada en Supabase (columnas):', idOrFolio);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('❌ Error actualizando cotización:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Función para actualizar notificaciones de instalaciones
+  async function actualizarNotificacionInstalaciones(notificacionId, datos) {
+    try {
+      if (!client) {
+        console.warn('⚠️ Supabase no disponible, actualizando localStorage');
+        // Actualizar localStorage si no hay Supabase
+        const notificaciones = JSON.parse(localStorage.getItem('notificaciones_instalaciones') || '[]');
+        const index = notificaciones.findIndex(n => String(n.id) === String(notificacionId));
+        if (index !== -1) {
+          notificaciones[index] = { ...notificaciones[index], ...datos };
+          localStorage.setItem('notificaciones_instalaciones', JSON.stringify(notificaciones));
+        }
+        return { success: true };
+      }
+
+      // Actualizar en Supabase
+      const { data, error } = await client
+        .from('notificaciones_instalaciones')
+        .update(datos)
+        .eq('id', notificacionId);
+      
+      if (error) throw error;
+      console.log('✅ Notificación instalaciones actualizada en Supabase:', notificacionId);
+
+      return { success: true };
+    } catch (error) {
+      console.error('❌ Error actualizando notificación instalaciones:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Exponer API
   window.dataService = {
     hasSupabase: () => !!client,
@@ -1050,6 +1130,7 @@
     patchNotificacionInstalacionesById,
     patchNotificacionBySolicitudId,
     findNotificacionBySolicitudId,
+    actualizarNotificacionInstalaciones,
     subscribeNotificacionesInstalaciones,
     // soporte
     fetchNotificacionesSoporte,
@@ -1074,6 +1155,7 @@
     deleteCotizacionByIdOrFolio,
     deleteCotizacionCascade,
     patchCotizacionById,
+    actualizarCotizacion,
     subscribeCotizaciones,
     // helpers
     getCotizacionByIdOrFolio: async (idOrFolio) => {
