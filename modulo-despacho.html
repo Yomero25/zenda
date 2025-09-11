@@ -1553,31 +1553,56 @@
                             solicitud.estado = 'enviada_instalaciones';
                             solicitud.fechaEnvioInstalaciones = new Date().toISOString().split('T')[0];
                             window.dataService.patchSolicitudDespachoById(solicitud.id, { estado: 'enviada_instalaciones', fechaEnvioInstalaciones: solicitud.fechaEnvioInstalaciones });
-                            // Enviar a Soporte en paralelo si hay equipos MDVR o GPS, o si alguna solución con grabación requiere MDVR
+                            // Enviar a Soporte en paralelo si la solución requiere configuración
                             try {
                                 const requiereSoporte = (() => {
-                                    const equipos = solicitud.equipos || {};
-                                    console.log('🔍 DEBUG SOPORTE - Equipos en solicitud:', equipos);
-                                    console.log('🔍 DEBUG SOPORTE - Claves de equipos:', Object.keys(equipos));
-                                    
-                                    const tieneMDVR = Object.keys(equipos).some(k => /(MDVR|MVR|Grabador de video)/i.test(k));
-                                    const tieneGPS = Object.keys(equipos).some(k => /(GPS|GV310|GV58|GV75|SMOC|GV|GPS.*GV)/i.test(k));
-                                    const tieneDashcam = Object.keys(equipos).some(k => /(Dashcam\s*ad2|Dashcam\s*c6)/i.test(k));
-                                    
-                                    console.log('🔍 DEBUG SOPORTE - Tiene MDVR:', tieneMDVR);
-                                    console.log('🔍 DEBUG SOPORTE - Tiene GPS:', tieneGPS);
-                                    console.log('🔍 DEBUG SOPORTE - Tiene Dashcam:', tieneDashcam);
-                                    
-                                    if (tieneMDVR || tieneGPS || tieneDashcam) return true;
+                                    // Obtener soluciones detalladas de la cotización
                                     const det = (notificacionInstalaciones.solucionesDetalladas && notificacionInstalaciones.solucionesDetalladas.length)
                                       ? notificacionInstalaciones.solucionesDetalladas
                                       : (cotizacionOriginal ? obtenerSolucionesDetalladas(cotizacionOriginal) : []);
-                                    return det.some(sd => {
-                                        const sol = (sd.solucion||'').toLowerCase();
+                                    
+                                    console.log('🔍 DEBUG SOPORTE - Soluciones detalladas:', det);
+                                    
+                                    // Verificar si alguna solución requiere soporte
+                                    const requiere = det.some(sd => {
+                                        const sol = (sd.solucion || '').toLowerCase();
+                                        console.log('🔍 DEBUG SOPORTE - Verificando solución:', sol);
+                                        
+                                        // Soluciones que siempre requieren soporte
+                                        const solucionesSoporte = [
+                                            'rastreo básico',
+                                            'rastreo avanzado', 
+                                            'rastreo satelital',
+                                            'mdvr 4 canales',
+                                            'mdvr 8 canales'
+                                        ];
+                                        
+                                        // Verificar soluciones exactas
+                                        const esSolucionSoporte = solucionesSoporte.some(s => sol.includes(s));
+                                        if (esSolucionSoporte) {
+                                            console.log('🔍 DEBUG SOPORTE - Solución requiere soporte (exacta):', sol);
+                                            return true;
+                                        }
+                                        
+                                        // Verificar si incluye "grabación" en el nombre
+                                        if (sol.includes('grabación') || sol.includes('grabacion')) {
+                                            console.log('🔍 DEBUG SOPORTE - Solución con grabación detectada:', sol);
+                                            return true;
+                                        }
+                                        
+                                        // Verificar configuraciones que requieren grabación
                                         const cfg = sd.configuraciones || {};
                                         const grab = !!(cfg.grabacion === true || cfg['grabación'] === true);
-                                        return grab && (sol.includes('vpc') || sol.includes('sideview') || sol.includes('encadenamiento'));
+                                        if (grab) {
+                                            console.log('🔍 DEBUG SOPORTE - Configuración con grabación detectada:', cfg);
+                                            return true;
+                                        }
+                                        
+                                        return false;
                                     });
+                                    
+                                    console.log('🔍 DEBUG SOPORTE - Requiere soporte:', requiere);
+                                    return requiere;
                                 })();
                                 console.log('🔍 DEBUG SOPORTE - Requiere soporte:', requiereSoporte);
                                 
