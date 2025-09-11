@@ -605,7 +605,7 @@
                                         `<button class="btn btn-success btn-sm" onclick="validarCambiosProcesados('${notificacion.id}')">
                                             <i class="bi bi-check-circle"></i> Validar Cambios
                                         </button>` :
-                                        notificacion.estado === 'despachada' ? 
+                                        (notificacion.estado === 'despachada' || notificacion.estado === 'validada' || notificacion.estado === 'cambios_validados') ? 
                                         `<button class="btn btn-success btn-sm" onclick="marcarComoInstalada('${notificacion.id}')">
                                             <i class="bi bi-tools"></i> Marcar Instalada
                                         </button>` :
@@ -630,7 +630,8 @@
                 'retornada': '<span class="badge bg-info">Retornada a Despacho</span>',
                 'despacho_cambios_solicitados': '<span class="badge bg-primary">Despacho de Cambios Solicitados</span>',
                 'cambios_validados': '<span class="badge bg-success">Cambios Validados</span>',
-                'despachada': '<span class="badge bg-secondary">Despachada</span>'
+                'despachada': '<span class="badge bg-secondary">Despachada</span>',
+                'instalada': '<span class="badge bg-success">Instalada</span>'
             };
             return estados[estado] || '<span class="badge bg-secondary">Desconocido</span>';
         }
@@ -1238,6 +1239,7 @@
             const cambiosValidados = notificacionesInstalaciones.filter(n => n.estado === 'cambios_validados').length;
             const urgentes = notificacionesInstalaciones.filter(n => n.urgencia === 'alta' && n.estado !== 'validada').length;
             const despachadas = notificacionesInstalaciones.filter(n => n.estado === 'despachada').length;
+            const instaladas = notificacionesInstalaciones.filter(n => n.estado === 'instalada').length;
 
             document.getElementById('totalSolicitudes').textContent = total;
             document.getElementById('pendientes').textContent = pendientes;
