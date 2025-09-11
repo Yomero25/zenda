@@ -605,7 +605,10 @@
                                         `<button class="btn btn-success btn-sm" onclick="validarCambiosProcesados('${notificacion.id}')">
                                             <i class="bi bi-check-circle"></i> Validar Cambios
                                         </button>` :
-                                        notificacion.estado === 'despachada' ? '' :
+                                        notificacion.estado === 'despachada' ? 
+                                        `<button class="btn btn-success btn-sm" onclick="marcarComoInstalada('${notificacion.id}')">
+                                            <i class="bi bi-tools"></i> Marcar Instalada
+                                        </button>` :
                                         `<button class="btn btn-success btn-sm" onclick="validarSolicitud('${notificacion.id}')">
                                             <i class="bi bi-check"></i> Validar
                                         </button>`
@@ -1490,6 +1493,46 @@
                     alertDiv.parentNode.removeChild(alertDiv);
                 }
             }, 5000);
+        }
+
+        // Función para marcar como instalada
+        async function marcarComoInstalada(notificacionId) {
+            try {
+                const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+                if (!notificacion) {
+                    mostrarAlerta('Solicitud no encontrada', 'danger');
+                    return;
+                }
+
+                // Confirmar acción
+                if (!confirm('¿Estás seguro de marcar esta solicitud como instalada?')) {
+                    return;
+                }
+
+                // Actualizar estado localmente
+                notificacion.estado = 'instalada';
+                notificacion.fecha_instalacion = new Date().toISOString();
+
+                // Actualizar en Supabase si está disponible
+                if (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
+                    await window.dataService.actualizarNotificacionInstalaciones(notificacionId, {
+                        estado: 'instalada',
+                        fecha_instalacion: notificacion.fecha_instalacion
+                    });
+
+                    // Actualizar la cotización correspondiente
+                    await window.dataService.actualizarCotizacion(notificacion.cotizacionId, {
+                        fecha_instalacion: notificacion.fecha_instalacion
+                    });
+                }
+
+                // Re-renderizar la lista
+                renderSolicitudes();
+                mostrarAlerta('Solicitud marcada como instalada exitosamente', 'success');
+            } catch (error) {
+                console.error('Error marcando como instalada:', error);
+                mostrarAlerta('Error al marcar como instalada', 'danger');
+            }
         }
     </script>
 </body>
