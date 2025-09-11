@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Notificaciones Existentes</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Verificar Notificaciones de Soporte Existentes</h1>
+    <button onclick="verificarNotificaciones()">Verificar Notificaciones</button>
+    <button onclick="eliminarTodasLasPruebas()">Eliminar Todas las Pruebas</button>
+    <div id="resultado"></div>
+
+    <script>
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://lsmhcpsvjcbduqovbatj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzbWhjcHN2amNiZHVxb3ZiYXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMTM4MzgsImV4cCI6MjA3MjU4OTgzOH0.8Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q7Q';
+        
+        const { createClient } = supabase;
+        const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function verificarNotificaciones() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '<p>🔄 Verificando notificaciones existentes...</p>';
+
+            try {
+                // 1. Obtener todas las notificaciones
+                const { data: notificaciones, error: error1 } = await client
+                    .from('notificaciones_soporte')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error1) {
+                    resultado.innerHTML = `<p>❌ Error al obtener notificaciones: ${error1.message}</p>`;
+                    return;
+                }
+
+                resultado.innerHTML += `<p>📊 Total de notificaciones: ${notificaciones.length}</p>`;
+
+                if (notificaciones.length > 0) {
+                    resultado.innerHTML += `<h3>📋 Lista de Notificaciones:</h3>`;
+                    notificaciones.forEach((notif, index) => {
+                        resultado.innerHTML += `
+                            <div style="border: 1px solid #ccc; margin: 10px 0; padding: 10px;">
+                                <h4>Notificación ${index + 1} (ID: ${notif.id})</h4>
+                                <p><strong>Cotización ID:</strong> ${notif.data?.cotizacionId || 'N/A'}</p>
+                                <p><strong>Solicitud ID:</strong> ${notif.data?.solicitudDespachoId || 'N/A'}</p>
+                                <p><strong>Cliente:</strong> ${notif.data?.cliente || 'N/A'}</p>
+                                <p><strong>Solución:</strong> ${notif.data?.solucion || 'N/A'}</p>
+                                <p><strong>Estado:</strong> ${notif.data?.estado || 'N/A'}</p>
+                                <p><strong>Creada:</strong> ${notif.created_at}</p>
+                                <button onclick="eliminarNotificacion(${notif.id})">Eliminar Esta</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    resultado.innerHTML += `<p>ℹ️ No hay notificaciones en la tabla</p>`;
+                }
+
+                // 2. Verificar notificaciones por cotizacionId específico
+                const cotizacionTest = 'COT-2025-664'; // Usar una cotización real
+                const { data: notifPorCotizacion, error: error2 } = await client
+                    .from('notificaciones_soporte')
+                    .select('*')
+                    .eq('data->>cotizacionId', cotizacionTest);
+
+                if (error2) {
+                    resultado.innerHTML += `<p>⚠️ Error al buscar por cotización ${cotizacionTest}: ${error2.message}</p>`;
+                } else {
+                    resultado.innerHTML += `<p>🔍 Notificaciones para cotización ${cotizacionTest}: ${notifPorCotizacion.length}</p>`;
+                }
+
+            } catch (error) {
+                console.error('❌ Error general:', error);
+                resultado.innerHTML = `<p>❌ Error general: ${error.message}</p>`;
+            }
+        }
+
+        async function eliminarNotificacion(id) {
+            try {
+                const { error } = await client
+                    .from('notificaciones_soporte')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert(`Error al eliminar: ${error.message}`);
+                } else {
+                    alert('Notificación eliminada exitosamente');
+                    verificarNotificaciones(); // Refrescar la lista
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function eliminarTodasLasPruebas() {
+            if (!confirm('¿Estás seguro de que quieres eliminar TODAS las notificaciones de prueba?')) {
+                return;
+            }
+
+            try {
+                // Eliminar notificaciones que contengan "TEST" en el cotizacionId
+                const { data, error } = await client
+                    .from('notificaciones_soporte')
+                    .delete()
+                    .like('data->>cotizacionId', '%TEST%')
+                    .select();
+
+                if (error) {
+                    alert(`Error al eliminar pruebas: ${error.message}`);
+                } else {
+                    alert(`Eliminadas ${data.length} notificaciones de prueba`);
+                    verificarNotificaciones(); // Refrescar la lista
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

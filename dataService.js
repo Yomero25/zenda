@@ -946,6 +946,15 @@
           console.log(`🗑️ Eliminadas notificaciones instalaciones para cotización ${k}:`, result1);
         } catch(e){ console.warn('Error eliminando notificaciones instalaciones:', e); }
         try { 
+          // Primero verificar si existen notificaciones antes de eliminar
+          const { data: notifExistentes, error: errorCheck } = await client
+            .from('notificaciones_soporte')
+            .select('id, data')
+            .eq('data->>cotizacionId', k);
+          
+          console.log(`🔍 DEBUG: Notificaciones soporte existentes para cotización ${k}:`, notifExistentes);
+          if (errorCheck) console.warn('Error verificando notificaciones soporte:', errorCheck);
+          
           const result2 = await client.from('notificaciones_soporte').delete().eq('data->>cotizacionId', k);
           console.log(`🗑️ Eliminadas notificaciones soporte para cotización ${k}:`, result2);
         } catch(e){ console.warn('Error eliminando notificaciones soporte:', e); }
