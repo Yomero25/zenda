@@ -14,13 +14,21 @@
   try {
     if (window && window.supabase && typeof window.supabase.createClient === 'function') {
       client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      serviceClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+      // Crear serviceClient solo cuando sea necesario para evitar múltiples instancias
       console.log('✅ Supabase inicializado');
     } else {
       console.warn('⚠️ Supabase CDN no encontrado; se usará fallback de localStorage');
     }
   } catch (e) {
     console.warn('⚠️ No fue posible inicializar Supabase; fallback localStorage.', e);
+  }
+
+  // Función para obtener serviceClient solo cuando sea necesario
+  function getServiceClient() {
+    if (!serviceClient && window && window.supabase && typeof window.supabase.createClient === 'function') {
+      serviceClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    }
+    return serviceClient;
   }
 
   // =====================
@@ -961,7 +969,7 @@
           if (errorCheck) console.warn('Error verificando notificaciones soporte:', errorCheck);
           
           // Usar serviceClient para eliminación (tiene permisos completos)
-          const clientToUse = serviceClient || client;
+          const clientToUse = getServiceClient() || client;
           const result2 = await clientToUse.from('notificaciones_soporte').delete().eq('data->>cotizacionId', k);
           console.log(`🗑️ Eliminadas notificaciones soporte para cotización ${k}:`, result2);
         } catch(e){ console.warn('Error eliminando notificaciones soporte:', e); }
@@ -974,7 +982,7 @@
         } catch(e){ console.warn('Error eliminando notificaciones instalaciones por solicitud:', e); }
         try { 
           // Usar serviceClient para eliminación (tiene permisos completos)
-          const clientToUse = serviceClient || client;
+          const clientToUse = getServiceClient() || client;
           const result4 = await clientToUse.from('notificaciones_soporte').delete().eq('data->>solicitudDespachoId', despId);
           console.log(`🗑️ Eliminadas notificaciones soporte para solicitud ${despId}:`, result4);
         } catch(e){ console.warn('Error eliminando notificaciones soporte por solicitud:', e); }
