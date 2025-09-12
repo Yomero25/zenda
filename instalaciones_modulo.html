@@ -443,6 +443,12 @@
         function inicializarRealtimeInstalaciones() {
             if (!(window.dataService && window.dataService.hasSupabase())) return;
             window.dataService.subscribeNotificacionesInstalaciones(async () => {
+                // Si estamos evitando recarga desde Supabase, no hacer nada
+                if (evitarRecargaSupabase) {
+                    console.log('🔄 DEBUG: Realtime ignorado - evitarRecargaSupabase activo');
+                    return;
+                }
+                
                 const data = await window.dataService.fetchNotificacionesInstalaciones();
                 if (Array.isArray(data)) {
                     notificacionesInstalaciones = data;
