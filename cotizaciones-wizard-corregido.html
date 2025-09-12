@@ -1010,8 +1010,27 @@
             }
         };
 
-        // Lista de todos los insumos disponibles
-        const listaInsumos = [
+        // Función para cargar tipos globales desde localStorage
+        function cargarTiposGlobales() {
+            try {
+                const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{}');
+                return {
+                    vehiculos: tiposGlobales.vehiculos || [],
+                    soluciones: tiposGlobales.soluciones || [],
+                    insumos: tiposGlobales.insumos || []
+                };
+            } catch (error) {
+                console.warn('Error cargando tipos globales:', error);
+                return { vehiculos: [], soluciones: [], insumos: [] };
+            }
+        }
+
+        // Cargar tipos globales
+        const tiposGlobales = cargarTiposGlobales();
+        console.log('📋 Tipos globales cargados:', tiposGlobales);
+
+        // Lista de todos los insumos disponibles (combinar con tipos globales)
+        const listaInsumosBase = [
             'Cable 4 pin 1 m', 'Cable 4 pin 3 m', 'Cable 4 pin 5 m', 'Cable 4 pin 7 m', 
             'Cable 4 pin 15 m', 'Cable 4 pin 30 m', 'Cable 6 pin 5 m', '"Y" 4 pines',
             'Base Pollak', 'Pollak Macho', 'Pollak Hembra', 'Tornillo hexagonal 5/16',
@@ -1033,6 +1052,59 @@
             'SD 512 Gb', 'Sensor derecho VPC', 'Sensor izquierda VPC', 'Sideview derecho',
             'Sideview izquierdo'
         ];
+        
+        // Combinar insumos base con tipos globales
+        const listaInsumos = [...new Set([...listaInsumosBase, ...tiposGlobales.insumos])].sort();
+
+        // Función para actualizar selects de tipos de vehículos
+        function actualizarSelectsVehiculos() {
+            const selectsVehiculos = document.querySelectorAll('select[name*="vehiculo_tipo"]');
+            selectsVehiculos.forEach(select => {
+                const valorActual = select.value;
+                const opcionesBase = [
+                    '1.5 ton', '2.5 ton', '3.5 ton', '4.5 ton', 'Autobus pasajeros',
+                    'Motocicleta', 'Rabón', 'Sedan', 'Sedan lujo', 'SUV',
+                    'Torton', 'Tracto', 'Tracto Cabina sobre motor', 'Van pasajeros'
+                ];
+                const opcionesCompletas = [...new Set([...opcionesBase, ...tiposGlobales.vehiculos])].sort();
+                
+                select.innerHTML = '<option value="">Seleccionar tipo</option>' +
+                    opcionesCompletas.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
+                
+                // Restaurar valor seleccionado si existe
+                if (valorActual && opcionesCompletas.includes(valorActual)) {
+                    select.value = valorActual;
+                }
+            });
+        }
+
+        // Función para actualizar selects de tipos de soluciones
+        function actualizarSelectsSoluciones() {
+            const selectsSoluciones = document.querySelectorAll('select[name*="solucion_tipo"]');
+            selectsSoluciones.forEach(select => {
+                const valorActual = select.value;
+                const opcionesBase = [
+                    'Encadenamiento señales', 'Insider', 'Led de giro', 'Limitador de velocidad',
+                    'MDVR 4 Ch', 'MDVR 8 Ch', 'Modulo sensor cinturon', 'Rastreo avanzado',
+                    'Rastreo basico', 'Rastreo satelital', 'Sensor VPC', 'Sideview', 'VPC'
+                ];
+                const opcionesCompletas = [...new Set([...opcionesBase, ...tiposGlobales.soluciones])].sort();
+                
+                select.innerHTML = '<option value="">Seleccionar solución</option>' +
+                    opcionesCompletas.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
+                
+                // Restaurar valor seleccionado si existe
+                if (valorActual && opcionesCompletas.includes(valorActual)) {
+                    select.value = valorActual;
+                }
+            });
+        }
+
+        // Función para actualizar todos los selects
+        function actualizarTodosLosSelects() {
+            actualizarSelectsVehiculos();
+            actualizarSelectsSoluciones();
+        }
 
         // Cargar almacén desde localStorage si existe
         const almacenGuardado = localStorage.getItem('almacen_insumos');
@@ -3187,6 +3259,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             cargarAccesorios();
             cargarProgreso();
             
+            // Actualizar selects con tipos globales
+            actualizarTodosLosSelects();
+            
             // Suscribirse a cambios en tiempo real de precios
             if (modoCentralizado && window.dataService && window.dataService.subscribePreciosElementos) {
                 console.log('🔄 Suscribiéndose a cambios de precios en tiempo real...');
@@ -3827,6 +3902,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             `;
             container.appendChild(unidadDiv);
             unidadVehiculoCounter++;
+            
+            // Actualizar selects con tipos globales
+            setTimeout(() => {
+                actualizarTodosLosSelects();
+            }, 100);
         }
 
         function eliminarUnidadVehiculo(button) {
@@ -4769,6 +4849,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             `;
             
             container.appendChild(solucionDiv);
+            
+            // Actualizar selects con tipos globales
+            setTimeout(() => {
+                actualizarTodosLosSelects();
+            }, 100);
         }
         
         function copiarSolucionAnteriorWizard(button) {

@@ -1555,12 +1555,10 @@
                         return;
                     }
                     
-                    // Agregar a todos los tipos de vehículo existentes
-                    Object.keys(almacenInsumos).forEach(vehiculo => {
-                        almacenInsumos[vehiculo][nombre] = {};
-                    });
+                    // NO agregar automáticamente a todos los vehículos
+                    // Solo agregar a los vehículos que el usuario seleccione en el modal de nueva combinación
                     console.log(`✅ Nuevo tipo de solución agregado: ${nombre}`);
-                    mostrarAlerta(`Tipo de solución "${nombre}" agregado exitosamente`, 'success');
+                    mostrarAlerta(`Tipo de solución "${nombre}" agregado exitosamente. Se agregará cuando crees una nueva combinación.`, 'success');
                     
                     // Sincronizar con todos los módulos
                     await sincronizarTiposConModulos('solucion', nombre);
@@ -1586,11 +1584,20 @@
                 // Si estamos en el modal de nueva combinación, actualizar el select correspondiente
                 if (tipoActualAgregando === 'vehiculo') {
                     const selectUnidad = document.getElementById('nuevoTipoUnidad');
-                    selectUnidad.value = nombre;
+                    if (selectUnidad) {
+                        selectUnidad.value = nombre;
+                    }
                 } else if (tipoActualAgregando === 'solucion') {
                     const selectSolucion = document.getElementById('nuevoTipoSolucion');
-                    selectSolucion.value = nombre;
+                    if (selectSolucion) {
+                        selectSolucion.value = nombre;
+                    }
                 }
+                
+                // Forzar actualización adicional después de un breve delay
+                setTimeout(() => {
+                    actualizarListasEnModalNuevaCombinacion();
+                }, 200);
                 
                 // Cerrar modal
                 bootstrap.Modal.getInstance(document.getElementById('modalNuevoTipo')).hide();
@@ -1634,6 +1641,11 @@
                 
                 // Actualizar las listas en el modal de nueva combinación
                 actualizarListasEnModalNuevaCombinacion();
+                
+                // Forzar actualización adicional después de un breve delay
+                setTimeout(() => {
+                    actualizarListasEnModalNuevaCombinacion();
+                }, 200);
                 
                 // Cerrar modal
                 bootstrap.Modal.getInstance(document.getElementById('modalNuevoInsumo')).hide();
