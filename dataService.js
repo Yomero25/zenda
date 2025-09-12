@@ -1060,7 +1060,9 @@
           idOrFolio,
           datosEnviados: datos,
           datosExistentes: found.row.data,
-          mergeResultado: { ...found.row.data, ...datos }
+          mergeResultado: { ...found.row.data, ...datos },
+          facturadaExistente: found.row.data.facturada,
+          facturadaEnviada: datos.facturada
         });
         
         const { data, error } = await client

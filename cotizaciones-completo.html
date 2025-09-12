@@ -1748,6 +1748,7 @@
                 case 'rechazada': 
                     return cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo;
                 case 'instalada': 
+                    // Solo activo si está instalada Y aceptada, pero no debe afectar facturada
                     return cotizacion.fecha_instalacion && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
                 case 'facturada': 
                     const resultadoFacturada = cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
