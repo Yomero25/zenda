@@ -615,6 +615,10 @@
         }
 
         function cargarListaSolicitudes() {
+            console.log('🔄 DEBUG: Iniciando cargarListaSolicitudes');
+            console.log('🔄 DEBUG: Total notificaciones:', notificacionesInstalaciones.length);
+            console.log('🔄 DEBUG: Estados de notificaciones:', notificacionesInstalaciones.map(n => ({ id: n.id, estado: n.estado })));
+            
             const contenedor = document.getElementById('listaSolicitudes');
             contenedor.innerHTML = '';
 
@@ -1620,6 +1624,11 @@
                 if (observaciones) {
                     notificacion.observaciones_instalacion = observaciones;
                 }
+                
+                console.log('🔄 DEBUG: Estado actualizado localmente:', notificacion.estado);
+                console.log('🔄 DEBUG: Verificando en array principal...');
+                const notificacionEnArray = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
+                console.log('🔄 DEBUG: Estado en array principal:', notificacionEnArray ? notificacionEnArray.estado : 'NO ENCONTRADA');
 
                 // Actualizar en Supabase si está disponible
                 if (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
