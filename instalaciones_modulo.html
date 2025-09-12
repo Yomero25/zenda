@@ -515,6 +515,13 @@
                     console.log('✅ Notificaciones cargadas desde localStorage:', notificacionesInstalaciones.length, 'elementos');
                     console.log('📋 DEBUG: Contenido:', notificacionesInstalaciones);
                     
+                    // Debug específico para solicitudes instaladas
+                    const instaladas = notificacionesInstalaciones.filter(n => n.estado === 'instalada');
+                    console.log('🔧 DEBUG: Solicitudes instaladas encontradas:', instaladas.length);
+                    instaladas.forEach(inst => {
+                        console.log(`🔧 DEBUG: Instalada - ID: ${inst.id}, Estado: ${inst.estado}, Fecha: ${inst.fecha_instalacion}`);
+                    });
+                    
                     // Actualizar solicitudes existentes con datos faltantes
                     actualizarSolicitudesExistentes();
                 } catch (error) {
@@ -1408,8 +1415,8 @@
             notificacionesInstalaciones = notificacionesInstalaciones.filter(notificacion => {
                 const cotizacionExiste = cotizacionesValidas.includes(notificacion.cotizacionId);
                 
-                // Mantener solo si tiene cotización válida (sin importar el estado)
-                const mantener = cotizacionExiste;
+                // Mantener si tiene cotización válida O si está instalada (preservar instaladas)
+                const mantener = cotizacionExiste || notificacion.estado === 'instalada';
                 
                 if (!mantener) {
                     console.log(`🗑️ DEBUG: Eliminando solicitud (cotización eliminada): ${notificacion.id} (Cotización: ${notificacion.cotizacionId}, Estado: ${notificacion.estado})`);
@@ -1617,6 +1624,11 @@
                         fecha_instalacion: notificacion.fecha_instalacion
                     });
                 }
+
+                // Guardar cambios en localStorage (importante para persistencia)
+                guardarNotificaciones();
+                console.log('💾 DEBUG: Cambios guardados en localStorage para solicitud:', notificacionInstalacionId);
+                console.log('💾 DEBUG: Estado actualizado a:', notificacion.estado);
 
                 // Cerrar modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarInstalacion'));
