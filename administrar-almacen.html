@@ -1675,11 +1675,15 @@
                         if (resultado) {
                             console.log('✅ Tipos sincronizados con Supabase');
                         } else {
-                            console.warn('⚠️ No se pudo sincronizar con Supabase, pero se guardó en localStorage');
+                            console.log('ℹ️ Sincronización local completada (Supabase no disponible)');
                         }
                     } catch (supabaseError) {
-                        console.warn('⚠️ Error sincronizando tipos con Supabase:', supabaseError);
-                        console.log('ℹ️ Continuando con sincronización local...');
+                        // Solo mostrar el error la primera vez para evitar spam en consola
+                        if (!window.configuracionSistemaErrorMostrado) {
+                            console.warn('⚠️ Tabla configuracion_sistema no disponible en Supabase, usando solo localStorage');
+                            window.configuracionSistemaErrorMostrado = true;
+                        }
+                        console.log('ℹ️ Sincronización local completada');
                     }
                 }
                 
