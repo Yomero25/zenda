@@ -1619,7 +1619,15 @@
                         }
 
                         console.log('🔄 DEBUG: Actualizando notificación en Supabase:', datosActualizacion);
-                        const resultado = await window.dataService.actualizarNotificacionInstalaciones(notificacionInstalacionId, datosActualizacion);
+                        console.log('🔄 DEBUG: ID de notificación a actualizar:', notificacionInstalacionId);
+                        console.log('🔄 DEBUG: ID en data de notificación:', notificacion.id);
+                        console.log('🔄 DEBUG: _row_id de notificación:', notificacion._row_id);
+                        
+                        // Usar el _row_id si existe, sino el ID del data
+                        const idParaActualizar = notificacion._row_id || notificacionInstalacionId;
+                        console.log('🔄 DEBUG: ID final para actualizar:', idParaActualizar);
+                        
+                        const resultado = await window.dataService.actualizarNotificacionInstalaciones(idParaActualizar, datosActualizacion);
                         console.log('✅ DEBUG: Resultado actualización Supabase:', resultado);
 
                         // Actualizar la cotización correspondiente con fecha_instalacion
