@@ -623,6 +623,7 @@
 
         function cargarListaSolicitudes() {
             console.log('🔄 DEBUG: Iniciando cargarListaSolicitudes');
+            console.log('🔄 DEBUG: Flag evitarRecargaSupabase:', evitarRecargaSupabase);
             console.log('🔄 DEBUG: Total notificaciones:', notificacionesInstalaciones.length);
             console.log('🔄 DEBUG: Estados de notificaciones:', notificacionesInstalaciones.map(n => ({ id: n.id, estado: n.estado })));
             console.log('🔄 DEBUG: Array completo de notificaciones:', notificacionesInstalaciones);
@@ -1696,6 +1697,10 @@
                 guardarNotificaciones();
                 console.log('💾 DEBUG: Cambios guardados en localStorage para solicitud:', notificacionInstalacionId);
                 console.log('💾 DEBUG: Estado actualizado a:', notificacion.estado);
+                
+                // Verificar que el array principal esté actualizado
+                const notificacionVerificada = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
+                console.log('💾 DEBUG: Verificación final - Estado en array:', notificacionVerificada ? notificacionVerificada.estado : 'NO ENCONTRADA');
 
                 // Cerrar modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarInstalacion'));
