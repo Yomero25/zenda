@@ -635,6 +635,12 @@
                 const urgenciaBadge = obtenerUrgenciaBadge(notificacion.urgencia);
                 const claseDespachada = notificacion.estado === 'despachada' ? 'solicitud-despachada' : '';
                 const claseInstalada = notificacion.estado === 'instalada' ? 'solicitud-instalada' : '';
+                
+                // Debug para verificar clases aplicadas
+                if (notificacion.estado === 'instalada') {
+                    console.log('🎨 DEBUG: Aplicando clase instalada a solicitud:', notificacion.id);
+                    console.log('🎨 DEBUG: Clase instalada:', claseInstalada);
+                }
 
                 const totalInsumos = Object.values(notificacion.insumos || {}).reduce((sum, cant) => sum + cant, 0);
                 const totalEquipos = Object.values(notificacion.equipos || {}).reduce((sum, cant) => sum + cant, 0);
@@ -1568,6 +1574,7 @@
 
         // Variables para el modal de instalación
         let notificacionInstalacionId = null;
+        let procesandoInstalacion = false;
 
         // Función para mostrar modal de confirmación de instalación
         function marcarComoInstalada(notificacionId) {
@@ -1590,6 +1597,13 @@
 
         // Función para confirmar instalación
         async function confirmarInstalacion() {
+            if (procesandoInstalacion) {
+                console.log('⚠️ DEBUG: Ya se está procesando una instalación, ignorando...');
+                return;
+            }
+            
+            procesandoInstalacion = true;
+            
             try {
                 const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
                 if (!notificacion) {
@@ -1650,12 +1664,16 @@
                 modal.hide();
 
                 // Re-renderizar la lista
+                console.log('🔄 DEBUG: Re-renderizando lista después de actualización');
+                console.log('🔄 DEBUG: Estado final de la notificación:', notificacion.estado);
                 cargarListaSolicitudes();
                 actualizarEstadisticas();
                 mostrarAlerta('Solicitud marcada como instalada exitosamente', 'success');
             } catch (error) {
                 console.error('Error marcando como instalada:', error);
                 mostrarAlerta('Error al marcar como instalada', 'danger');
+            } finally {
+                procesandoInstalacion = false;
             }
         }
     </script>
