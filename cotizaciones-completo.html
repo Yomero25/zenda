@@ -1750,7 +1750,14 @@
                 case 'instalada': 
                     return cotizacion.fecha_instalacion && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
                 case 'facturada': 
-                    return cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
+                    const resultadoFacturada = cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
+                    console.log(`🔍 DEBUG facturada:`, {
+                        facturada: cotizacion.facturada,
+                        estado: cotizacion.estado,
+                        fecha_aceptacion: cotizacion.fecha_aceptacion,
+                        resultado: resultadoFacturada
+                    });
+                    return resultadoFacturada;
                 case 'finalizada': 
                     return esFinalizada(cotizacion);
                 default: 
