@@ -1747,8 +1747,18 @@
 
         function actualizarListasEnModalNuevaCombinacion() {
             // Actualizar lista de tipos de vehículo
-            const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
-            console.log('🔍 DEBUG: Tipos de unidad encontrados:', tiposUnidad);
+            const tiposUnidadAlmacen = [...new Set(Object.keys(almacenInsumos))];
+            
+            // Obtener tipos de vehículo de tipos_globales
+            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
+            const tiposVehiculoGlobales = tiposGlobales.vehiculos || [];
+            
+            // Combinar y eliminar duplicados
+            const tiposUnidad = [...new Set([...tiposUnidadAlmacen, ...tiposVehiculoGlobales])].sort();
+            
+            console.log('🔍 DEBUG: Tipos de unidad del almacén:', tiposUnidadAlmacen);
+            console.log('🔍 DEBUG: Tipos de vehículo globales:', tiposVehiculoGlobales);
+            console.log('🔍 DEBUG: Tipos de unidad combinados:', tiposUnidad);
             console.log('🔍 DEBUG: AlmacenInsumos keys:', Object.keys(almacenInsumos));
             
             const selectUnidad = document.getElementById('nuevoTipoUnidad');
@@ -1761,12 +1771,29 @@
             }
             
             // Actualizar lista de tipos de solución
-            const tiposSolucion = [...new Set(
+            const tiposSolucionAlmacen = [...new Set(
                 Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
-            )].sort();
+            )];
+            
+            // Obtener tipos de solución de tipos_globales
+            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
+            const tiposSolucionGlobales = tiposGlobales.soluciones || [];
+            
+            // Combinar y eliminar duplicados
+            const tiposSolucion = [...new Set([...tiposSolucionAlmacen, ...tiposSolucionGlobales])].sort();
+            
+            console.log('🔍 DEBUG: Tipos de solución del almacén:', tiposSolucionAlmacen);
+            console.log('🔍 DEBUG: Tipos de solución globales:', tiposSolucionGlobales);
+            console.log('🔍 DEBUG: Tipos de solución combinados:', tiposSolucion);
+            
             const selectSolucion = document.getElementById('nuevoTipoSolucion');
-            selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
-                tiposSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
+            if (selectSolucion) {
+                selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
+                    tiposSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
+                console.log('🔍 DEBUG: Select solución actualizado con', tiposSolucion.length, 'opciones');
+            } else {
+                console.warn('⚠️ Select solución no encontrado');
+            }
             
             // Actualizar lista de insumos en todos los selects existentes
             console.log('🔍 DEBUG: Lista de insumos actual:', listaInsumos);
