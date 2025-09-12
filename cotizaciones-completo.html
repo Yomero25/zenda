@@ -1794,17 +1794,34 @@
                 progreso = 50;
             }
 
-            // Facturada = +25% (75% total) - Solo si está aceptada
-            if (cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion)) {
-                progreso = 75;
+            // Verificar si está aceptada para continuar
+            const estaAceptada = cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion;
+            
+            if (estaAceptada) {
+                // Verificar instalada y facturada
+                const estaInstalada = cotizacion.fecha_instalacion;
+                const estaFacturada = cotizacion.facturada;
+                
+                // Si tiene AMBOS (instalada Y facturada) = 100%
+                if (estaInstalada && estaFacturada) {
+                    progreso = 100;
+                }
+                // Si tiene SOLO UNO (instalada O facturada) = 75%
+                else if (estaInstalada || estaFacturada) {
+                    progreso = 75;
+                }
+                // Si solo está aceptada = 50% (ya establecido arriba)
             }
 
-            // Instalada = +25% (100% total) - Solo si está aceptada Y facturada
-            if (cotizacion.fecha_instalacion && 
-                (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion) && 
-                cotizacion.facturada) {
-                progreso = 100;
-            }
+            // Debug temporal
+            console.log(`📊 PROGRESO DEBUG - ${cotizacion.folio}:`, {
+                estado: cotizacion.estado,
+                fecha_envio: cotizacion.fecha_envio,
+                fecha_aceptacion: cotizacion.fecha_aceptacion,
+                fecha_instalacion: cotizacion.fecha_instalacion,
+                facturada: cotizacion.facturada,
+                progreso: progreso
+            });
 
             return Math.min(progreso, 100);
         }
