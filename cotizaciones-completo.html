@@ -35,27 +35,82 @@
             background-color: #c3e6cb !important;
             box-shadow: 0 4px 8px rgba(25, 135, 84, 0.15);
         }
-        .estado-badge {
-            padding: 0.375rem 0.75rem;
+        /* Badge unificado para todos los tipos */
+        .badge-unificado {
+            padding: 0.5rem 0.875rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .estado-badge {
+            padding: 0.5rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+            line-height: 1.2;
         }
         
         .estado-finalizada {
             background-color: #198754 !important;
             color: white !important;
-            border: 2px solid #198754;
+            border: 1px solid #198754 !important;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            min-width: 100px;
         }
-        .estado-borrador { background-color: #f3f4f6; color: #374151; }
-        .estado-enviada { background-color: #dbeafe; color: #1e40af; }
-        .estado-aceptada { background-color: #d1fae5; color: #065f46; }
-        .estado-rechazada { background-color: #fee2e2; color: #dc2626; }
-        .estado-revisando { background-color: #fef3c7; color: #92400e; }
-        .estado-autorizada { background-color: #d1fae5; color: #065f46; }
+        .estado-borrador { 
+            background-color: #f3f4f6; 
+            color: #374151; 
+            border: 1px solid #d1d5db;
+        }
+        .estado-enviada { 
+            background-color: #dbeafe; 
+            color: #1e40af; 
+            border: 1px solid #93c5fd;
+        }
+        .estado-aceptada { 
+            background-color: #d1fae5; 
+            color: #065f46; 
+            border: 1px solid #a7f3d0;
+        }
+        .estado-rechazada { 
+            background-color: #fee2e2; 
+            color: #dc2626; 
+            border: 1px solid #fca5a5;
+        }
+        .estado-revisando { 
+            background-color: #fef3c7; 
+            color: #92400e; 
+            border: 1px solid #fde68a;
+        }
+        .estado-autorizada { 
+            background-color: #d1fae5; 
+            color: #065f46; 
+            border: 1px solid #a7f3d0;
+        }
+        
+        /* Estilos específicos para badges de tipo cliente */
+        .badge-unificado.bg-light {
+            background-color: #f8f9fa !important;
+            color: #495057 !important;
+            border: 1px solid #dee2e6 !important;
+        }
+        
+        /* Estilos para iconos dentro de badges */
+        .estado-badge i,
+        .badge-unificado i {
+            font-size: 0.7rem;
+            margin-right: 0.25rem;
+        }
         
         /* Colores personalizados de la empresa */
         .bg-primary { background-color: #fb930c !important; }
@@ -455,7 +510,7 @@
                         ${esFinalizada(cotizacion) ? '<i class="bi bi-check-circle-fill text-success ms-2" title="Cotización Finalizada"></i>' : ''}
                     </td>
                     <td><strong>${cotizacion.cliente_nombre || ''}</strong></td>
-                    <td><span class="badge bg-light text-dark">${cotizacion.tipo_cliente || ''}</span></td>
+                    <td><span class="badge-unificado bg-light text-dark">${cotizacion.tipo_cliente || ''}</span></td>
                     <td>${getEstadoBadge(cotizacion.estado, cotizacion)}</td>
                     <td>${generarBarraProgreso(cotizacion)}</td>
                     <td>
