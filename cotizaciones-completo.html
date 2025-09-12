@@ -1718,11 +1718,19 @@
         }
 
         function esEstadoActivo(cotizacion, estadoKey) {
+            console.log(`🔍 DEBUG esEstadoActivo: ${estadoKey}`, {
+                estado: cotizacion.estado,
+                fecha_envio: cotizacion.fecha_envio,
+                fecha_aceptacion: cotizacion.fecha_aceptacion,
+                fecha_rechazo: cotizacion.fecha_rechazo,
+                fecha_instalacion: cotizacion.fecha_instalacion
+            });
+            
             switch(estadoKey) {
                 case 'enviada': 
                     // Activo si fue enviada (completado) o está actualmente enviada
                     // Si está aceptada, rechazada, instalada o finalizada, significa que pasó por enviada
-                    return cotizacion.estado === 'enviada' || 
+                    const resultadoEnviada = cotizacion.estado === 'enviada' || 
                            cotizacion.fecha_envio || 
                            cotizacion.estado === 'aceptada' || 
                            cotizacion.estado === 'rechazada' || 
@@ -1731,6 +1739,8 @@
                            cotizacion.fecha_aceptacion ||
                            cotizacion.fecha_rechazo ||
                            cotizacion.fecha_instalacion;
+                    console.log(`🔍 DEBUG enviada resultado:`, resultadoEnviada);
+                    return resultadoEnviada;
                 case 'seguimiento': 
                     return requiereSeguimiento(cotizacion);
                 case 'aceptada': 
