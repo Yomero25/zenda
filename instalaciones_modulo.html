@@ -1601,17 +1601,22 @@
 
         // Función para confirmar instalación
         async function confirmarInstalacion() {
+            console.log('🚀 DEBUG: Iniciando confirmarInstalacion');
+            console.log('🚀 DEBUG: notificacionInstalacionId:', notificacionInstalacionId);
+            
             if (procesandoInstalacion) {
                 console.log('⚠️ DEBUG: Ya se está procesando una instalación, ignorando...');
                 return;
             }
             
             procesandoInstalacion = true;
+            console.log('🚀 DEBUG: Flag procesandoInstalacion establecido a true');
             
             try {
                 const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
                 if (!notificacion) {
                     mostrarAlerta('Solicitud no encontrada', 'danger');
+                    procesandoInstalacion = false;
                     return;
                 }
 
@@ -1675,8 +1680,11 @@
                 // Re-renderizar la lista
                 console.log('🔄 DEBUG: Re-renderizando lista después de actualización');
                 console.log('🔄 DEBUG: Estado final de la notificación:', notificacion.estado);
+                console.log('🔄 DEBUG: Llamando a cargarListaSolicitudes...');
                 cargarListaSolicitudes();
+                console.log('🔄 DEBUG: Llamando a actualizarEstadisticas...');
                 actualizarEstadisticas();
+                console.log('🔄 DEBUG: Mostrando alerta...');
                 mostrarAlerta('Solicitud marcada como instalada exitosamente', 'success');
             } catch (error) {
                 console.error('Error marcando como instalada:', error);
