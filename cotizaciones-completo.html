@@ -1699,10 +1699,8 @@
         function esEstadoActivo(cotizacion, estadoKey) {
             switch(estadoKey) {
                 case 'enviada': 
-                    // Solo activo si está enviada y no ha avanzado a otros estados
-                    return (cotizacion.estado === 'enviada' || cotizacion.fecha_envio) && 
-                           !cotizacion.fecha_aceptacion && 
-                           !cotizacion.fecha_rechazo;
+                    // Activo si fue enviada (completado) o está actualmente enviada
+                    return cotizacion.estado === 'enviada' || cotizacion.fecha_envio;
                 case 'seguimiento': 
                     return requiereSeguimiento(cotizacion);
                 case 'aceptada': 
