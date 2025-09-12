@@ -1647,9 +1647,22 @@
             estados.forEach((estado, index) => {
                 const activo = esEstadoActivo(cotizacion, estado.key);
                 const color = obtenerColorEstado(cotizacion, estado.key);
+                
+                // Determinar el color del icono
+                let colorIcono = '';
+                if (color === 'danger') {
+                    colorIcono = 'color: #dc3545 !important;'; // Rojo para rechazada
+                } else if (color === 'success') {
+                    colorIcono = 'color: #198754 !important;'; // Verde para finalizada
+                } else if (activo) {
+                    colorIcono = 'color: #fb930c !important;'; // Naranja para activos
+                } else {
+                    colorIcono = 'color: #6c757d !important;'; // Gris para inactivos
+                }
+                
                 html += `<div class="me-1" title="${estado.label}">
-                    <i class="bi ${estado.icon} ${activo ? 'text-' + color : 'text-muted'}" 
-                       style="font-size: 12px; ${activo ? 'color: #fb930c !important;' : ''}"></i>
+                    <i class="bi ${estado.icon}" 
+                       style="font-size: 12px; ${colorIcono}"></i>
                 </div>`;
             });
             html += '</div>';
