@@ -913,6 +913,10 @@
                     almacenInsumos = await cargarMatrizCompletaCSV();
                     cargarAlmacenDesdeStorage();
                 }
+                
+                // Limpiar soluciones duplicadas
+                limpiarSolucionesDuplicadas();
+                
                 cargarFiltros();
                 cargarTablaAlmacen();
                 actualizarEstadisticas();
@@ -1600,6 +1604,7 @@
                 }, 200);
                 
                 // Cerrar modal
+                document.getElementById('nuevoTipoNombre').blur();
                 bootstrap.Modal.getInstance(document.getElementById('modalNuevoTipo')).hide();
                 
             } catch (error) {
@@ -1624,9 +1629,11 @@
             }
 
             try {
-                // Agregar a la lista de insumos
-                listaInsumos.push(nombre);
-                listaInsumos.sort(); // Mantener ordenado
+                // Agregar a la lista de insumos (actualizar la constante)
+                if (!listaInsumos.includes(nombre)) {
+                    listaInsumos.push(nombre);
+                    listaInsumos.sort(); // Mantener ordenado
+                }
                 
                 console.log(`✅ Nuevo insumo agregado: ${nombre}`);
                 mostrarAlerta(`Insumo "${nombre}" agregado exitosamente`, 'success');
@@ -1648,6 +1655,7 @@
                 }, 200);
                 
                 // Cerrar modal
+                document.getElementById('nuevoInsumoNombre').blur();
                 bootstrap.Modal.getInstance(document.getElementById('modalNuevoInsumo')).hide();
                 
             } catch (error) {
@@ -1705,6 +1713,31 @@
                 console.error('❌ Error sincronizando tipos con módulos:', error);
                 throw error;
             }
+        }
+
+        // Función para limpiar soluciones duplicadas
+        function limpiarSolucionesDuplicadas() {
+            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{}');
+            const solucionesGlobales = tiposGlobales.soluciones || [];
+            
+            // Solo mantener soluciones que están en tiposGlobales o son básicas
+            const solucionesBasicas = ['VPC', 'GPS', 'Rastreo', 'Dashcam', 'Sensor VPC', 'Sideview', 'Rastreo avanzado', 'Rastreo basico', 'Rastreo satelital'];
+            
+            Object.keys(almacenInsumos).forEach(vehiculo => {
+                const solucionesActuales = Object.keys(almacenInsumos[vehiculo]);
+                const solucionesValidas = solucionesActuales.filter(sol => 
+                    solucionesGlobales.includes(sol) || solucionesBasicas.includes(sol)
+                );
+                
+                // Reconstruir el objeto solo con soluciones válidas
+                const nuevoVehiculo = {};
+                solucionesValidas.forEach(sol => {
+                    nuevoVehiculo[sol] = almacenInsumos[vehiculo][sol];
+                });
+                almacenInsumos[vehiculo] = nuevoVehiculo;
+            });
+            
+            console.log('🧹 Soluciones duplicadas limpiadas');
         }
 
         function actualizarListasEnModalNuevaCombinacion() {
