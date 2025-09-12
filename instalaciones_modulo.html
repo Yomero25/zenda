@@ -417,6 +417,13 @@
         let modoCentralizado = false;
 
         async function cargarNotificacionesDesdeSupabaseYFallback() {
+            // Si estamos evitando recarga desde Supabase, usar solo localStorage
+            if (evitarRecargaSupabase) {
+                console.log('🔄 DEBUG: Evitando recarga desde Supabase, usando solo localStorage');
+                cargarNotificacionesDesdeStorage();
+                return;
+            }
+            
             try {
                 if (window.dataService && window.dataService.hasSupabase()) {
                     const data = await window.dataService.fetchNotificacionesInstalaciones();
@@ -1593,6 +1600,7 @@
         // Variables para el modal de instalación
         let notificacionInstalacionId = null;
         let procesandoInstalacion = false;
+        let evitarRecargaSupabase = false;
 
         // Función para mostrar modal de confirmación de instalación
         function marcarComoInstalada(notificacionId) {
@@ -1624,7 +1632,9 @@
             }
             
             procesandoInstalacion = true;
+            evitarRecargaSupabase = true;
             console.log('🚀 DEBUG: Flag procesandoInstalacion establecido a true');
+            console.log('🚀 DEBUG: Flag evitarRecargaSupabase establecido a true');
             
             try {
                 const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
@@ -1705,6 +1715,11 @@
                 mostrarAlerta('Error al marcar como instalada', 'danger');
             } finally {
                 procesandoInstalacion = false;
+                // Resetear el flag después de un breve delay para permitir que se complete la actualización
+                setTimeout(() => {
+                    evitarRecargaSupabase = false;
+                    console.log('🔄 DEBUG: Flag evitarRecargaSupabase reseteado a false');
+                }, 2000);
             }
         }
     </script>
