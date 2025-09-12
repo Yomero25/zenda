@@ -1121,6 +1121,56 @@
     }
   }
 
+  // =====================
+  // Configuración del Sistema
+  async function upsertConfiguracionSistema(clave, valor) {
+    if (!client) return false;
+    try {
+      const payload = {
+        clave: clave,
+        valor: valor,
+        ultima_actualizacion: new Date().toISOString()
+      };
+      
+      const { error } = await client
+        .from('configuracion_sistema')
+        .upsert(payload, { onConflict: 'clave' });
+      
+      if (error) {
+        console.error('❌ Error upsertConfiguracionSistema:', error);
+        return false;
+      }
+      
+      console.log('✅ Configuración del sistema actualizada:', clave);
+      return true;
+    } catch (e) {
+      console.error('❌ Error upsertConfiguracionSistema:', e);
+      return false;
+    }
+  }
+
+  async function fetchConfiguracionSistema(clave) {
+    if (!client) return null;
+    try {
+      const { data, error } = await client
+        .from('configuracion_sistema')
+        .select('valor')
+        .eq('clave', clave)
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('❌ Error fetchConfiguracionSistema:', error);
+        return null;
+      }
+      
+      return data ? data.valor : null;
+    } catch (e) {
+      console.error('❌ Error fetchConfiguracionSistema:', e);
+      return null;
+    }
+  }
+
   // Exponer API
   window.dataService = {
     hasSupabase: () => !!client,
@@ -1166,6 +1216,9 @@
     patchCotizacionById,
     actualizarCotizacion,
     subscribeCotizaciones,
+    // configuracion
+    upsertConfiguracionSistema,
+    fetchConfiguracionSistema,
     // helpers
     getCotizacionByIdOrFolio: async (idOrFolio) => {
       const found = await getCotizacionRowByIdOrFolio(idOrFolio);
