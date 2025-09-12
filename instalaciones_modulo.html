@@ -424,6 +424,22 @@
                 return;
             }
             
+            // Verificar si hay datos locales más recientes que Supabase
+            const datosLocales = localStorage.getItem('notificaciones_instalaciones');
+            if (datosLocales) {
+                try {
+                    const notificacionesLocales = JSON.parse(datosLocales);
+                    const hayInstaladas = notificacionesLocales.some(n => n.estado === 'instalada');
+                    if (hayInstaladas) {
+                        console.log('🔄 DEBUG: Detectadas solicitudes instaladas en localStorage, priorizando datos locales');
+                        cargarNotificacionesDesdeStorage();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Error parseando datos locales:', e);
+                }
+            }
+            
             try {
                 if (window.dataService && window.dataService.hasSupabase()) {
                     const data = await window.dataService.fetchNotificacionesInstalaciones();
@@ -1694,7 +1710,9 @@
                             fecha_instalacion: notificacion.fecha_instalacion
                         });
                         
-                        // NO llamar cargarListaSolicitudes() aquí - se llama después
+                        // Forzar recarga desde localStorage para mantener el estado actualizado
+                        console.log('🔄 DEBUG: Forzando recarga desde localStorage después de actualizar Supabase');
+                        cargarNotificacionesDesdeStorage();
                     } catch (supabaseError) {
                         console.warn('⚠️ DEBUG: Error en Supabase, pero continuando con localStorage:', supabaseError);
                         // Continuar con localStorage aunque falle Supabase
