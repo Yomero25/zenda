@@ -1609,20 +1609,27 @@
 
                 // Actualizar en Supabase si está disponible
                 if (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
-                    const datosActualizacion = {
-                        estado: 'instalada',
-                        fecha_instalacion: notificacion.fecha_instalacion
-                    };
-                    if (observaciones) {
-                        datosActualizacion.observaciones_instalacion = observaciones;
+                    try {
+                        // Solo actualizar campos que existen en la tabla notificaciones_instalaciones
+                        const datosActualizacion = {
+                            estado: 'instalada'
+                        };
+                        if (observaciones) {
+                            datosActualizacion.observaciones = observaciones;
+                        }
+
+                        console.log('🔄 DEBUG: Actualizando notificación en Supabase:', datosActualizacion);
+                        const resultado = await window.dataService.actualizarNotificacionInstalaciones(notificacionInstalacionId, datosActualizacion);
+                        console.log('✅ DEBUG: Resultado actualización Supabase:', resultado);
+
+                        // Actualizar la cotización correspondiente con fecha_instalacion
+                        await window.dataService.actualizarCotizacion(notificacion.cotizacionId, {
+                            fecha_instalacion: notificacion.fecha_instalacion
+                        });
+                    } catch (supabaseError) {
+                        console.warn('⚠️ DEBUG: Error en Supabase, pero continuando con localStorage:', supabaseError);
+                        // Continuar con localStorage aunque falle Supabase
                     }
-
-                    await window.dataService.actualizarNotificacionInstalaciones(notificacionInstalacionId, datosActualizacion);
-
-                    // Actualizar la cotización correspondiente
-                    await window.dataService.actualizarCotizacion(notificacion.cotizacionId, {
-                        fecha_instalacion: notificacion.fecha_instalacion
-                    });
                 }
 
                 // Guardar cambios en localStorage (importante para persistencia)
