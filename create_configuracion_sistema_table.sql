@@ -12,7 +12,9 @@ CREATE INDEX IF NOT EXISTS idx_configuracion_sistema_clave ON public.configuraci
 ALTER TABLE public.configuracion_sistema ENABLE ROW LEVEL SECURITY;
 
 -- Crear política para permitir lectura y escritura a usuarios autenticados
-CREATE POLICY IF NOT EXISTS "Permitir acceso completo a configuracion_sistema" 
+-- Primero eliminar la política si existe, luego crearla
+DROP POLICY IF EXISTS "Permitir acceso completo a configuracion_sistema" ON public.configuracion_sistema;
+CREATE POLICY "Permitir acceso completo a configuracion_sistema" 
 ON public.configuracion_sistema 
 FOR ALL 
 TO authenticated 
