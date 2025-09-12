@@ -618,6 +618,7 @@
             console.log('🔄 DEBUG: Iniciando cargarListaSolicitudes');
             console.log('🔄 DEBUG: Total notificaciones:', notificacionesInstalaciones.length);
             console.log('🔄 DEBUG: Estados de notificaciones:', notificacionesInstalaciones.map(n => ({ id: n.id, estado: n.estado })));
+            console.log('🔄 DEBUG: Array completo de notificaciones:', notificacionesInstalaciones);
             
             const contenedor = document.getElementById('listaSolicitudes');
             contenedor.innerHTML = '';
@@ -633,12 +634,25 @@
                 return;
             }
 
-            notificacionesInstalaciones.forEach(notificacion => {
+            notificacionesInstalaciones.forEach((notificacion, index) => {
+                console.log(`🔄 DEBUG: Procesando notificación ${index + 1}:`, {
+                    id: notificacion.id,
+                    estado: notificacion.estado,
+                    cliente: notificacion.cliente
+                });
+                
                 const urgenciaClass = `urgencia-${notificacion.urgencia}`;
                 const estadoBadge = obtenerEstadoBadge(notificacion.estado);
                 const urgenciaBadge = obtenerUrgenciaBadge(notificacion.urgencia);
                 const claseDespachada = notificacion.estado === 'despachada' ? 'solicitud-despachada' : '';
                 const claseInstalada = notificacion.estado === 'instalada' ? 'solicitud-instalada' : '';
+                
+                console.log(`🔄 DEBUG: Clases para ${notificacion.id}:`, {
+                    urgenciaClass,
+                    claseDespachada,
+                    claseInstalada,
+                    estado: notificacion.estado
+                });
                 
                 // Debug para verificar clases aplicadas
                 if (notificacion.estado === 'instalada') {
