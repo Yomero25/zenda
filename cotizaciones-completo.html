@@ -1621,6 +1621,13 @@
         // =====================
 
         function generarBarraProgreso(cotizacion) {
+            console.log('🎨 DEBUG BARRA PROGRESO:', {
+                folio: cotizacion.folio,
+                estado: cotizacion.estado,
+                fecha_envio: cotizacion.fecha_envio,
+                fecha_aceptacion: cotizacion.fecha_aceptacion
+            });
+            
             const estados = [
                 { key: 'enviada', label: 'Enviada', icon: 'bi-send' },
                 { key: 'seguimiento', label: 'En Seguimiento', icon: 'bi-clock' },
@@ -1646,19 +1653,20 @@
             html += '<div class="d-flex">';
             estados.forEach((estado, index) => {
                 const activo = esEstadoActivo(cotizacion, estado.key);
-                const color = obtenerColorEstado(cotizacion, estado.key);
                 
-                // Determinar el color del icono
+                // Lógica simplificada de colores
                 let colorIcono = '';
-                if (color === 'danger') {
+                if (estado.key === 'rechazada' && (cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo)) {
                     colorIcono = 'color: #dc3545 !important;'; // Rojo para rechazada
-                } else if (color === 'success') {
+                } else if (estado.key === 'finalizada' && esFinalizada(cotizacion)) {
                     colorIcono = 'color: #198754 !important;'; // Verde para finalizada
                 } else if (activo) {
-                    colorIcono = 'color: #fb930c !important;'; // Naranja para activos
+                    colorIcono = 'color: #fb930c !important;'; // Naranja para activos/completados
                 } else {
                     colorIcono = 'color: #6c757d !important;'; // Gris para inactivos
                 }
+                
+                console.log(`🎨 ${estado.key}: activo=${activo}, color=${colorIcono}`);
                 
                 html += `<div class="me-1" title="${estado.label}">
                     <i class="bi ${estado.icon}" 
