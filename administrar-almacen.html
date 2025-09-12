@@ -233,17 +233,32 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label for="nuevoTipoUnidad" class="form-label">Tipo de Unidad:</label>
-                            <input type="text" class="form-control" id="nuevoTipoUnidad" list="listaTiposUnidad" placeholder="Ej. Tracto">
-                            <datalist id="listaTiposUnidad"></datalist>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="nuevoTipoUnidad" list="listaTiposUnidad" placeholder="Ej. Tracto">
+                                <datalist id="listaTiposUnidad"></datalist>
+                                <button class="btn btn-outline-success" type="button" onclick="mostrarModalNuevoTipo('vehiculo')" title="Agregar nuevo tipo de vehículo">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="nuevoTipoSolucion" class="form-label">Tipo de Solución:</label>
-                            <input type="text" class="form-control" id="nuevoTipoSolucion" list="listaTiposSolucion" placeholder="Ej. VPC">
-                            <datalist id="listaTiposSolucion"></datalist>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="nuevoTipoSolucion" list="listaTiposSolucion" placeholder="Ej. VPC">
+                                <datalist id="listaTiposSolucion"></datalist>
+                                <button class="btn btn-outline-success" type="button" onclick="mostrarModalNuevoTipo('solucion')" title="Agregar nuevo tipo de solución">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-3">
-                        <label class="form-label">Insumos y Cantidades:</label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Insumos y Cantidades:</label>
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="mostrarModalNuevoInsumo()" title="Agregar nuevo insumo">
+                                <i class="bi bi-plus-circle"></i> Nuevo Insumo
+                            </button>
+                        </div>
                         <div id="nuevoInsumos"></div>
                     </div>
                 </div>
@@ -253,6 +268,74 @@
                         <i class="bi bi-plus"></i> Agregar Insumo
                     </button>
                     <button type="button" class="btn btn-primary" onclick="guardarNuevaCombinacion()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar Nuevo Tipo de Vehículo/Solución/Insumo -->
+    <div class="modal fade" id="modalNuevoTipo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNuevoTipoTitulo">Agregar Nuevo Tipo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nuevoTipoNombre" class="form-label" id="modalNuevoTipoLabel">Nombre del nuevo tipo:</label>
+                        <input type="text" class="form-control" id="nuevoTipoNombre" placeholder="Ingrese el nombre del nuevo tipo">
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <span id="modalNuevoTipoDescripcion">Este nuevo tipo estará disponible inmediatamente para usar en las combinaciones.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarNuevoTipo()">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar Nuevo Insumo -->
+    <div class="modal fade" id="modalNuevoInsumo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Nuevo Insumo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nuevoInsumoNombre" class="form-label">Nombre del nuevo insumo:</label>
+                        <input type="text" class="form-control" id="nuevoInsumoNombre" placeholder="Ej. Cable especial 10m">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevoInsumoCategoria" class="form-label">Categoría (opcional):</label>
+                        <select class="form-select" id="nuevoInsumoCategoria">
+                            <option value="">Sin categoría</option>
+                            <option value="Cables y conectores">Cables y conectores</option>
+                            <option value="Materiales básicos">Materiales básicos</option>
+                            <option value="Componentes electrónicos">Componentes electrónicos</option>
+                            <option value="Almacenamiento">Almacenamiento</option>
+                            <option value="Alarmas y audio">Alarmas y audio</option>
+                            <option value="Controles">Controles</option>
+                            <option value="Cámaras">Cámaras</option>
+                            <option value="Dashcams">Dashcams</option>
+                            <option value="Sensores y accesorios">Sensores y accesorios</option>
+                            <option value="Equipos principales">Equipos principales</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Este nuevo insumo estará disponible inmediatamente en la lista de insumos para seleccionar.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarNuevoInsumo()">Agregar Insumo</button>
                 </div>
             </div>
         </div>
@@ -1235,16 +1318,10 @@
         // ===== NUEVA COMBINACIÓN =====
         function agregarNuevaCombinacion() {
             try {
-                const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
-                const tiposSolucion = [...new Set(
-                    Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
-                )].sort();
+                // Actualizar las listas de opciones
+                actualizarListasEnModalNuevaCombinacion();
 
-                const dlUnidad = document.getElementById('listaTiposUnidad');
-                const dlSolucion = document.getElementById('listaTiposSolucion');
-                dlUnidad.innerHTML = tiposUnidad.map(t => `<option value="${t}">`).join('');
-                dlSolucion.innerHTML = tiposSolucion.map(t => `<option value="${t}">`).join('');
-
+                // Limpiar campos
                 document.getElementById('nuevoTipoUnidad').value = '';
                 document.getElementById('nuevoTipoSolucion').value = '';
 
@@ -1402,6 +1479,192 @@
                     console.warn('Realtime almacen refresco fallido', e);
                 }
             });
+        }
+
+        // ===== FUNCIONES PARA AGREGAR NUEVOS TIPOS =====
+        
+        let tipoActualAgregando = null; // 'vehiculo', 'solucion', o 'insumo'
+
+        function mostrarModalNuevoTipo(tipo) {
+            tipoActualAgregando = tipo;
+            const modal = document.getElementById('modalNuevoTipo');
+            const titulo = document.getElementById('modalNuevoTipoTitulo');
+            const label = document.getElementById('modalNuevoTipoLabel');
+            const descripcion = document.getElementById('modalNuevoTipoDescripcion');
+            const input = document.getElementById('nuevoTipoNombre');
+            
+            input.value = '';
+            
+            if (tipo === 'vehiculo') {
+                titulo.textContent = 'Agregar Nuevo Tipo de Vehículo';
+                label.textContent = 'Nombre del nuevo tipo de vehículo:';
+                input.placeholder = 'Ej. Camión de carga, Furgón, etc.';
+                descripcion.textContent = 'Este nuevo tipo de vehículo estará disponible inmediatamente para usar en las combinaciones.';
+            } else if (tipo === 'solucion') {
+                titulo.textContent = 'Agregar Nuevo Tipo de Solución';
+                label.textContent = 'Nombre del nuevo tipo de solución:';
+                input.placeholder = 'Ej. GPS Avanzado, Sistema de Monitoreo, etc.';
+                descripcion.textContent = 'Este nuevo tipo de solución estará disponible inmediatamente para usar en las combinaciones.';
+            }
+            
+            new bootstrap.Modal(modal).show();
+        }
+
+        function mostrarModalNuevoInsumo() {
+            const modal = document.getElementById('modalNuevoInsumo');
+            const input = document.getElementById('nuevoInsumoNombre');
+            const categoria = document.getElementById('nuevoInsumoCategoria');
+            
+            input.value = '';
+            categoria.value = '';
+            
+            new bootstrap.Modal(modal).show();
+        }
+
+        async function guardarNuevoTipo() {
+            const nombre = document.getElementById('nuevoTipoNombre').value.trim();
+            
+            if (!nombre) {
+                mostrarAlerta('Por favor ingrese un nombre para el nuevo tipo', 'warning');
+                return;
+            }
+
+            try {
+                if (tipoActualAgregando === 'vehiculo') {
+                    // Verificar si ya existe
+                    if (almacenInsumos[nombre]) {
+                        mostrarAlerta('Ya existe un tipo de vehículo con ese nombre', 'warning');
+                        return;
+                    }
+                    
+                    // Agregar nuevo tipo de vehículo
+                    almacenInsumos[nombre] = {};
+                    console.log(`✅ Nuevo tipo de vehículo agregado: ${nombre}`);
+                    mostrarAlerta(`Tipo de vehículo "${nombre}" agregado exitosamente`, 'success');
+                    
+                } else if (tipoActualAgregando === 'solucion') {
+                    // Verificar si ya existe en algún vehículo
+                    const existe = Object.values(almacenInsumos).some(vehiculo => vehiculo[nombre]);
+                    if (existe) {
+                        mostrarAlerta('Ya existe un tipo de solución con ese nombre', 'warning');
+                        return;
+                    }
+                    
+                    // Agregar a todos los tipos de vehículo existentes
+                    Object.keys(almacenInsumos).forEach(vehiculo => {
+                        almacenInsumos[vehiculo][nombre] = {};
+                    });
+                    console.log(`✅ Nuevo tipo de solución agregado: ${nombre}`);
+                    mostrarAlerta(`Tipo de solución "${nombre}" agregado exitosamente`, 'success');
+                }
+
+                // Guardar cambios
+                if (modoCentralizado) {
+                    // En modo centralizado, actualizar Supabase
+                    await actualizarAlmacenEnSupabase();
+                } else {
+                    // En modo localStorage
+                    localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
+                }
+
+                // Actualizar la interfaz
+                cargarFiltros();
+                cargarTablaAlmacen();
+                actualizarEstadisticas();
+                
+                // Actualizar las listas en el modal de nueva combinación
+                actualizarListasEnModalNuevaCombinacion();
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalNuevoTipo')).hide();
+                
+            } catch (error) {
+                console.error('❌ Error guardando nuevo tipo:', error);
+                mostrarAlerta('Error al guardar el nuevo tipo', 'danger');
+            }
+        }
+
+        async function guardarNuevoInsumo() {
+            const nombre = document.getElementById('nuevoInsumoNombre').value.trim();
+            const categoria = document.getElementById('nuevoInsumoCategoria').value;
+            
+            if (!nombre) {
+                mostrarAlerta('Por favor ingrese un nombre para el nuevo insumo', 'warning');
+                return;
+            }
+
+            // Verificar si ya existe
+            if (listaInsumos.includes(nombre)) {
+                mostrarAlerta('Ya existe un insumo con ese nombre', 'warning');
+                return;
+            }
+
+            try {
+                // Agregar a la lista de insumos
+                listaInsumos.push(nombre);
+                listaInsumos.sort(); // Mantener ordenado
+                
+                console.log(`✅ Nuevo insumo agregado: ${nombre}`);
+                mostrarAlerta(`Insumo "${nombre}" agregado exitosamente`, 'success');
+                
+                // Actualizar la interfaz
+                cargarFiltros();
+                cargarTablaAlmacen();
+                actualizarEstadisticas();
+                
+                // Actualizar las listas en el modal de nueva combinación
+                actualizarListasEnModalNuevaCombinacion();
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalNuevoInsumo')).hide();
+                
+            } catch (error) {
+                console.error('❌ Error guardando nuevo insumo:', error);
+                mostrarAlerta('Error al guardar el nuevo insumo', 'danger');
+            }
+        }
+
+        function actualizarListasEnModalNuevaCombinacion() {
+            // Actualizar lista de tipos de vehículo
+            const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
+            const dlUnidad = document.getElementById('listaTiposUnidad');
+            dlUnidad.innerHTML = tiposUnidad.map(t => `<option value="${t}">`).join('');
+            
+            // Actualizar lista de tipos de solución
+            const tiposSolucion = [...new Set(
+                Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
+            )].sort();
+            const dlSolucion = document.getElementById('listaTiposSolucion');
+            dlSolucion.innerHTML = tiposSolucion.map(t => `<option value="${t}">`).join('');
+        }
+
+        async function actualizarAlmacenEnSupabase() {
+            try {
+                // Actualizar todas las combinaciones en Supabase
+                const tareas = [];
+                for (const [tipoUnidad, soluciones] of Object.entries(almacenInsumos)) {
+                    for (const [tipoSolucion, insumos] of Object.entries(soluciones)) {
+                        const id = `${tipoUnidad}::${tipoSolucion}`;
+                        tareas.push(window.dataService.upsertAlmacenInsumoById(id, {
+                            id,
+                            tipoUnidad,
+                            tipoSolucion,
+                            insumos: insumos || {},
+                        }));
+                    }
+                }
+                
+                // Ejecutar en lotes de 25
+                for (let i = 0; i < tareas.length; i += 25) {
+                    const slice = tareas.slice(i, i + 25);
+                    await Promise.all(slice);
+                }
+                
+                console.log('✅ Almacén actualizado en Supabase');
+            } catch (error) {
+                console.error('❌ Error actualizando almacén en Supabase:', error);
+                throw error;
+            }
         }
 
         function mostrarAlerta(mensaje, tipo = 'info') {
