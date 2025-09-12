@@ -1721,7 +1721,16 @@
             switch(estadoKey) {
                 case 'enviada': 
                     // Activo si fue enviada (completado) o está actualmente enviada
-                    return cotizacion.estado === 'enviada' || cotizacion.fecha_envio;
+                    // Si está aceptada, rechazada, instalada o finalizada, significa que pasó por enviada
+                    return cotizacion.estado === 'enviada' || 
+                           cotizacion.fecha_envio || 
+                           cotizacion.estado === 'aceptada' || 
+                           cotizacion.estado === 'rechazada' || 
+                           cotizacion.estado === 'instalada' || 
+                           cotizacion.estado === 'finalizada' ||
+                           cotizacion.fecha_aceptacion ||
+                           cotizacion.fecha_rechazo ||
+                           cotizacion.fecha_instalacion;
                 case 'seguimiento': 
                     return requiereSeguimiento(cotizacion);
                 case 'aceptada': 
