@@ -42,7 +42,7 @@
             font-size: 0.75rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 80px;
+            min-width: 90px;
             text-align: center;
             line-height: 1.2;
         }
@@ -53,7 +53,7 @@
             font-size: 0.75rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 80px;
+            min-width: 90px;
             text-align: center;
             line-height: 1.2;
         }
@@ -65,7 +65,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            min-width: 100px;
+            min-width: 90px;
         }
         .estado-borrador { 
             background-color: #f3f4f6; 
@@ -103,6 +103,15 @@
             background-color: #f8f9fa !important;
             color: #495057 !important;
             border: 1px solid #dee2e6 !important;
+        }
+        
+        /* Asegurar que todos los badges tengan el mismo tamaño base */
+        .estado-badge,
+        .badge-unificado {
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         /* Estilos para iconos dentro de badges */
@@ -1812,16 +1821,6 @@
                 }
                 // Si solo está aceptada = 50% (ya establecido arriba)
             }
-
-            // Debug temporal
-            console.log(`📊 PROGRESO DEBUG - ${cotizacion.folio}:`, {
-                estado: cotizacion.estado,
-                fecha_envio: cotizacion.fecha_envio,
-                fecha_aceptacion: cotizacion.fecha_aceptacion,
-                fecha_instalacion: cotizacion.fecha_instalacion,
-                facturada: cotizacion.facturada,
-                progreso: progreso
-            });
 
             return Math.min(progreso, 100);
         }
