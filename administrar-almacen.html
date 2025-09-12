@@ -1346,7 +1346,7 @@
                 <div class="col-md-8">
                     <select class="form-control">
                         <option value="">Seleccionar insumo...</option>
-                        ${listaInsumos.map(insumo => `<option>${insumo.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</option>`).join('')}
+                        ${listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('')}
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -1671,10 +1671,15 @@
                 // Si estamos en modo centralizado, también sincronizar con Supabase
                 if (modoCentralizado) {
                     try {
-                        await window.dataService.upsertConfiguracionSistema('tipos_globales', tiposGlobales);
-                        console.log('✅ Tipos sincronizados con Supabase');
+                        const resultado = await window.dataService.upsertConfiguracionSistema('tipos_globales', tiposGlobales);
+                        if (resultado) {
+                            console.log('✅ Tipos sincronizados con Supabase');
+                        } else {
+                            console.warn('⚠️ No se pudo sincronizar con Supabase, pero se guardó en localStorage');
+                        }
                     } catch (supabaseError) {
                         console.warn('⚠️ Error sincronizando tipos con Supabase:', supabaseError);
+                        console.log('ℹ️ Continuando con sincronización local...');
                     }
                 }
                 
@@ -1700,6 +1705,21 @@
             const selectSolucion = document.getElementById('nuevoTipoSolucion');
             selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
                 tiposSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
+            
+            // Actualizar lista de insumos en todos los selects existentes
+            const contenedorInsumos = document.getElementById('nuevoInsumos');
+            if (contenedorInsumos) {
+                const selects = contenedorInsumos.querySelectorAll('select');
+                selects.forEach(select => {
+                    const valorActual = select.value;
+                    select.innerHTML = '<option value="">Seleccionar insumo...</option>' + 
+                        listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('');
+                    // Mantener el valor seleccionado si aún existe
+                    if (valorActual && listaInsumos.includes(valorActual)) {
+                        select.value = valorActual;
+                    }
+                });
+            }
         }
 
         async function actualizarAlmacenEnSupabase() {
