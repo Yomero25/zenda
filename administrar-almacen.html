@@ -964,8 +964,15 @@
                         const tipoUnidad = r.tipoUnidad;
                         const tipoSolucion = r.tipoSolucion;
                         const insumos = r.insumos || {};
-                        if (!mapa[tipoUnidad]) mapa[tipoUnidad] = {};
-                        mapa[tipoUnidad][tipoSolucion] = insumos;
+                        
+                        // Si es un placeholder, crear tipo de vehículo vacío
+                        if (tipoSolucion === '_placeholder') {
+                            mapa[tipoUnidad] = {};
+                        } else {
+                            // Procesar solución normal
+                            if (!mapa[tipoUnidad]) mapa[tipoUnidad] = {};
+                            mapa[tipoUnidad][tipoSolucion] = insumos;
+                        }
                     });
                 }
                 almacenInsumos = mapa;
@@ -1787,14 +1794,26 @@
                 // Actualizar todas las combinaciones en Supabase
                 const tareas = [];
                 for (const [tipoUnidad, soluciones] of Object.entries(almacenInsumos)) {
-                    for (const [tipoSolucion, insumos] of Object.entries(soluciones)) {
-                        const id = `${tipoUnidad}::${tipoSolucion}`;
+                    // Si el tipo de vehículo está vacío, crear una entrada básica
+                    if (Object.keys(soluciones).length === 0) {
+                        const id = `${tipoUnidad}::_placeholder`;
                         tareas.push(window.dataService.upsertAlmacenInsumoById(id, {
                             id,
                             tipoUnidad,
-                            tipoSolucion,
-                            insumos: insumos || {},
+                            tipoSolucion: '_placeholder',
+                            insumos: {},
                         }));
+                    } else {
+                        // Procesar soluciones existentes
+                        for (const [tipoSolucion, insumos] of Object.entries(soluciones)) {
+                            const id = `${tipoUnidad}::${tipoSolucion}`;
+                            tareas.push(window.dataService.upsertAlmacenInsumoById(id, {
+                                id,
+                                tipoUnidad,
+                                tipoSolucion,
+                                insumos: insumos || {},
+                            }));
+                        }
                     }
                 }
                 
