@@ -21,16 +21,38 @@
             border-radius: 0.5rem;
             font-weight: 500;
         }
+        
+        /* Estilos para filas finalizadas */
+        .fila-finalizada {
+            background-color: #d4edda !important;
+            border-left: 4px solid #198754 !important;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(25, 135, 84, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .fila-finalizada:hover {
+            background-color: #c3e6cb !important;
+            box-shadow: 0 4px 8px rgba(25, 135, 84, 0.15);
+        }
         .estado-badge {
             padding: 0.375rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
         }
+        
+        .estado-finalizada {
+            background-color: #198754 !important;
+            color: white !important;
+            border: 2px solid #198754;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         .estado-borrador { background-color: #f3f4f6; color: #374151; }
         .estado-enviada { background-color: #dbeafe; color: #1e40af; }
         .estado-aceptada { background-color: #d1fae5; color: #065f46; }
-        .estado-finalizada { background-color: #e0e7ff; color: #3730a3; }
         .estado-rechazada { background-color: #fee2e2; color: #dc2626; }
         .estado-revisando { background-color: #fef3c7; color: #92400e; }
         .estado-autorizada { background-color: #d1fae5; color: #065f46; }
@@ -422,11 +444,19 @@
                     row.style.backgroundColor = '#fff3cd';
                     row.style.borderLeft = '4px solid #ffc107';
                 }
+                
+                // Aplicar clase CSS para filas finalizadas
+                if (esFinalizada(cotizacion)) {
+                    row.classList.add('fila-finalizada');
+                }
                 row.innerHTML = `
-                    <td><strong class="text-primary">${cotizacion.folio || ('COT-' + (cotizacion.id || 'N/A'))}</strong></td>
+                    <td>
+                        <strong class="text-primary">${cotizacion.folio || ('COT-' + (cotizacion.id || 'N/A'))}</strong>
+                        ${esFinalizada(cotizacion) ? '<i class="bi bi-check-circle-fill text-success ms-2" title="Cotización Finalizada"></i>' : ''}
+                    </td>
                     <td><strong>${cotizacion.cliente_nombre || ''}</strong></td>
                     <td><span class="badge bg-light text-dark">${cotizacion.tipo_cliente || ''}</span></td>
-                    <td>${getEstadoBadge(cotizacion.estado)}</td>
+                    <td>${getEstadoBadge(cotizacion.estado, cotizacion)}</td>
                     <td>${generarBarraProgreso(cotizacion)}</td>
                     <td>
                         <div class="form-check d-flex justify-content-center">
@@ -490,7 +520,14 @@
             });
         }
 
-        function getEstadoBadge(estado) {
+        function getEstadoBadge(estado, cotizacion = null) {
+            // Si se proporciona la cotización y está finalizada, mostrar "FINALIZADA"
+            if (cotizacion && esFinalizada(cotizacion)) {
+                return `<span class="estado-badge estado-finalizada">
+                    <i class="bi bi-check-circle-fill me-1"></i>FINALIZADA
+                </span>`;
+            }
+            
             const estados = {
                 "borrador": {class: "estado-borrador", text: "Borrador"},
                 "enviada": {class: "estado-enviada", text: "Enviada"},
