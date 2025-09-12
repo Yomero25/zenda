@@ -1746,11 +1746,11 @@
         }
 
         function actualizarListasEnModalNuevaCombinacion() {
+            // Obtener tipos globales una sola vez
+            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
+            
             // Actualizar lista de tipos de vehículo
             const tiposUnidadAlmacen = [...new Set(Object.keys(almacenInsumos))];
-            
-            // Obtener tipos de vehículo de tipos_globales
-            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
             const tiposVehiculoGlobales = tiposGlobales.vehiculos || [];
             
             // Combinar y eliminar duplicados
@@ -1775,8 +1775,7 @@
                 Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
             )];
             
-            // Obtener tipos de solución de tipos_globales
-            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
+            // Obtener tipos de solución de tipos_globales (ya declarado arriba)
             const tiposSolucionGlobales = tiposGlobales.soluciones || [];
             
             // Combinar y eliminar duplicados
