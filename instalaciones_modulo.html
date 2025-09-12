@@ -1693,6 +1693,8 @@
                         await window.dataService.actualizarCotizacion(notificacion.cotizacionId, {
                             fecha_instalacion: notificacion.fecha_instalacion
                         });
+                        
+                        // NO llamar cargarListaSolicitudes() aquí - se llama después
                     } catch (supabaseError) {
                         console.warn('⚠️ DEBUG: Error en Supabase, pero continuando con localStorage:', supabaseError);
                         // Continuar con localStorage aunque falle Supabase
@@ -1707,6 +1709,7 @@
                 // Verificar que el array principal esté actualizado
                 const notificacionVerificada = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
                 console.log('💾 DEBUG: Verificación final - Estado en array:', notificacionVerificada ? notificacionVerificada.estado : 'NO ENCONTRADA');
+                console.log('💾 DEBUG: Array completo después de actualización:', notificacionesInstalaciones.map(n => ({ id: n.id, estado: n.estado })));
 
                 // Cerrar modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarInstalacion'));
