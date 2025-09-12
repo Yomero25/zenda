@@ -1622,18 +1622,16 @@
                 return;
             }
 
-            // Verificar si ya existe
-            if (listaInsumos.includes(nombre)) {
-                mostrarAlerta('Ya existe un insumo con ese nombre', 'warning');
-                return;
-            }
-
             try {
-                // Agregar a la lista de insumos (actualizar la constante)
-                if (!listaInsumos.includes(nombre)) {
-                    listaInsumos.push(nombre);
-                    listaInsumos.sort(); // Mantener ordenado
+                // Verificar si ya existe
+                if (listaInsumos.includes(nombre)) {
+                    mostrarAlerta('Ya existe un insumo con ese nombre', 'warning');
+                    return;
                 }
+
+                // Agregar a la lista de insumos (actualizar la constante)
+                listaInsumos.push(nombre);
+                listaInsumos.sort(); // Mantener ordenado
                 
                 console.log(`✅ Nuevo insumo agregado: ${nombre}`);
                 mostrarAlerta(`Insumo "${nombre}" agregado exitosamente`, 'success');
@@ -1743,9 +1741,17 @@
         function actualizarListasEnModalNuevaCombinacion() {
             // Actualizar lista de tipos de vehículo
             const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
+            console.log('🔍 DEBUG: Tipos de unidad encontrados:', tiposUnidad);
+            console.log('🔍 DEBUG: AlmacenInsumos keys:', Object.keys(almacenInsumos));
+            
             const selectUnidad = document.getElementById('nuevoTipoUnidad');
-            selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>' + 
-                tiposUnidad.map(t => `<option value="${t}">${t}</option>`).join('');
+            if (selectUnidad) {
+                selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>' + 
+                    tiposUnidad.map(t => `<option value="${t}">${t}</option>`).join('');
+                console.log('🔍 DEBUG: Select unidad actualizado con', tiposUnidad.length, 'opciones');
+            } else {
+                console.warn('⚠️ Select unidad no encontrado');
+            }
             
             // Actualizar lista de tipos de solución
             const tiposSolucion = [...new Set(
@@ -1756,10 +1762,12 @@
                 tiposSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
             
             // Actualizar lista de insumos en todos los selects existentes
+            console.log('🔍 DEBUG: Lista de insumos actual:', listaInsumos);
             const contenedorInsumos = document.getElementById('nuevoInsumos');
             if (contenedorInsumos) {
                 const selects = contenedorInsumos.querySelectorAll('select');
-                selects.forEach(select => {
+                console.log('🔍 DEBUG: Selects de insumos encontrados:', selects.length);
+                selects.forEach((select, index) => {
                     const valorActual = select.value;
                     select.innerHTML = '<option value="">Seleccionar insumo...</option>' + 
                         listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('');
@@ -1767,7 +1775,10 @@
                     if (valorActual && listaInsumos.includes(valorActual)) {
                         select.value = valorActual;
                     }
+                    console.log(`🔍 DEBUG: Select ${index} actualizado con ${listaInsumos.length} insumos`);
                 });
+            } else {
+                console.warn('⚠️ Contenedor de insumos no encontrado');
             }
         }
 
