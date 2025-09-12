@@ -76,6 +76,18 @@
             opacity: 0.8;
         }
         .solicitud-despachada .card-title { color: #6c757d; }
+        
+        /* Instalada (estilo distintivo) */
+        .solicitud-instalada {
+            background-color: #f0f8f0;
+            border-left: 5px solid #28a745;
+            border: 2px solid #28a745;
+        }
+        .solicitud-instalada .card-title { color: #155724; }
+        .solicitud-instalada:hover {
+            background-color: #e8f5e8;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -177,6 +189,12 @@
                                 <p>Despachadas</p>
                             </div>
                         </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="instaladas">0</h2>
+                                <p>Instaladas</p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Filtros -->
@@ -193,6 +211,7 @@
                                     <option value="despacho_cambios_solicitados">Cambios Solicitados</option>
                                     <option value="cambios_validados">Cambios Validados</option>
                                     <option value="despachada">Despachadas</option>
+                                    <option value="instalada">Instaladas</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -608,12 +627,13 @@
                 const estadoBadge = obtenerEstadoBadge(notificacion.estado);
                 const urgenciaBadge = obtenerUrgenciaBadge(notificacion.urgencia);
                 const claseDespachada = notificacion.estado === 'despachada' ? 'solicitud-despachada' : '';
+                const claseInstalada = notificacion.estado === 'instalada' ? 'solicitud-instalada' : '';
 
                 const totalInsumos = Object.values(notificacion.insumos || {}).reduce((sum, cant) => sum + cant, 0);
                 const totalEquipos = Object.values(notificacion.equipos || {}).reduce((sum, cant) => sum + cant, 0);
 
                 const card = `
-                    <div class="solicitud-card ${urgenciaClass} ${claseDespachada}" data-solicitud-id="${notificacion.id}">
+                    <div class="solicitud-card ${urgenciaClass} ${claseDespachada} ${claseInstalada}" data-solicitud-id="${notificacion.id}">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-8">
@@ -1290,6 +1310,7 @@
             document.getElementById('cambiosValidados').textContent = cambiosValidados;
             document.getElementById('urgentes').textContent = urgentes;
             document.getElementById('despachadas').textContent = despachadas;
+            document.getElementById('instaladas').textContent = instaladas;
         }
 
         function aplicarFiltros() {
