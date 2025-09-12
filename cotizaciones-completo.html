@@ -1698,25 +1698,46 @@
 
         function esEstadoActivo(cotizacion, estadoKey) {
             switch(estadoKey) {
-                case 'enviada': return cotizacion.estado === 'enviada' || cotizacion.fecha_envio;
-                case 'seguimiento': return requiereSeguimiento(cotizacion);
-                case 'aceptada': return cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion;
-                case 'rechazada': return cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo;
-                case 'instalada': return cotizacion.fecha_instalacion && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
-                case 'facturada': return cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
-                case 'finalizada': return esFinalizada(cotizacion);
-                default: return false;
+                case 'enviada': 
+                    // Solo activo si está enviada y no ha avanzado a otros estados
+                    return (cotizacion.estado === 'enviada' || cotizacion.fecha_envio) && 
+                           !cotizacion.fecha_aceptacion && 
+                           !cotizacion.fecha_rechazo;
+                case 'seguimiento': 
+                    return requiereSeguimiento(cotizacion);
+                case 'aceptada': 
+                    return cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion;
+                case 'rechazada': 
+                    return cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo;
+                case 'instalada': 
+                    return cotizacion.fecha_instalacion && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
+                case 'facturada': 
+                    return cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
+                case 'finalizada': 
+                    return esFinalizada(cotizacion);
+                default: 
+                    return false;
             }
         }
 
         function obtenerColorEstado(cotizacion, estadoKey) {
+            // Rechazada siempre es roja
             if (estadoKey === 'rechazada' && (cotizacion.estado === 'rechazada' || cotizacion.fecha_rechazo)) {
                 return 'danger';
             }
+            
+            // Finalizada siempre es verde
             if (estadoKey === 'finalizada' && esFinalizada(cotizacion)) {
                 return 'success';
             }
-            return 'primary';
+            
+            // Si el estado está activo, usar color primario (azul)
+            if (esEstadoActivo(cotizacion, estadoKey)) {
+                return 'primary';
+            }
+            
+            // Si no está activo, usar color secundario (gris)
+            return 'secondary';
         }
 
         function requiereSeguimiento(cotizacion) {
