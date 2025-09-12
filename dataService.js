@@ -1056,6 +1056,13 @@
       // Actualizar en Supabase
       if (found.kind === 'rows') {
         // Estructura JSONB
+        console.log('🔍 DEBUG actualizarCotizacion:', {
+          idOrFolio,
+          datosEnviados: datos,
+          datosExistentes: found.row.data,
+          mergeResultado: { ...found.row.data, ...datos }
+        });
+        
         const { data, error } = await client
           .from('cotizaciones')
           .update({ data: { ...found.row.data, ...datos } })
