@@ -1171,6 +1171,217 @@
     }
   }
 
+  // =====================
+  // Gestión de Tipos Separados
+  // =====================
+  
+  // Tipos de Unidad
+  async function fetchTiposUnidad() {
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('tipos_unidad')
+        .select('*')
+        .eq('activo', true)
+        .order('nombre');
+      
+      if (error) {
+        console.error('❌ Error fetchTiposUnidad:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (e) {
+      console.error('❌ Error fetchTiposUnidad:', e);
+      return [];
+    }
+  }
+
+  async function upsertTipoUnidad(nombre, descripcion = '') {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('tipos_unidad')
+        .upsert({
+          nombre: nombre,
+          descripcion: descripcion,
+          activo: true,
+          fecha_actualizacion: new Date().toISOString()
+        }, { onConflict: 'nombre' });
+      
+      if (error) {
+        console.error('❌ Error upsertTipoUnidad:', error);
+        return false;
+      }
+      
+      console.log('✅ Tipo de unidad actualizado:', nombre);
+      return true;
+    } catch (e) {
+      console.error('❌ Error upsertTipoUnidad:', e);
+      return false;
+    }
+  }
+
+  async function deleteTipoUnidad(id) {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('tipos_unidad')
+        .update({ activo: false })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleteTipoUnidad:', error);
+        return false;
+      }
+      
+      console.log('✅ Tipo de unidad eliminado:', id);
+      return true;
+    } catch (e) {
+      console.error('❌ Error deleteTipoUnidad:', e);
+      return false;
+    }
+  }
+
+  // Tipos de Solución
+  async function fetchTiposSolucion() {
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('tipos_solucion')
+        .select('*')
+        .eq('activo', true)
+        .order('nombre');
+      
+      if (error) {
+        console.error('❌ Error fetchTiposSolucion:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (e) {
+      console.error('❌ Error fetchTiposSolucion:', e);
+      return [];
+    }
+  }
+
+  async function upsertTipoSolucion(nombre, descripcion = '', categoria = '') {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('tipos_solucion')
+        .upsert({
+          nombre: nombre,
+          descripcion: descripcion,
+          categoria: categoria,
+          activo: true,
+          fecha_actualizacion: new Date().toISOString()
+        }, { onConflict: 'nombre' });
+      
+      if (error) {
+        console.error('❌ Error upsertTipoSolucion:', error);
+        return false;
+      }
+      
+      console.log('✅ Tipo de solución actualizado:', nombre);
+      return true;
+    } catch (e) {
+      console.error('❌ Error upsertTipoSolucion:', e);
+      return false;
+    }
+  }
+
+  async function deleteTipoSolucion(id) {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('tipos_solucion')
+        .update({ activo: false })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleteTipoSolucion:', error);
+        return false;
+      }
+      
+      console.log('✅ Tipo de solución eliminado:', id);
+      return true;
+    } catch (e) {
+      console.error('❌ Error deleteTipoSolucion:', e);
+      return false;
+    }
+  }
+
+  // Tipos de Insumo
+  async function fetchTiposInsumo() {
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('tipos_insumo')
+        .select('*')
+        .eq('activo', true)
+        .order('nombre');
+      
+      if (error) {
+        console.error('❌ Error fetchTiposInsumo:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (e) {
+      console.error('❌ Error fetchTiposInsumo:', e);
+      return [];
+    }
+  }
+
+  async function upsertTipoInsumo(nombre, descripcion = '', categoria = '', unidad_medida = '') {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('tipos_insumo')
+        .upsert({
+          nombre: nombre,
+          descripcion: descripcion,
+          categoria: categoria,
+          unidad_medida: unidad_medida,
+          activo: true,
+          fecha_actualizacion: new Date().toISOString()
+        }, { onConflict: 'nombre' });
+      
+      if (error) {
+        console.error('❌ Error upsertTipoInsumo:', error);
+        return false;
+      }
+      
+      console.log('✅ Tipo de insumo actualizado:', nombre);
+      return true;
+    } catch (e) {
+      console.error('❌ Error upsertTipoInsumo:', e);
+      return false;
+    }
+  }
+
+  async function deleteTipoInsumo(id) {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('tipos_insumo')
+        .update({ activo: false })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleteTipoInsumo:', error);
+        return false;
+      }
+      
+      console.log('✅ Tipo de insumo eliminado:', id);
+      return true;
+    } catch (e) {
+      console.error('❌ Error deleteTipoInsumo:', e);
+      return false;
+    }
+  }
+
   // Exponer API
   window.dataService = {
     hasSupabase: () => !!client,
@@ -1219,6 +1430,16 @@
     // configuracion
     upsertConfiguracionSistema,
     fetchConfiguracionSistema,
+    // tipos separados
+    fetchTiposUnidad,
+    upsertTipoUnidad,
+    deleteTipoUnidad,
+    fetchTiposSolucion,
+    upsertTipoSolucion,
+    deleteTipoSolucion,
+    fetchTiposInsumo,
+    upsertTipoInsumo,
+    deleteTipoInsumo,
     // helpers
     getCotizacionByIdOrFolio: async (idOrFolio) => {
       const found = await getCotizacionRowByIdOrFolio(idOrFolio);
