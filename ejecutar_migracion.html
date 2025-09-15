@@ -43,7 +43,10 @@
                         </div>
                         
                         <div class="text-center mb-4">
-                            <button id="btnMigrar" class="btn btn-success btn-lg me-3">
+                            <button id="btnVerificar" class="btn btn-warning btn-lg me-2">
+                                🔍 Verificar Conexión
+                            </button>
+                            <button id="btnMigrar" class="btn btn-success btn-lg me-2">
                                 🚀 Ejecutar Migración
                             </button>
                             <button id="btnProbar" class="btn btn-info btn-lg">
@@ -65,7 +68,7 @@
     <!-- Scripts necesarios -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="dataService.js"></script>
+    <script src="dataService.js" onload="console.log('✅ dataService.js cargado')" onerror="console.error('❌ Error cargando dataService.js')"></script>
     
     <script>
         let logContent = '';
@@ -82,6 +85,53 @@
             resultado.innerHTML = `<div class="alert alert-${tipo}">${mensaje}</div>`;
         }
         
+        // Función para verificar conexión
+        async function verificarConexion() {
+            log('🔍 Verificando conexión...');
+            
+            try {
+                // Verificar que dataService esté disponible
+                if (!window.dataService) {
+                    log('❌ dataService no está definido');
+                    mostrarResultado('Error: dataService no está definido. Verifica que dataService.js se cargó correctamente.', 'danger');
+                    return false;
+                }
+                
+                if (!window.dataService.client) {
+                    log('❌ dataService.client no está disponible');
+                    mostrarResultado('Error: dataService.client no está disponible. Verifica la conexión a Supabase.', 'danger');
+                    return false;
+                }
+                
+                // Probar una consulta simple
+                log('📡 Probando conexión a Supabase...');
+                const testResult = await window.dataService.client.from('tipos_unidad').select('count').limit(1);
+                log('✅ Conexión a Supabase exitosa');
+                
+                // Verificar funciones específicas
+                if (typeof window.dataService.fetchTiposUnidad !== 'function') {
+                    log('❌ fetchTiposUnidad no está disponible');
+                    mostrarResultado('Error: fetchTiposUnidad no está disponible', 'danger');
+                    return false;
+                }
+                
+                if (typeof window.dataService.upsertTipoUnidad !== 'function') {
+                    log('❌ upsertTipoUnidad no está disponible');
+                    mostrarResultado('Error: upsertTipoUnidad no está disponible', 'danger');
+                    return false;
+                }
+                
+                log('✅ Todas las funciones están disponibles');
+                mostrarResultado('✅ Conexión verificada correctamente. Puedes proceder con la migración.', 'success');
+                return true;
+                
+            } catch (error) {
+                log(`❌ Error verificando conexión: ${error.message}`);
+                mostrarResultado('❌ Error verificando conexión: ' + error.message, 'danger');
+                return false;
+            }
+        }
+
         // Función de migración
         async function migrarATablasSeparadas() {
             log('🚀 Iniciando migración a tablas separadas...');
@@ -90,7 +140,7 @@
                 // Verificar que dataService esté disponible
                 if (!window.dataService || !window.dataService.client) {
                     log('❌ dataService no está disponible');
-                    mostrarResultado('Error: dataService no está disponible', 'danger');
+                    mostrarResultado('Error: dataService no está disponible. Usa "Verificar Conexión" primero.', 'danger');
                     return false;
                 }
                 
@@ -195,28 +245,40 @@
         }
         
         // Event listeners
+        document.getElementById('btnVerificar').addEventListener('click', async function() {
+            document.getElementById('logContainer').style.display = 'block';
+            logContent = '';
+            this.disabled = true;
+            this.innerHTML = '⏳ Verificando...';
+            
+            const resultado = await verificarConexion();
+            
+            this.disabled = false;
+            this.innerHTML = '🔍 Verificar Conexión';
+        });
+        
         document.getElementById('btnMigrar').addEventListener('click', async function() {
             document.getElementById('logContainer').style.display = 'block';
             logContent = '';
             this.disabled = true;
-            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Migrando...';
+            this.innerHTML = '⏳ Migrando...';
             
             const resultado = await migrarATablasSeparadas();
             
             this.disabled = false;
-            this.innerHTML = '<i class="bi bi-play-circle"></i> Ejecutar Migración';
+            this.innerHTML = '🚀 Ejecutar Migración';
         });
         
         document.getElementById('btnProbar').addEventListener('click', async function() {
             document.getElementById('logContainer').style.display = 'block';
             logContent = '';
             this.disabled = true;
-            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Probando...';
+            this.innerHTML = '⏳ Probando...';
             
             const resultado = await probarTablasSeparadas();
             
             this.disabled = false;
-            this.innerHTML = '<i class="bi bi-check-circle"></i> Probar Tablas';
+            this.innerHTML = '🧪 Probar Tablas';
         });
         
         // Inicialización
