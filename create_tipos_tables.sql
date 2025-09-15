@@ -4,7 +4,8 @@
 -- ============================================
 -- TABLA: tipos_unidad
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.tipos_unidad (
+DROP TABLE IF EXISTS public.tipos_unidad CASCADE;
+CREATE TABLE public.tipos_unidad (
     id SERIAL PRIMARY KEY,
     nombre TEXT UNIQUE NOT NULL,
     descripcion TEXT,
@@ -14,13 +15,14 @@ CREATE TABLE IF NOT EXISTS public.tipos_unidad (
 );
 
 -- Índices para tipos_unidad
-CREATE INDEX IF NOT EXISTS idx_tipos_unidad_nombre ON public.tipos_unidad(nombre);
-CREATE INDEX IF NOT EXISTS idx_tipos_unidad_activo ON public.tipos_unidad(activo);
+CREATE INDEX idx_tipos_unidad_nombre ON public.tipos_unidad(nombre);
+CREATE INDEX idx_tipos_unidad_activo ON public.tipos_unidad(activo);
 
 -- ============================================
 -- TABLA: tipos_solucion
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.tipos_solucion (
+DROP TABLE IF EXISTS public.tipos_solucion CASCADE;
+CREATE TABLE public.tipos_solucion (
     id SERIAL PRIMARY KEY,
     nombre TEXT UNIQUE NOT NULL,
     descripcion TEXT,
@@ -31,14 +33,15 @@ CREATE TABLE IF NOT EXISTS public.tipos_solucion (
 );
 
 -- Índices para tipos_solucion
-CREATE INDEX IF NOT EXISTS idx_tipos_solucion_nombre ON public.tipos_solucion(nombre);
-CREATE INDEX IF NOT EXISTS idx_tipos_solucion_activo ON public.tipos_solucion(activo);
-CREATE INDEX IF NOT EXISTS idx_tipos_solucion_categoria ON public.tipos_solucion(categoria);
+CREATE INDEX idx_tipos_solucion_nombre ON public.tipos_solucion(nombre);
+CREATE INDEX idx_tipos_solucion_activo ON public.tipos_solucion(activo);
+CREATE INDEX idx_tipos_solucion_categoria ON public.tipos_solucion(categoria);
 
 -- ============================================
 -- TABLA: tipos_insumo
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.tipos_insumo (
+DROP TABLE IF EXISTS public.tipos_insumo CASCADE;
+CREATE TABLE public.tipos_insumo (
     id SERIAL PRIMARY KEY,
     nombre TEXT UNIQUE NOT NULL,
     descripcion TEXT,
@@ -50,9 +53,9 @@ CREATE TABLE IF NOT EXISTS public.tipos_insumo (
 );
 
 -- Índices para tipos_insumo
-CREATE INDEX IF NOT EXISTS idx_tipos_insumo_nombre ON public.tipos_insumo(nombre);
-CREATE INDEX IF NOT EXISTS idx_tipos_insumo_activo ON public.tipos_insumo(activo);
-CREATE INDEX IF NOT EXISTS idx_tipos_insumo_categoria ON public.tipos_insumo(categoria);
+CREATE INDEX idx_tipos_insumo_nombre ON public.tipos_insumo(nombre);
+CREATE INDEX idx_tipos_insumo_activo ON public.tipos_insumo(activo);
+CREATE INDEX idx_tipos_insumo_categoria ON public.tipos_insumo(categoria);
 
 -- ============================================
 -- HABILITAR RLS (Row Level Security)
