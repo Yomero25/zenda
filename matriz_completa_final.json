@@ -1,8 +1,8 @@
 {
   "combinaciones": [
     {
-      "tipo_unidad": "Tracto Cabina sobre motor",
-      "tipo_solucion": "VPC",
+      "tipoUnidad": "Tracto Cabina sobre motor",
+      "tipoSolucion": "VPC",
       "insumos": {
         "Cable 4 pin 5 m": 3,
         "Cable 4 pin 7 m": 1,
