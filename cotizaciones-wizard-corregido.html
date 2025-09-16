@@ -3639,7 +3639,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     document.querySelectorAll('[name^="insumo_sugerido_"]:checked').forEach(checkbox => {
                         // Buscar la cantidad en la tabla de insumos sugeridos
                         const row = checkbox.closest('tr');
-                        const cantidadBadge = row.querySelector('.badge');
+                        // Buscar específicamente el badge de cantidad (no el de telemetría)
+                        const cantidadBadge = row.querySelector('td:nth-child(3) .badge');
                         const cantidadText = cantidadBadge ? cantidadBadge.textContent.trim() : '1';
                         
                         // Usar parseFloat para manejar decimales correctamente
@@ -3651,7 +3652,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             sugerido: true
                         });
                         
-                        console.log(`💾 Guardando insumo: ${checkbox.value} = ${cantidad}`);
+                        console.log(`💾 Guardando insumo: ${checkbox.value} = ${cantidad} (texto: "${cantidadText}")`);
                     });
                     
                     // Guardar insumos adicionales
@@ -3675,7 +3676,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     const accesoriosSugeridosCheckboxes = document.querySelectorAll('.accesorio-sugerido-checkbox:checked');
                     accesoriosSugeridosCheckboxes.forEach(checkbox => {
                         const row = checkbox.closest('tr');
-                        const cantidadBadge = row.querySelector('.badge');
+                        // Buscar específicamente el badge de cantidad (no el de telemetría)
+                        const cantidadBadge = row.querySelector('td:nth-child(3) .badge');
                         const cantidadText = cantidadBadge ? cantidadBadge.textContent.trim() : '1';
                         
                         // Usar parseFloat para manejar decimales correctamente
@@ -3687,7 +3689,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             sugerido: true
                         });
                         
-                        console.log(`💾 Guardando accesorio: ${checkbox.value} = ${cantidad}`);
+                        console.log(`💾 Guardando accesorio: ${checkbox.value} = ${cantidad} (texto: "${cantidadText}")`);
                     });
                     break;
             }
