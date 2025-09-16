@@ -1177,9 +1177,19 @@
                 const tiposSolucionUnicos = new Set();
                 
                 // Procesar datos según el esquema devuelto por Supabase
+                console.log('🔍 DEBUG: Iniciando procesamiento de datos...');
                 if (Array.isArray(almacenData)) {
                     // Esquema por filas (más común)
-                    almacenData.forEach(row => {
+                    console.log('🔍 DEBUG: Procesando array de', almacenData.length, 'registros');
+                    almacenData.forEach((row, index) => {
+                        console.log(`🔍 DEBUG: Procesando registro ${index}:`, {
+                            hasInsumos: !!row.insumos,
+                            hasTipoUnidad: !!row.tipoUnidad,
+                            hasTipoSolucion: !!row.tipoSolucion,
+                            insumosType: typeof row.insumos,
+                            keys: Object.keys(row)
+                        });
+                        
                         if (row.insumos && typeof row.insumos === 'object') {
                             // Esquema: {tipoUnidad: {tipoSolucion: {insumos: {}}}}
                             Object.values(row.insumos).forEach(soluciones => {
