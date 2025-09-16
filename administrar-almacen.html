@@ -1502,7 +1502,7 @@
 
         // ===== INICIALIZACIÓN =====
         
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // Mostrar funciones de migración disponibles
             if (modoCentralizado) {
                 console.log('🔧 Funciones de migración disponibles:');
@@ -1510,6 +1510,18 @@
                 console.log('2. probarTablasSeparadas() - Prueba que las tablas funcionen correctamente');
                 console.log('');
                 console.log('💡 Ejecuta: migrarATablasSeparadas() para comenzar la migración');
+            }
+            
+            // Cargar datos iniciales
+            try {
+                console.log('🔄 Cargando datos iniciales...');
+                await cargarDesdeSupabase();
+                await cargarFiltros();
+                cargarTablaAlmacen();
+                await actualizarEstadisticas();
+                console.log('✅ Datos iniciales cargados correctamente');
+            } catch (error) {
+                console.error('❌ Error cargando datos iniciales:', error);
             }
         });
     </script>
