@@ -904,6 +904,10 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🔄 Inicializando almacén...');
             try {
+                // Limpiar localStorage de tipos para evitar conflictos
+                localStorage.removeItem('tipos_globales');
+                console.log('🧹 localStorage de tipos limpiado');
+                
                 if (modoCentralizado) {
                     console.log('📦 Modo centralizado (Supabase)');
                     await cargarDesdeSupabase();
@@ -1666,78 +1670,19 @@
 
         async function sincronizarTiposConModulos(tipo, nombre) {
             try {
-                // Obtener tipos existentes o crear estructura inicial
-                let tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{}');
-                
-                if (!tiposGlobales.vehiculos) tiposGlobales.vehiculos = [];
-                if (!tiposGlobales.soluciones) tiposGlobales.soluciones = [];
-                if (!tiposGlobales.insumos) tiposGlobales.insumos = [];
-                
-                // Agregar el nuevo tipo si no existe
-                if (tipo === 'vehiculo' && !tiposGlobales.vehiculos.includes(nombre)) {
-                    tiposGlobales.vehiculos.push(nombre);
-                    tiposGlobales.vehiculos.sort();
-                } else if (tipo === 'solucion' && !tiposGlobales.soluciones.includes(nombre)) {
-                    tiposGlobales.soluciones.push(nombre);
-                    tiposGlobales.soluciones.sort();
-                } else if (tipo === 'insumo' && !tiposGlobales.insumos.includes(nombre)) {
-                    tiposGlobales.insumos.push(nombre);
-                    tiposGlobales.insumos.sort();
-                }
-                
-                // Guardar en localStorage para que esté disponible en todos los módulos
-                localStorage.setItem('tipos_globales', JSON.stringify(tiposGlobales));
-                
-                // Si estamos en modo centralizado, también sincronizar con Supabase
-                if (modoCentralizado) {
-                    try {
-                        const resultado = await window.dataService.upsertConfiguracionSistema('tipos_globales', tiposGlobales);
-                        if (resultado) {
-                            console.log('✅ Tipos sincronizados con Supabase');
-                        } else {
-                            console.log('ℹ️ Sincronización local completada (Supabase no disponible)');
-                        }
-                    } catch (supabaseError) {
-                        // Solo mostrar el error la primera vez para evitar spam en consola
-                        if (!window.configuracionSistemaErrorMostrado) {
-                            console.warn('⚠️ Tabla configuracion_sistema no disponible en Supabase, usando solo localStorage');
-                            window.configuracionSistemaErrorMostrado = true;
-                        }
-                        console.log('ℹ️ Sincronización local completada');
-                    }
-                }
-                
-                console.log(`✅ Tipo ${tipo} "${nombre}" sincronizado con todos los módulos`);
+                // Ya no necesitamos sincronizar con localStorage
+                // Los tipos se guardan directamente en las tablas de Supabase
+                console.log(`✅ Tipo ${tipo} "${nombre}" guardado en Supabase`);
                 
             } catch (error) {
-                console.error('❌ Error sincronizando tipos con módulos:', error);
-                throw error;
+                console.error('❌ Error sincronizando tipos:', error);
             }
         }
 
-        // Función para limpiar soluciones duplicadas
+        // Función para limpiar soluciones duplicadas (ya no necesaria con Supabase)
         function limpiarSolucionesDuplicadas() {
-            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{}');
-            const solucionesGlobales = tiposGlobales.soluciones || [];
-            
-            // Solo mantener soluciones que están en tiposGlobales o son básicas
-            const solucionesBasicas = ['VPC', 'GPS', 'Rastreo', 'Dashcam', 'Sensor VPC', 'Sideview', 'Rastreo avanzado', 'Rastreo basico', 'Rastreo satelital'];
-            
-            Object.keys(almacenInsumos).forEach(vehiculo => {
-                const solucionesActuales = Object.keys(almacenInsumos[vehiculo]);
-                const solucionesValidas = solucionesActuales.filter(sol => 
-                    solucionesGlobales.includes(sol) || solucionesBasicas.includes(sol)
-                );
-                
-                // Reconstruir el objeto solo con soluciones válidas
-                const nuevoVehiculo = {};
-                solucionesValidas.forEach(sol => {
-                    nuevoVehiculo[sol] = almacenInsumos[vehiculo][sol];
-                });
-                almacenInsumos[vehiculo] = nuevoVehiculo;
-            });
-            
-            console.log('🧹 Soluciones duplicadas limpiadas');
+            // Ya no necesitamos limpiar duplicados porque usamos Supabase
+            console.log('✅ Usando Supabase - no se necesitan limpiezas de duplicados');
         }
 
         async function actualizarListasEnModalNuevaCombinacion() {
