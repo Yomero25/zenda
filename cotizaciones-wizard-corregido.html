@@ -1672,8 +1672,12 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         let ultimaGeneracion = 0; // Timestamp de la última generación
         
         async function generarInsumosSugeridos() {
+            console.log('🔄 DEBUG: Iniciando generarInsumosSugeridos()...');
             const container = document.getElementById('insumosSugeridosContainer');
-            if (!container) return;
+            if (!container) {
+                console.log('❌ DEBUG: Container insumosSugeridosContainer no encontrado');
+                return;
+            }
             
             const ahora = Date.now();
             
@@ -2687,6 +2691,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 </div>
             `;
 
+            console.log('🔄 DEBUG: Actualizando contenedor con HTML generado...');
+            console.log('🔄 DEBUG: HTML generado:', html.substring(0, 200) + '...');
             container.innerHTML = html;
             
             // Liberar el flag
@@ -3497,11 +3503,13 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             // Cargar insumos cuando se muestra el paso 3
             if (step === 3) {
+                console.log('🔄 DEBUG: Mostrando paso 3, actualizando tabla de insumos...');
                 setTimeout(() => {
                     cargarInsumos();
                     cargarServicios();
                     cargarAccesorios();
                     // Actualizar la tabla de insumos sugeridos
+                    console.log('🔄 DEBUG: Llamando a generarInsumosSugeridos() desde paso 3...');
                     generarInsumosSugeridos();
                 }, 100);
             }
