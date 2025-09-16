@@ -921,7 +921,7 @@
                 // Limpiar soluciones duplicadas
                 limpiarSolucionesDuplicadas();
                 
-                cargarFiltros();
+                await cargarFiltros();
                 cargarTablaAlmacen();
                 actualizarEstadisticas();
             } catch (error) {
@@ -944,7 +944,7 @@
                     }
                 } catch (e) { console.warn('⚠️ Error sincronizando almacén en Supabase', e); }
 
-                cargarFiltros();
+                await cargarFiltros();
                 cargarTablaAlmacen();
                 actualizarEstadisticas();
                 console.log('✅ Almacén restaurado');
@@ -1053,25 +1053,57 @@
             }
         }
 
-        function cargarFiltros() {
-            const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
-            const tiposSolucion = [...new Set(
-                Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
-            )].sort();
+        async function cargarFiltros() {
+            try {
+                console.log('🔄 Cargando filtros desde Supabase...');
+                
+                // Cargar tipos desde Supabase
+                const [tiposUnidad, tiposSolucion] = await Promise.all([
+                    window.dataService.fetchTiposUnidad(),
+                    window.dataService.fetchTiposSolucion()
+                ]);
+                
+                const nombresUnidad = tiposUnidad.map(t => t.nombre).sort();
+                const nombresSolucion = tiposSolucion.map(t => t.nombre).sort();
+                
+                console.log('🔍 DEBUG: Tipos de unidad para filtros:', nombresUnidad);
+                console.log('🔍 DEBUG: Tipos de solución para filtros:', nombresSolucion);
 
-            // Cargar filtro de tipos de unidad
-            const selectUnidad = document.getElementById('filtroTipoUnidad');
-            selectUnidad.innerHTML = '<option value="">Todos</option>';
-            tiposUnidad.forEach(tipo => {
-                selectUnidad.innerHTML += `<option value="${tipo}">${tipo}</option>`;
-            });
+                // Cargar filtro de tipos de unidad
+                const selectUnidad = document.getElementById('filtroTipoUnidad');
+                selectUnidad.innerHTML = '<option value="">Todos</option>';
+                nombresUnidad.forEach(tipo => {
+                    selectUnidad.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                });
 
-            // Cargar filtro de tipos de solución
-            const selectSolucion = document.getElementById('filtroTipoSolucion');
-            selectSolucion.innerHTML = '<option value="">Todos</option>';
-            tiposSolucion.forEach(tipo => {
-                selectSolucion.innerHTML += `<option value="${tipo}">${tipo}</option>`;
-            });
+                // Cargar filtro de tipos de solución
+                const selectSolucion = document.getElementById('filtroTipoSolucion');
+                selectSolucion.innerHTML = '<option value="">Todos</option>';
+                nombresSolucion.forEach(tipo => {
+                    selectSolucion.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                });
+                
+                console.log('✅ Filtros cargados desde Supabase');
+            } catch (error) {
+                console.error('❌ Error cargando filtros desde Supabase:', error);
+                // Fallback a datos locales si hay error
+                const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
+                const tiposSolucion = [...new Set(
+                    Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
+                )].sort();
+
+                const selectUnidad = document.getElementById('filtroTipoUnidad');
+                selectUnidad.innerHTML = '<option value="">Todos</option>';
+                tiposUnidad.forEach(tipo => {
+                    selectUnidad.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                });
+
+                const selectSolucion = document.getElementById('filtroTipoSolucion');
+                selectSolucion.innerHTML = '<option value="">Todos</option>';
+                tiposSolucion.forEach(tipo => {
+                    selectSolucion.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                });
+            }
         }
 
         function cargarTablaAlmacen() {
@@ -1324,7 +1356,7 @@
                     console.warn('No se pudo guardar cambios', error);
                 }
                 
-                cargarFiltros();
+                await cargarFiltros();
                 cargarTablaAlmacen();
                 actualizarEstadisticas();
                 
@@ -1454,12 +1486,12 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const almacenImportado = JSON.parse(e.target.result);
                     almacenInsumos = almacenImportado;
                     
-                    cargarFiltros();
+                    await cargarFiltros();
                     cargarTablaAlmacen();
                     actualizarEstadisticas();
                     
@@ -1471,12 +1503,12 @@
             reader.readAsText(file);
         }
 
-        function resetearAlmacen() {
+        async function resetearAlmacen() {
             if (confirm('¿Está seguro de resetear el almacén a los valores por defecto del CSV?')) {
                 localStorage.removeItem('almacen_insumos');
-                cargarMatrizCompletaCSV().then(matriz => {
+                cargarMatrizCompletaCSV().then(async matriz => {
                     almacenInsumos = matriz;
-                    cargarFiltros();
+                    await cargarFiltros();
                     cargarTablaAlmacen();
                     actualizarEstadisticas();
                     mostrarAlerta('Almacén reseteado a valores del CSV', 'success');
@@ -1489,7 +1521,7 @@
             window.dataService.subscribeAlmacenInsumos(async (payload) => {
                 try {
                     await cargarDesdeSupabase();
-                    cargarFiltros();
+                    await cargarFiltros();
                     cargarTablaAlmacen();
                     actualizarEstadisticas();
                 } catch (e) {
@@ -1584,7 +1616,7 @@
                 }
 
                 // Actualizar la interfaz
-                cargarFiltros();
+                await cargarFiltros();
                 cargarTablaAlmacen();
                 actualizarEstadisticas();
                 
@@ -1646,7 +1678,7 @@
                 mostrarAlerta(`Insumo "${nombre}" agregado exitosamente`, 'success');
                 
                 // Actualizar la interfaz
-                cargarFiltros();
+                await cargarFiltros();
                 cargarTablaAlmacen();
                 actualizarEstadisticas();
                 
