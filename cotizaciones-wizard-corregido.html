@@ -3465,6 +3465,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         // Navegación del wizard (funciones movidas al inicio del script)
 
         function mostrarPaso(step) {
+            console.log(`🔄 DEBUG: Mostrando paso ${step}...`);
             // Ocultar todos los pasos
             document.querySelectorAll('.step-content').forEach(el => {
                 el.classList.remove('active');
