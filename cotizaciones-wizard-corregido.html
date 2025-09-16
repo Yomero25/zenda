@@ -2293,9 +2293,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                         const key = insumo.nombre;
                                         const categoria = obtenerCategoriaInsumo(insumo.nombre);
                                         
-                                        // Saltar relevadores si ya los manejamos de manera especial
-                                        if ((key === 'Relevador' || key === 'Relevador 12v' || key === 'Relevador 24v') && tieneBloqueo) {
-                                            console.log(`⏭️ DEBUG: Saltando ${key} (ya manejado por bloqueo)`);
+                                        // Saltar TODOS los tipos de relevadores si ya los manejamos de manera especial
+                                        if (key.includes('Relevador') && tieneBloqueo) {
+                                            console.log(`⏭️ DEBUG: Saltando ${key} (ya manejado por bloqueo - voltaje ${vehiculo.voltaje || '12v'})`);
                                             return;
                                         }
                                         
@@ -2341,6 +2341,26 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                                 categoria: categoria
                                             };
                                             console.log(`✨ DEBUG: Nuevo insumo: ${key} = ${cantidadFinal}`);
+                                        }
+                                        
+                                        // Si es un relevador genérico y hay bloqueo, reemplazarlo por el relevador correcto según voltaje
+                                        if (key === 'Relevador' && tieneBloqueo) {
+                                            const voltaje = vehiculo.voltaje || '12v';
+                                            const keyRelevadorCorrecto = voltaje === '24v' ? 'Relevador 24v' : 'Relevador 12v';
+                                            
+                                            // Crear el relevador correcto
+                                            todosLosInsumos[keyRelevadorCorrecto] = {
+                                                nombre: keyRelevadorCorrecto,
+                                                cantidad: todosLosInsumos[key].cantidad,
+                                                unidades: todosLosInsumos[key].unidades,
+                                                sugerido: true,
+                                                categoria: categoria
+                                            };
+                                            
+                                            // Eliminar el relevador genérico
+                                            delete todosLosInsumos[key];
+                                            
+                                            console.log(`🔄 DEBUG: Reemplazando Relevador genérico por ${keyRelevadorCorrecto} (voltaje: ${voltaje})`);
                                         }
                                     });
                                 }
