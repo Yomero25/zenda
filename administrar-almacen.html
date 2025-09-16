@@ -1333,7 +1333,7 @@
         }
 
         // ===== NUEVA COMBINACIÓN =====
-        function agregarNuevaCombinacion() {
+        async function agregarNuevaCombinacion() {
             try {
                 // Actualizar las listas de opciones
                 await actualizarListasEnModalNuevaCombinacion();
@@ -1605,7 +1605,7 @@
                 }
                 
                 // Forzar actualización adicional después de un breve delay
-                setTimeout(() => {
+                setTimeout(async () => {
                     await actualizarListasEnModalNuevaCombinacion();
                 }, 200);
                 
@@ -1654,7 +1654,7 @@
                 await actualizarListasEnModalNuevaCombinacion();
                 
                 // Forzar actualización adicional después de un breve delay
-                setTimeout(() => {
+                setTimeout(async () => {
                     await actualizarListasEnModalNuevaCombinacion();
                 }, 200);
                 
