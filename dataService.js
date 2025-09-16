@@ -1405,6 +1405,79 @@
     }
   }
 
+  // =====================
+  // Funciones de Rastreo
+  // =====================
+  
+  async function fetchFuncionesRastreo() {
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('funciones_rastreo')
+        .select('*')
+        .eq('activo', true)
+        .order('funcionalidad');
+      
+      if (error) {
+        console.error('❌ Error fetchFuncionesRastreo:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (e) {
+      console.error('❌ Error fetchFuncionesRastreo:', e);
+      return [];
+    }
+  }
+
+  async function upsertFuncionRastreo(funcionalidad, insumos = []) {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('funciones_rastreo')
+        .upsert({
+          funcionalidad: funcionalidad,
+          insumos: insumos,
+          activo: true,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'funcionalidad'
+        });
+      
+      if (error) {
+        console.error('❌ Error upsertFuncionRastreo:', error);
+        return false;
+      }
+      
+      console.log('✅ Función de rastreo actualizada:', funcionalidad);
+      return true;
+    } catch (e) {
+      console.error('❌ Error upsertFuncionRastreo:', e);
+      return false;
+    }
+  }
+
+  async function deleteFuncionRastreo(funcionalidad) {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('funciones_rastreo')
+        .update({ activo: false })
+        .eq('funcionalidad', funcionalidad);
+      
+      if (error) {
+        console.error('❌ Error deleteFuncionRastreo:', error);
+        return false;
+      }
+      
+      console.log('✅ Función de rastreo eliminada:', funcionalidad);
+      return true;
+    } catch (e) {
+      console.error('❌ Error deleteFuncionRastreo:', e);
+      return false;
+    }
+  }
+
   // Exponer API
   window.dataService = {
     hasSupabase: () => !!client,
@@ -1463,6 +1536,10 @@
     fetchTiposInsumo,
     upsertTipoInsumo,
     deleteTipoInsumo,
+    // funciones de rastreo
+    fetchFuncionesRastreo,
+    upsertFuncionRastreo,
+    deleteFuncionRastreo,
     // helpers
     getCotizacionByIdOrFolio: async (idOrFolio) => {
       const found = await getCotizacionRowByIdOrFolio(idOrFolio);

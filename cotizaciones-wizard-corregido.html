@@ -470,6 +470,7 @@
         let selectedSolutions = [];
         let unidadVehiculoCounter = 1;
         let preciosCache = null;
+        let funcionesRastreo = [];
 
         async function cargarPreciosCache() {
             try {
@@ -1146,11 +1147,29 @@
             actualizarSelectsSoluciones();
         }
 
+        // Cargar funciones de rastreo desde Supabase
+        async function cargarFuncionesRastreo() {
+            try {
+                if (!modoCentralizado) {
+                    console.log('ℹ️ Modo no centralizado, funciones de rastreo no disponibles');
+                    return;
+                }
+
+                console.log('🔄 Cargando funciones de rastreo desde Supabase...');
+                funcionesRastreo = await window.dataService.fetchFuncionesRastreo();
+                console.log(`✅ Funciones de rastreo cargadas: ${funcionesRastreo.length}`);
+            } catch (error) {
+                console.error('❌ Error cargando funciones de rastreo:', error);
+            }
+        }
+
         // Cargar almacén desde Supabase o localStorage
         async function inicializarAlmacen() {
             if (modoCentralizado) {
                 // Cargar desde Supabase
                 await cargarAlmacenDesdeSupabase();
+                // Cargar funciones de rastreo
+                await cargarFuncionesRastreo();
             } else {
                 // Cargar desde localStorage si existe
                 const almacenGuardado = localStorage.getItem('almacen_insumos');
@@ -1225,41 +1244,47 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         // Headers de la matriz de telemetría
         const headersTelemetria = ['Boton membrana','Cable 2 vias','Sensor magnetico chico','Sensor magnetico grande','Teclado sencillo','Teclado dinámico','Microfono','Bocina','Relevador'];
 
-        // Función para obtener insumos de rastreo desde el CSV
+        // Función para obtener insumos de rastreo desde el CSV actualizado
         function obtenerInsumosRastreo(funcionalidad) {
-            const insumosRastreo = {
+            // Buscar la función en los datos de Supabase
+            const funcion = funcionesRastreo.find(f => f.funcionalidad === funcionalidad);
+            
+            if (funcion && funcion.insumos) {
+                console.log(`📦 Función de rastreo encontrada en Supabase: ${funcionalidad}`, funcion.insumos);
+                return funcion.insumos;
+            }
+            
+            // Fallback a datos hardcodeados si no se encuentra en Supabase
+            console.log(`⚠️ Función de rastreo no encontrada en Supabase: ${funcionalidad}, usando fallback`);
+            const insumosRastreoFallback = {
                 'SOS simple': [
+                    { nombre: 'Boton membrana', cantidad: 1 },
                     { nombre: 'Cable 2 vias', cantidad: 2 }
                 ],
                 'SOS llamada': [
+                    { nombre: 'Boton membrana', cantidad: 1 },
                     { nombre: 'Microfono', cantidad: 1 },
                     { nombre: 'Bocina', cantidad: 1 }
                 ],
                 'SOS Bloqueo': [
-                    // Botón membrana se agrega por separado basado en cantidad configurada
+                    { nombre: 'Boton membrana', cantidad: 1 }
                 ],
                 'Bloqueo normal': [
-                    { nombre: 'Relevador 12v', cantidad: 1 }
-                ],
-                'Bloqueo gradual': [
-                    { nombre: 'Relevador 12v', cantidad: 1 }
-                ],
-                'Bloqueo cortacorriente': [
-                    { nombre: 'Relevador 12v', cantidad: 1 }
+                    { nombre: 'Relevador', cantidad: 1 }
                 ],
                 'Bloqueo CC': [
-                    { nombre: 'Relevador 12v', cantidad: 1 }
+                    { nombre: 'Relevador', cantidad: 1 }
                 ],
                 'Sensores juntos': [
                     { nombre: 'Cable 2 vias', cantidad: 8 },
-                    { nombre: 'Relevador 12v', cantidad: 1 }
+                    { nombre: 'Relevador', cantidad: 1 }
                 ],
                 'Sensores independientes': [
                     { nombre: 'Sensor magnetico chico', cantidad: 2 }
                 ],
                 'Sensores y bloqueo': [
                     { nombre: 'Sensor magnetico chico', cantidad: 2 },
-                    { nombre: 'Relevador 12v', cantidad: 1 }
+                    { nombre: 'Relevador', cantidad: 1 }
                 ],
                 'Audio bidireccional': [
                     { nombre: 'Microfono', cantidad: 1 },
@@ -1272,17 +1297,14 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     { nombre: 'Cable 2 vias', cantidad: 12 },
                     { nombre: 'Sensor magnetico grande', cantidad: 1 }
                 ],
-                'teclado_sencillo': [
+                'habilitado': [
                     { nombre: 'Cable 2 vias', cantidad: 2 },
-                    { nombre: 'Teclado sencillo', cantidad: 1 }
-                ],
-                'teclado_dinamico': [
-                    { nombre: 'Cable 2 vias', cantidad: 2 },
+                    { nombre: 'Teclado sencillo', cantidad: 1 },
                     { nombre: 'Teclado dinámico', cantidad: 1 }
                 ]
             };
             
-            return insumosRastreo[funcionalidad] || [];
+            return insumosRastreoFallback[funcionalidad] || [];
         }
 
         // Función para obtener insumos sugeridos basados en tipo de unidad y solución
@@ -1673,6 +1695,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             // Asegurar que el almacén esté cargado desde Supabase
             if (modoCentralizado) {
                 await cargarAlmacenDesdeSupabase();
+                // También recargar funciones de rastreo
+                await cargarFuncionesRastreo();
             }
             
             // Obtener datos actuales

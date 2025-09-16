@@ -68,6 +68,15 @@
                 <button class="btn btn-info" onclick="mostrarModalCargaMasiva()">
                     <i class="bi bi-upload"></i> Carga Masiva
                 </button>
+                
+                <button class="btn btn-warning" onclick="console.log('🔘 Botón Funciones Rastreo clickeado'); mostrarModalFuncionesRastreo();" style="margin-bottom: 10px; width: 100%;">
+                    <i class="bi bi-gear"></i> Funciones Rastreo
+                </button>
+                
+                <!-- Botón de prueba temporal -->
+                <button class="btn btn-danger" onclick="alert('¡Botón de prueba funciona!'); console.log('✅ Botón de prueba clickeado');" style="margin-bottom: 10px; width: 100%;">
+                    <i class="bi bi-bug"></i> PRUEBA
+                </button>
 
                 
                 <div class="mt-4">
@@ -404,6 +413,75 @@
                     <button type="button" class="btn btn-primary" id="btnConfirmarCarga" onclick="confirmarCargaMasiva()" disabled>
                         <i class="bi bi-check-circle"></i> Confirmar Carga
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Funciones de Rastreo -->
+    <div class="modal fade" id="modalFuncionesRastreo" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-gear"></i> Gestión de Funciones de Rastreo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Funciones Existentes</h6>
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Función</th>
+                                            <th>Insumos</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaFuncionesRastreo">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Agregar/Editar Función</h6>
+                            <form id="formFuncionRastreo">
+                                <div class="mb-3">
+                                    <label for="funcionalidadRastreo" class="form-label">Funcionalidad:</label>
+                                    <input type="text" class="form-control" id="funcionalidadRastreo" placeholder="Ej: SOS simple">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Insumos:</label>
+                                    <div id="insumosRastreoContainer">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control insumo-nombre" placeholder="Nombre del insumo">
+                                            <input type="number" class="form-control insumo-cantidad" placeholder="Cantidad" min="1" value="1">
+                                            <button type="button" class="btn btn-outline-danger" onclick="eliminarInsumoRastreo(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarInsumoRastreo()">
+                                        <i class="bi bi-plus"></i> Agregar Insumo
+                                    </button>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-success" onclick="guardarFuncionRastreo()">
+                                        <i class="bi bi-save"></i> Guardar Función
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="limpiarFormularioRastreo()">
+                                        <i class="bi bi-arrow-clockwise"></i> Limpiar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -1472,6 +1550,217 @@
                 mostrarAlerta('❌ Error probando tablas: ' + error.message, 'danger');
                 return false;
             }
+        }
+
+        // ===== FUNCIONES DE RASTREO =====
+        
+        let funcionesRastreoExistentes = [];
+        let funcionRastreoEditando = null;
+
+        async function mostrarModalFuncionesRastreo() {
+            console.log('🔧 Abriendo modal de funciones de rastreo...');
+            
+            try {
+                // Verificar que el modal existe
+                const modalElement = document.getElementById('modalFuncionesRastreo');
+                if (!modalElement) {
+                    console.error('❌ Modal modalFuncionesRastreo no encontrado');
+                    alert('Error: Modal no encontrado');
+                    return;
+                }
+                
+                console.log('✅ Modal encontrado, procediendo...');
+                
+                // Limpiar formulario
+                limpiarFormularioRastreo();
+                
+                // Cargar funciones existentes
+                await cargarFuncionesRastreo();
+                
+                // Mostrar modal
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                console.log('✅ Modal mostrado correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error abriendo modal:', error);
+                alert('Error abriendo modal: ' + error.message);
+            }
+        }
+
+        async function cargarFuncionesRastreo() {
+            try {
+                console.log('🔄 Cargando funciones de rastreo desde Supabase...');
+                
+                // Verificar que dataService esté disponible
+                if (!window.dataService || !window.dataService.fetchFuncionesRastreo) {
+                    console.warn('⚠️ dataService no disponible, usando datos de prueba');
+                    funcionesRastreoExistentes = [
+                        {
+                            funcionalidad: 'SOS simple',
+                            insumos: [
+                                { nombre: 'Boton membrana', cantidad: 1 },
+                                { nombre: 'Cable 2 vias', cantidad: 2 }
+                            ]
+                        }
+                    ];
+                } else {
+                    funcionesRastreoExistentes = await window.dataService.fetchFuncionesRastreo();
+                }
+                
+                console.log(`✅ Funciones cargadas: ${funcionesRastreoExistentes.length}`);
+                console.log('📋 Funciones:', funcionesRastreoExistentes);
+                
+                // Actualizar tabla
+                actualizarTablaFuncionesRastreo();
+            } catch (error) {
+                console.error('❌ Error cargando funciones de rastreo:', error);
+                console.log('🔄 Usando datos de prueba como fallback...');
+                
+                // Datos de prueba como fallback
+                funcionesRastreoExistentes = [
+                    {
+                        funcionalidad: 'SOS simple',
+                        insumos: [
+                            { nombre: 'Boton membrana', cantidad: 1 },
+                            { nombre: 'Cable 2 vias', cantidad: 2 }
+                        ]
+                    }
+                ];
+                
+                actualizarTablaFuncionesRastreo();
+            }
+        }
+
+        function actualizarTablaFuncionesRastreo() {
+            const tbody = document.getElementById('tablaFuncionesRastreo');
+            tbody.innerHTML = '';
+
+            funcionesRastreoExistentes.forEach(funcion => {
+                const row = document.createElement('tr');
+                const insumosText = funcion.insumos.map(i => `${i.nombre} (${i.cantidad})`).join(', ');
+                
+                row.innerHTML = `
+                    <td>${funcion.funcionalidad}</td>
+                    <td>${insumosText}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarFuncionRastreo('${funcion.funcionalidad}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarFuncionRastreo('${funcion.funcionalidad}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function editarFuncionRastreo(funcionalidad) {
+            const funcion = funcionesRastreoExistentes.find(f => f.funcionalidad === funcionalidad);
+            if (!funcion) return;
+
+            funcionRastreoEditando = funcionalidad;
+            document.getElementById('funcionalidadRastreo').value = funcion.funcionalidad;
+            
+            // Limpiar contenedor de insumos
+            const container = document.getElementById('insumosRastreoContainer');
+            container.innerHTML = '';
+            
+            // Agregar insumos existentes
+            funcion.insumos.forEach(insumo => {
+                agregarInsumoRastreo(insumo.nombre, insumo.cantidad);
+            });
+            
+            // Si no hay insumos, agregar uno vacío
+            if (funcion.insumos.length === 0) {
+                agregarInsumoRastreo();
+            }
+        }
+
+        async function eliminarFuncionRastreo(funcionalidad) {
+            if (!confirm(`¿Estás seguro de eliminar la función "${funcionalidad}"?`)) return;
+
+            try {
+                const success = await window.dataService.deleteFuncionRastreo(funcionalidad);
+                if (success) {
+                    mostrarAlerta('Función eliminada correctamente', 'success');
+                    await cargarFuncionesRastreo();
+                } else {
+                    mostrarAlerta('Error al eliminar la función', 'danger');
+                }
+            } catch (error) {
+                console.error('❌ Error eliminando función:', error);
+                mostrarAlerta('Error al eliminar la función: ' + error.message, 'danger');
+            }
+        }
+
+        function agregarInsumoRastreo(nombre = '', cantidad = 1) {
+            const container = document.getElementById('insumosRastreoContainer');
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control insumo-nombre" placeholder="Nombre del insumo" value="${nombre}">
+                <input type="number" class="form-control insumo-cantidad" placeholder="Cantidad" min="1" value="${cantidad}">
+                <button type="button" class="btn btn-outline-danger" onclick="eliminarInsumoRastreo(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function eliminarInsumoRastreo(button) {
+            button.parentElement.remove();
+        }
+
+        async function guardarFuncionRastreo() {
+            const funcionalidad = document.getElementById('funcionalidadRastreo').value.trim();
+            if (!funcionalidad) {
+                mostrarAlerta('Por favor ingresa el nombre de la funcionalidad', 'warning');
+                return;
+            }
+
+            // Recopilar insumos
+            const insumos = [];
+            const insumoNombres = document.querySelectorAll('.insumo-nombre');
+            const insumoCantidades = document.querySelectorAll('.insumo-cantidad');
+
+            for (let i = 0; i < insumoNombres.length; i++) {
+                const nombre = insumoNombres[i].value.trim();
+                const cantidad = parseInt(insumoCantidades[i].value) || 0;
+                
+                if (nombre && cantidad > 0) {
+                    insumos.push({ nombre, cantidad });
+                }
+            }
+
+            if (insumos.length === 0) {
+                mostrarAlerta('Por favor agrega al menos un insumo', 'warning');
+                return;
+            }
+
+            try {
+                const success = await window.dataService.upsertFuncionRastreo(funcionalidad, insumos);
+                if (success) {
+                    mostrarAlerta('Función guardada correctamente', 'success');
+                    await cargarFuncionesRastreo();
+                    limpiarFormularioRastreo();
+                } else {
+                    mostrarAlerta('Error al guardar la función', 'danger');
+                }
+            } catch (error) {
+                console.error('❌ Error guardando función:', error);
+                mostrarAlerta('Error al guardar la función: ' + error.message, 'danger');
+            }
+        }
+
+        function limpiarFormularioRastreo() {
+            funcionRastreoEditando = null;
+            document.getElementById('funcionalidadRastreo').value = '';
+            
+            const container = document.getElementById('insumosRastreoContainer');
+            container.innerHTML = '';
+            agregarInsumoRastreo(); // Agregar un insumo vacío por defecto
         }
 
         // ===== INICIALIZACIÓN =====
