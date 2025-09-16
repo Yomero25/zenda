@@ -1241,6 +1241,19 @@
                 console.log(`  - Tipos de solución: ${tiposSolucion.length}`);
                 console.log('🔍 DEBUG: Datos de almacenData:', almacenData);
                 console.log('🔍 DEBUG: Esquema detectado:', Array.isArray(almacenData) ? 'Array' : 'Object');
+                console.log('🔍 DEBUG: Primer registro:', almacenData[0]);
+                console.log('🔍 DEBUG: Total registros:', almacenData.length);
+                
+                // Log detallado de cada registro
+                almacenData.forEach((row, index) => {
+                    console.log(`🔍 DEBUG: Registro ${index}:`, {
+                        hasInsumos: !!row.insumos,
+                        hasTipoUnidad: !!row.tipoUnidad,
+                        hasTipoSolucion: !!row.tipoSolucion,
+                        insumosType: typeof row.insumos,
+                        keys: Object.keys(row)
+                    });
+                });
                 
             } catch (error) {
                 console.error('❌ Error actualizando estadísticas desde Supabase:', error);
