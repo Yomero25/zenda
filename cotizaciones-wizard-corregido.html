@@ -1025,6 +1025,46 @@
             }
         }
 
+        // Función para cargar almacén desde Supabase
+        async function cargarAlmacenDesdeSupabase() {
+            try {
+                if (!modoCentralizado) {
+                    console.log('ℹ️ Modo no centralizado, usando localStorage');
+                    return;
+                }
+
+                console.log('🔄 Cargando almacén desde Supabase...');
+                const registros = await window.dataService.fetchAlmacenInsumos();
+                
+                // Convertir registros de Supabase al formato esperado
+                const nuevoAlmacen = {};
+                (registros || []).forEach(r => {
+                    const tipoUnidad = r.tipoUnidad;
+                    const tipoSolucion = r.tipoSolucion;
+                    const insumos = r.insumos || {};
+                    
+                    if (!nuevoAlmacen[tipoUnidad]) {
+                        nuevoAlmacen[tipoUnidad] = {};
+                    }
+                    nuevoAlmacen[tipoUnidad][tipoSolucion] = insumos;
+                });
+                
+                // Actualizar la variable global almacenInsumos
+                Object.keys(nuevoAlmacen).forEach(tipoUnidad => {
+                    if (!almacenInsumos[tipoUnidad]) {
+                        almacenInsumos[tipoUnidad] = {};
+                    }
+                    Object.keys(nuevoAlmacen[tipoUnidad]).forEach(tipoSolucion => {
+                        almacenInsumos[tipoUnidad][tipoSolucion] = nuevoAlmacen[tipoUnidad][tipoSolucion];
+                    });
+                });
+                
+                console.log(`✅ Almacén cargado desde Supabase: ${Object.keys(almacenInsumos).length} tipos de unidad`);
+            } catch (error) {
+                console.error('❌ Error cargando almacén desde Supabase:', error);
+            }
+        }
+
         // Cargar tipos globales
         const tiposGlobales = cargarTiposGlobales();
         console.log('📋 Tipos globales cargados:', tiposGlobales);
@@ -1106,25 +1146,36 @@
             actualizarSelectsSoluciones();
         }
 
-        // Cargar almacén desde localStorage si existe
-        const almacenGuardado = localStorage.getItem('almacen_insumos');
-        if (almacenGuardado) {
-            try {
-                const almacenCargado = JSON.parse(almacenGuardado);
-                // Fusionar con el almacén por defecto
-                Object.keys(almacenCargado).forEach(tipoUnidad => {
-                    if (!almacenInsumos[tipoUnidad]) {
-                        almacenInsumos[tipoUnidad] = {};
+        // Cargar almacén desde Supabase o localStorage
+        async function inicializarAlmacen() {
+            if (modoCentralizado) {
+                // Cargar desde Supabase
+                await cargarAlmacenDesdeSupabase();
+            } else {
+                // Cargar desde localStorage si existe
+                const almacenGuardado = localStorage.getItem('almacen_insumos');
+                if (almacenGuardado) {
+                    try {
+                        const almacenCargado = JSON.parse(almacenGuardado);
+                        // Fusionar con el almacén por defecto
+                        Object.keys(almacenCargado).forEach(tipoUnidad => {
+                            if (!almacenInsumos[tipoUnidad]) {
+                                almacenInsumos[tipoUnidad] = {};
+                            }
+                            Object.keys(almacenCargado[tipoUnidad]).forEach(tipoSolucion => {
+                                almacenInsumos[tipoUnidad][tipoSolucion] = almacenCargado[tipoUnidad][tipoSolucion];
+                            });
+                        });
+                        console.log('✓ Almacén cargado desde localStorage');
+                    } catch (error) {
+                        console.error('Error al cargar almacén:', error);
                     }
-                    Object.keys(almacenCargado[tipoUnidad]).forEach(tipoSolucion => {
-                        almacenInsumos[tipoUnidad][tipoSolucion] = almacenCargado[tipoUnidad][tipoSolucion];
-                    });
-                });
-                console.log('✓ Almacén cargado desde localStorage');
-            } catch (error) {
-                console.error('Error al cargar almacén:', error);
+                }
             }
         }
+
+        // Inicializar almacén
+        inicializarAlmacen();
 
         // Definición de categorías de insumos
         const categoriasInsumos = {
@@ -1598,7 +1649,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         let generandoInsumos = false; // Flag para evitar ejecuciones múltiples
         let ultimaGeneracion = 0; // Timestamp de la última generación
         
-        function generarInsumosSugeridos() {
+        async function generarInsumosSugeridos() {
             const container = document.getElementById('insumosSugeridosContainer');
             if (!container) return;
             
@@ -1618,6 +1669,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             generandoInsumos = true;
             ultimaGeneracion = ahora;
             console.log('Generando insumos sugeridos...');
+            
+            // Asegurar que el almacén esté cargado desde Supabase
+            if (modoCentralizado) {
+                await cargarAlmacenDesdeSupabase();
+            }
             
             // Obtener datos actuales
             guardarPasoActual();
