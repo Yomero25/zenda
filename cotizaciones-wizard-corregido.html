@@ -2246,37 +2246,33 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 
                                 console.log(`🔌 DEBUG: Agregando relevador ${voltaje} x1 por unidad (hay bloqueo)`);
                                 
+                                // ELIMINAR TODOS los tipos de relevadores existentes para evitar duplicación
+                                Object.keys(todosLosInsumos).forEach(key => {
+                                    if (key.includes('Relevador') && key !== keyRelevador) {
+                                        console.log(`🗑️ DEBUG: Eliminando relevador duplicado: ${key}`);
+                                        delete todosLosInsumos[key];
+                                    }
+                                });
+                                
                                 // Agregar relevador según voltaje
-                                if (todosLosInsumos[keyRelevador]) {
-                                    todosLosInsumos[keyRelevador].cantidad = 1; // Se multiplicará después por cantidadUnidades
-                                    todosLosInsumos[keyRelevador].unidades = [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`];
-                                    console.log(`📊 DEBUG: Configurando: ${keyRelevador} = 1 por unidad`);
-                                } else {
-                                    todosLosInsumos[keyRelevador] = {
-                                        nombre: keyRelevador,
-                                        cantidad: 1, // Se multiplicará después por cantidadUnidades
-                                        unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`],
-                                        sugerido: true,
-                                        categoria: categoria
-                                    };
-                                    console.log(`✨ DEBUG: Nuevo insumo: ${keyRelevador} = 1 por unidad`);
-                                }
+                                todosLosInsumos[keyRelevador] = {
+                                    nombre: keyRelevador,
+                                    cantidad: 1, // Se multiplicará después por cantidadUnidades
+                                    unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`],
+                                    sugerido: true,
+                                    categoria: categoria
+                                };
+                                console.log(`✨ DEBUG: Agregando relevador correcto: ${keyRelevador} = 1 por unidad`);
                                 
                                 // Agregar portarelevador automáticamente
-                                if (todosLosInsumos[keyPortarelevador]) {
-                                    todosLosInsumos[keyPortarelevador].cantidad = 1; // Se multiplicará después por cantidadUnidades
-                                    todosLosInsumos[keyPortarelevador].unidades = [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`];
-                                    console.log(`📊 DEBUG: Configurando: ${keyPortarelevador} = 1 por unidad`);
-                                } else {
-                                    todosLosInsumos[keyPortarelevador] = {
-                                        nombre: keyPortarelevador,
-                                        cantidad: 1, // Se multiplicará después por cantidadUnidades
-                                        unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`],
-                                        sugerido: true,
-                                        categoria: categoria
-                                    };
-                                    console.log(`✨ DEBUG: Nuevo insumo: ${keyPortarelevador} = 1 por unidad`);
-                                }
+                                todosLosInsumos[keyPortarelevador] = {
+                                    nombre: keyPortarelevador,
+                                    cantidad: 1, // Se multiplicará después por cantidadUnidades
+                                    unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`],
+                                    sugerido: true,
+                                    categoria: categoria
+                                };
+                                console.log(`✨ DEBUG: Agregando portarelevador: ${keyPortarelevador} = 1 por unidad`);
                             }
                             
                             // Buscar insumos para cada solución compatible
@@ -2343,25 +2339,6 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                             console.log(`✨ DEBUG: Nuevo insumo: ${key} = ${cantidadFinal}`);
                                         }
                                         
-                                        // Si es un relevador genérico y hay bloqueo, reemplazarlo por el relevador correcto según voltaje
-                                        if (key === 'Relevador' && tieneBloqueo) {
-                                            const voltaje = vehiculo.voltaje || '12v';
-                                            const keyRelevadorCorrecto = voltaje === '24v' ? 'Relevador 24v' : 'Relevador 12v';
-                                            
-                                            // Crear el relevador correcto
-                                            todosLosInsumos[keyRelevadorCorrecto] = {
-                                                nombre: keyRelevadorCorrecto,
-                                                cantidad: todosLosInsumos[key].cantidad,
-                                                unidades: todosLosInsumos[key].unidades,
-                                                sugerido: true,
-                                                categoria: categoria
-                                            };
-                                            
-                                            // Eliminar el relevador genérico
-                                            delete todosLosInsumos[key];
-                                            
-                                            console.log(`🔄 DEBUG: Reemplazando Relevador genérico por ${keyRelevadorCorrecto} (voltaje: ${voltaje})`);
-                                        }
                                     });
                                 }
                             });
