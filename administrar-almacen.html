@@ -1330,6 +1330,7 @@
                 }
                 
                 // Actualizar interfaz
+                await cargarDesdeSupabase(); // Recargar datos desde Supabase
                 await cargarFiltros();
                 cargarTablaAlmacen();
                 await actualizarEstadisticas();
