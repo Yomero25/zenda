@@ -484,516 +484,11 @@
         ];
 
         // ===== MATRIZ COMPLETA Y CORREGIDA DEL CSV =====
+        // FUNCIÓN ELIMINADA: Ya no se usa la matriz hardcodeada
         function cargarMatrizCompletaCSV() {
-            // MATRIZ CORREGIDA: Sin "Guía de meta", con Pollaks, datos exactos del CSV
-            return Promise.resolve({
-                "Tracto": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "1",
-                        "Cable 4 pin 7 m": "2", 
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    },
-                    "Sensor VPC": {
-                        "Cable 4 vias": "4",
-                        "Sensor derecho VPC": "1",
-                        "Sensor izquierda VPC": "1"
-                    },
-                    "Led de giro": {
-                        "Pija brocante 5/16": "10",
-                        "Terminal de ojillo": "2",
-                        "Poliflex 1/4": "8",
-                        "Cable 2 vias": "26",
-                        "Led de giro a la derecha": "2",
-                        "Led de giro a la izquierda": "2"
-                    },
-                    "Alarma parlante estandar": {
-                        "Tornillo 3/8": "2",
-                        "Cinta de tela": "1/2",
-                        "Poliflex 3/8": "8",
-                        "Cincho mediado": "30",
-                        "Pija brocante 5/16": "2",
-                        "Cable 4 vias": "6",
-                        "Tuerca 3/8": "2",
-                        "Rondana 3/8": "2",
-                        "Alarma parlante de 3 tonos": "1"
-                    },
-                    "Alarma parlante programable": {},
-                    "Encadenamiento señales": {
-                        // NOTA: Los condicionales deben aplicarse en el wizard:
-                        // - Si encadenamiento SENCILLO: 1 cámara de reversa
-                        // - Si encadenamiento FULL: 2 cámaras de reversa
-                        "Cable 4 pin 1 m": "5",
-                        "Cable 4 pin 5 m": "1", 
-                        "Cable 4 pin 7 m": "1",
-                        "Cable 4 pin 15 m": "2",
-                        "Base Pollak": "7",
-                        "Pollak Macho ": "4",
-                        "Pollak Hembra": "4",
-                        "Silicon": "1/10",
-                        "Cinta de tela": "1",
-                        "Poliflex 3/8": "30",
-                        "Cincho mediado": "120",
-                        "Cincho con grapa": "80",
-                        "Pija brocante 5/16": "40",
-                        "Cable 2 vias": "40",
-                        "Cable 4 vias": "40",
-                        "Espiral negro": "1",
-                        "Espiral verde": "2",
-                        "7 vias liso 2m": "1",
-                        "Relevador 2 pasos 2 tiros": "5",
-                        "placa perforada": "2.5",
-                        "Gabinete 5*7*3": "4",
-                        "Camara con microfono": "2",
-                        "Camara de reversa": "2"
-                    },
-                    "MDVR 4 Ch": {
-                        "Cable 4 pin 3 m": "1",
-                        "Cable 4 pin 7 m": "2",
-                        "Cable 4 pin 15 m": "1",
-                        "Cable 6 pin 5 m": "1",
-                        "Silicon": "1/10",
-
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "30",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "5",
-                        "Grabador de video 4 ch": "1"
-                    },
-                    "MDVR 8 Ch": {
-                        "Cable 4 pin 3 m": "1",
-                        "Cable 4 pin 7 m": "2",
-                        "Cable 4 pin 15 m": "1",
-                        "Cable 6 pin 5 m": "1",
-                        "Silicon": "1/10",
-
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "30",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "5",
-                        "Grabador de video 4 ch": "1"
-                    },
-                    "Sideview": {
-                        "Cable 4 pin 7 m": "4",
-                        "Silicon": "1/10",
-
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "15",
-                        "Cincho mediado": "60",
-                        "Pija brocante 5/16": "16",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "10",
-                        "Cable 4 vias": "10",
-                        "Camara sideview derecho": "1",
-                        "Camara sideview izquierdo": "1",
-                        "Sideview derecho": "1",
-                        "Sideview izquierdo": "1"
-                    },
-                    "Dashcam": {
-
-                        "Cinta de aislar": "1",
-                        "Cincho mediado": "15",
-                        "Pija brocante 5/16": "1",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "5",
-                        "Cable 4 vias": "5",
-                        "Dashcam ad2": "1",
-                        "Dashcam c6": "1"
-                    },
-                    "Rastreo basico": {
-
-                        "Cinta de aislar": "1",
-                        "Cincho mediado": "15",
-                        "Pija brocante 5/16": "1",
-                        "Terminal de ojillo": "3",
-                        "Cable 4 vias": "8",
-                        "Relevador 2 pasos 2 tiros": "1",
-                        "placa perforada": "1",
-                        "Gabinete 5*7*3": "1"
-                    },
-                    "Rastreo avanzado": {
-
-                        "Cinta de aislar": "1",
-                        "Cincho mediado": "15",
-                        "Pija brocante 5/16": "1",
-                        "Terminal de ojillo": "3",
-                        "Cable 4 vias": "8",
-                        "Relevador 2 pasos 2 tiros": "1",
-                        "placa perforada": "1",
-                        "Gabinete 5*7*3": "1"
-                    },
-                    "Rastreo satelital": {
-
-                        "Cinta de aislar": "1",
-                        "Cincho mediado": "15",
-                        "Pija brocante 5/16": "1",
-                        "Terminal de ojillo": "2",
-                        "Cable 4 vias": "4",
-                        "Relevador 2 pasos 2 tiros": "1",
-                        "placa perforada": "1",
-                        "Gabinete 5*7*3": "1"
-                    },
-                    "Insider": {},
-                    "Limitador de velocidad": {},
-                    "Modulo sensor cinturon": {}
-                },
-                "Tracto Cabina sobre motor": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    },
-                    "Sensor VPC": {
-                        "Cable 4 vias": "4",
-                        "Sensor derecho VPC": "1",
-                        "Sensor izquierda VPC": "1"
-                    }
-                },
-                "Rabón": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "Torton": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "4.5 ton": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "3.5 ton": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "2.5 ton": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "1.5 ton": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "Van pasajeros": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "Autobus pasajeros": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "SUV": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "Sedan lujo": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "Sedan": {
-                    "VPC": {
-                        "Cable 4 pin 5 m": "3",
-                        "Cable 4 pin 15 m": "1",
-                        "\"\"\"Y\"\" 4 pines\"": "4",
-                        "Silicon": "1/10",
-                        "Cinchos grande": "30",
-                        "Cinta de tela": "1",
-                        "Cinta de aislar": "1",
-                        "Poliflex 3/8": "18",
-                        "Cincho mediado": "80",
-                        "Cincho con grapa": "40",
-                        "Pija brocante 5/16": "6",
-                        "Terminal de ojillo": "2",
-                        "Cable 2 vias": "2",
-                        "Camara de reversa": "1",
-                        "Camara exterior mini": "1",
-                        "Camara lateral derecha de VPC": "1",
-                        "Camara lateral izquierda de VPC": "1",
-                        "Monitor de VPC": "1"
-                    }
-                },
-                "Motocicleta": {
-                    "Rastreo basico": {
-
-                        "Cinta de aislar": "1",
-                        "Cincho mediado": "15",
-                        "Pija brocante 5/16": "1",
-                        "Terminal de ojillo": "3",
-                        "Cable 4 vias": "8",
-                        "Relevador 2 pasos 2 tiros": "1",
-                        "placa perforada": "1",
-                        "Gabinete 5*7*3": "1"
-                    },
-                    "Rastreo avanzado": {
-
-                        "Cinta de aislar": "1",
-                        "Cincho mediado": "15",
-                        "Pija brocante 5/16": "1",
-                        "Terminal de ojillo": "3",
-                        "Cable 4 vias": "8",
-                        "Relevador 2 pasos 2 tiros": "1",
-                        "placa perforada": "1",
-                        "Gabinete 5*7*3": "1"
-                    },
-                    "Rastreo satelital": {
-
-                        "Cinta de aislar": "1",
-                        "Cincho mediado": "15",
-                        "Pija brocante 5/16": "1",
-                        "Terminal de ojillo": "2",
-                        "Cable 4 vias": "4",
-                        "Relevador 2 pasos 2 tiros": "1",
-                        "placa perforada": "1",
-                        "Gabinete 5*7*3": "1"
-                    }
-                }
-            });
+            console.warn('⚠️ cargarMatrizCompletaCSV() está deprecada. Usa la carga masiva desde JSON.');
+            return Promise.resolve({});
         }
-
-        // ===== INICIALIZACIÓN =====
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🔄 Inicializando almacén...');
-            try {
-                // Limpiar localStorage de tipos para evitar conflictos
-                localStorage.removeItem('tipos_globales');
-                console.log('🧹 localStorage de tipos limpiado');
-                
-                if (modoCentralizado) {
-                    console.log('📦 Modo centralizado (Supabase)');
-                    await cargarDesdeSupabase();
-                    suscribirRealtimeAlmacen();
-                } else {
-                    console.log('🗄️ Modo localStorage');
-                    almacenInsumos = await cargarMatrizCompletaCSV();
-                    cargarAlmacenDesdeStorage();
-                }
-                
-                // Limpiar soluciones duplicadas
-                limpiarSolucionesDuplicadas();
-                
-                await cargarFiltros();
-                cargarTablaAlmacen();
-                await actualizarEstadisticas();
-            } catch (error) {
-                console.error('❌ Error inicializando almacén:', error);
-                mostrarAlerta('Error al inicializar el almacén', 'danger');
-            }
-        });
 
         // Función para restaurar almacén si se perdió
         async function restaurarAlmacen() {
@@ -1019,8 +514,6 @@
             }
         }
 
-        // ===== FUNCIONES PRINCIPALES =====
-        
         async function cargarDesdeSupabase() {
             try {
                 const registros = await window.dataService.fetchAlmacenInsumos();
@@ -1047,29 +540,10 @@
                 almacenInsumos = mapa;
                 console.log(`✅ Supabase: ${Array.isArray(registros) ? registros.length : 0} registros`);
 
-                // Si no hay datos en Supabase, intentar migrar desde localStorage o CSV
-                const yaMigrado = localStorage.getItem('almacen_migrado_supabase') === 'true';
-                if ((registros || []).length === 0 && !yaMigrado) {
-                    console.log('ℹ️ Supabase vacío. Intentando migrar desde localStorage o CSV...');
-                    let origenMapa = null;
-                    try {
-                        const almacenGuardado = localStorage.getItem('almacen_insumos');
-                        if (almacenGuardado) {
-                            origenMapa = JSON.parse(almacenGuardado);
-                            console.log('📥 Encontrado almacén en localStorage; migrando...');
-                        } else {
-                            origenMapa = await cargarMatrizCompletaCSV();
-                            console.log('📥 Usando matriz CSV por defecto; migrando...');
-                        }
-                    } catch (e) {
-                        console.warn('⚠️ No fue posible obtener origen para migración:', e);
-                    }
-                    if (origenMapa) {
-                        await migrarAlmacenLocalASupabase(origenMapa);
-                        localStorage.setItem('almacen_migrado_supabase', 'true');
-                        // recargar desde supabase
-                        return cargarDesdeSupabase();
-                    }
+                // Si no hay datos en Supabase, mostrar mensaje informativo
+                if ((registros || []).length === 0) {
+                    console.log('ℹ️ Supabase vacío. No hay combinaciones cargadas.');
+                    console.log('💡 Usa la función "Carga Masiva" para importar combinaciones desde un archivo JSON.');
                 }
             } catch (e) {
                 console.error('❌ Error cargando Supabase almacen:', e);
@@ -1096,25 +570,10 @@
                     // eslint-disable-next-line no-await-in-loop
                     await Promise.all(slice);
                 }
-                console.log(`✅ Migración de almacén completada (filas)`);
-                mostrarAlerta('Almacén migrado a Supabase', 'success');
-            } catch (e) {
-                console.error('❌ Error migrando almacén a Supabase:', e);
+                console.log(`✅ Migración completada: ${tareas.length} combinaciones`);
+            } catch (error) {
+                console.error('❌ Error migrando almacén a Supabase:', error);
                 mostrarAlerta('Error migrando almacén a Supabase', 'danger');
-            }
-        }
-
-        function cargarAlmacenDesdeStorage() {
-            const almacenGuardado = localStorage.getItem('almacen_insumos');
-            if (almacenGuardado) {
-                try {
-                    const almacenParsed = JSON.parse(almacenGuardado);
-                    // Fusionar con la matriz CSV (prioridad a localStorage)
-                    almacenInsumos = { ...almacenInsumos, ...almacenParsed };
-                    console.log('✅ Almacén cargado desde localStorage');
-                } catch (error) {
-                    console.error('❌ Error parseando almacén de localStorage:', error);
-                }
             }
         }
 
@@ -1145,34 +604,19 @@
                 nombresSolucion.forEach(tipo => {
                     selectSolucion.innerHTML += `<option value="${tipo}">${tipo}</option>`;
                 });
+
+                // Actualizar listas globales
+                tiposUnidadExistentes = nombresUnidad;
+                tiposSolucionExistentes = nombresSolucion;
                 
                 console.log('✅ Filtros cargados desde Supabase');
             } catch (error) {
-                console.error('❌ Error cargando filtros desde Supabase:', error);
-                // Fallback a datos locales si hay error
-                const tiposUnidad = [...new Set(Object.keys(almacenInsumos))].sort();
-                const tiposSolucion = [...new Set(
-                    Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
-                )].sort();
-
-                const selectUnidad = document.getElementById('filtroTipoUnidad');
-                selectUnidad.innerHTML = '<option value="">Todos</option>';
-                tiposUnidad.forEach(tipo => {
-                    selectUnidad.innerHTML += `<option value="${tipo}">${tipo}</option>`;
-                });
-
-                const selectSolucion = document.getElementById('filtroTipoSolucion');
-                selectSolucion.innerHTML = '<option value="">Todos</option>';
-                tiposSolucion.forEach(tipo => {
-                    selectSolucion.innerHTML += `<option value="${tipo}">${tipo}</option>`;
-                });
+                console.error('❌ Error cargando filtros:', error);
+                mostrarAlerta('Error cargando filtros', 'danger');
             }
         }
 
         function cargarTablaAlmacen() {
-            const tbody = document.getElementById('tablaAlmacen');
-            tbody.innerHTML = '';
-
             let combinaciones = [];
             
             for (const [tipoUnidad, soluciones] of Object.entries(almacenInsumos)) {
@@ -1192,140 +636,37 @@
         function mostrarCombinaciones(combinaciones) {
             const tbody = document.getElementById('tablaAlmacen');
             tbody.innerHTML = '';
+            
+            if (combinaciones.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay combinaciones disponibles</td></tr>';
+                return;
+            }
 
-            combinaciones.forEach((combo, index) => {
-                const insumosTexto = Object.keys(combo.insumos).length > 0 
-                    ? Object.entries(combo.insumos)
-                        .map(([insumo, cantidad]) => `${insumo} (${cantidad})`)
-                        .join(', ')
-                    : 'Sin insumos';
-
-                const row = `
-                    <tr>
-                        <td><strong>${combo.tipoUnidad}</strong></td>
-                        <td><span class="badge bg-secondary">${combo.tipoSolucion}</span></td>
-                        <td style="max-width: 300px; word-wrap: break-word;">${insumosTexto}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" onclick="editarCombinacion('${combo.tipoUnidad}', '${combo.tipoSolucion}')">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarCombinacion('${combo.tipoUnidad}', '${combo.tipoSolucion}')">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
+            combinaciones.forEach(combinacion => {
+                const row = document.createElement('tr');
+                const insumosText = Object.entries(combinacion.insumos)
+                    .map(([insumo, cantidad]) => `${insumo}: ${cantidad}`)
+                    .join(', ');
+                
+                row.innerHTML = `
+                    <td>${combinacion.tipoUnidad}</td>
+                    <td>${combinacion.tipoSolucion}</td>
+                    <td>${insumosText}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarCombinacion('${combinacion.tipoUnidad}', '${combinacion.tipoSolucion}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarCombinacion('${combinacion.tipoUnidad}', '${combinacion.tipoSolucion}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
                 `;
-                tbody.innerHTML += row;
+                tbody.appendChild(row);
             });
 
+            // Actualizar contador de resultados
             document.getElementById('resultadosFiltro').textContent = 
                 `Mostrando ${combinaciones.length} combinaciones`;
-        }
-
-        async function actualizarEstadisticas() {
-            try {
-                console.log('🔄 Actualizando estadísticas desde Supabase...');
-                
-                // Cargar datos desde Supabase
-                const [tiposUnidad, tiposSolucion, tiposInsumo, almacenData] = await Promise.all([
-                    window.dataService.fetchTiposUnidad(),
-                    window.dataService.fetchTiposSolucion(),
-                    window.dataService.fetchTiposInsumo(),
-                    window.dataService.fetchAlmacenInsumos()
-                ]);
-                
-                // Calcular estadísticas reales desde datos de Supabase
-                let totalCombinaciones = 0;
-                const insumosUnicos = new Set();
-                const tiposSolucionUnicos = new Set();
-                
-                // Procesar datos según el esquema devuelto por Supabase
-                if (Array.isArray(almacenData)) {
-                    // Esquema por filas (más común)
-                    almacenData.forEach((row, index) => {
-                        if (row.tipoUnidad && row.tipoSolucion) {
-                            // Esquema por columnas: {tipoUnidad, tipoSolucion, insumos}
-                            tiposSolucionUnicos.add(row.tipoSolucion);
-                            totalCombinaciones++;
-                            
-                            if (row.insumos && typeof row.insumos === 'object') {
-                                Object.keys(row.insumos).forEach(insumo => {
-                                    insumosUnicos.add(insumo);
-                                });
-                            }
-                        } else if (row.insumos && typeof row.insumos === 'object') {
-                            // Esquema: {tipoUnidad: {tipoSolucion: {insumos: {}}}}
-                            Object.values(row.insumos).forEach(soluciones => {
-                                if (typeof soluciones === 'object') {
-                                    Object.keys(soluciones).forEach(tipoSolucion => {
-                                        tiposSolucionUnicos.add(tipoSolucion);
-                                        totalCombinaciones++;
-                                        
-                                        const insumos = soluciones[tipoSolucion];
-                                        if (typeof insumos === 'object') {
-                                            Object.keys(insumos).forEach(insumo => {
-                                                insumosUnicos.add(insumo);
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                } else if (typeof almacenData === 'object') {
-                    // Esquema de documento único
-                    Object.values(almacenData).forEach(soluciones => {
-                        if (typeof soluciones === 'object') {
-                            Object.keys(soluciones).forEach(tipoSolucion => {
-                                tiposSolucionUnicos.add(tipoSolucion);
-                                totalCombinaciones++;
-                                
-                                const insumos = soluciones[tipoSolucion];
-                                if (typeof insumos === 'object') {
-                                    Object.keys(insumos).forEach(insumo => {
-                                        insumosUnicos.add(insumo);
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-
-                // Actualizar UI con datos reales de Supabase
-                document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
-                document.getElementById('totalInsumos').textContent = insumosUnicos.size;
-                document.getElementById('totalTiposUnidad').textContent = tiposUnidad.length;
-                document.getElementById('totalTiposSolucion').textContent = tiposSolucion.length;
-                
-                console.log('✅ Estadísticas actualizadas desde Supabase:');
-                console.log(`  - Combinaciones: ${totalCombinaciones}`);
-                console.log(`  - Insumos únicos: ${insumosUnicos.size}`);
-                console.log(`  - Tipos de unidad: ${tiposUnidad.length}`);
-                console.log(`  - Tipos de solución: ${tiposSolucion.length}`);
-                
-            } catch (error) {
-                console.error('❌ Error actualizando estadísticas desde Supabase:', error);
-                // Fallback a datos locales si hay error
-                const totalCombinaciones = Object.values(almacenInsumos)
-                    .reduce((total, soluciones) => total + Object.keys(soluciones).length, 0);
-                
-                const insumosUnicos = new Set();
-                Object.values(almacenInsumos).forEach(soluciones => {
-                    Object.values(soluciones).forEach(insumos => {
-                        Object.keys(insumos).forEach(insumo => insumosUnicos.add(insumo));
-                    });
-                });
-
-                const tiposSolucionUnicos = new Set();
-                Object.values(almacenInsumos).forEach(soluciones => {
-                    Object.keys(soluciones).forEach(tipo => tiposSolucionUnicos.add(tipo));
-                });
-
-                document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
-                document.getElementById('totalInsumos').textContent = insumosUnicos.size;
-                document.getElementById('totalTiposUnidad').textContent = Object.keys(almacenInsumos).length;
-                document.getElementById('totalTiposSolucion').textContent = tiposSolucionUnicos.size;
-            }
         }
 
         function aplicarFiltros() {
@@ -1352,7 +693,7 @@
                         combinacionesFiltradas.push({
                             tipoUnidad,
                             tipoSolucion,
-                            insumos
+                            insumos: Object.keys(insumos).length > 0 ? insumos : {}
                         });
                     }
                 }
@@ -1368,9 +709,74 @@
             cargarTablaAlmacen();
         }
 
+        async function actualizarEstadisticas() {
+            try {
+                console.log('🔄 Actualizando estadísticas desde Supabase...');
+                
+                // Cargar datos desde Supabase
+                const [tiposUnidad, tiposSolucion, tiposInsumo, almacenData] = await Promise.all([
+                    window.dataService.fetchTiposUnidad(),
+                    window.dataService.fetchTiposSolucion(),
+                    window.dataService.fetchTiposInsumo(),
+                    window.dataService.fetchAlmacenInsumos()
+                ]);
+                
+                // Calcular estadísticas reales desde datos de Supabase
+                let totalCombinaciones = 0;
+                const insumosUnicos = new Set();
+                const tiposSolucionUnicos = new Set();
+                
+                // Procesar datos según el esquema devuelto por Supabase
+                if (Array.isArray(almacenData)) {
+                    // Esquema por filas (más común)
+                    almacenData.forEach((row, index) => {
+                        if (row.tipoUnidad && row.tipoSolucion) {
+                            // Esquema por columnas: {tipoUnidad, tipoSolucion, insumos}
+                            if (row.tipoSolucion !== '_placeholder') {
+                                totalCombinaciones++;
+                                tiposSolucionUnicos.add(row.tipoSolucion);
+                                
+                                // Contar insumos únicos
+                                if (row.insumos && typeof row.insumos === 'object') {
+                                    Object.keys(row.insumos).forEach(insumo => {
+                                        insumosUnicos.add(insumo);
+                                    });
+                                }
+                            }
+                        }
+                    });
+                } else if (almacenData && almacenData.insumos) {
+                    // Esquema single-doc: {insumos: {...}}
+                    Object.values(almacenData.insumos).forEach(soluciones => {
+                        Object.values(soluciones).forEach(insumos => {
+                            totalCombinaciones++;
+                            Object.keys(insumos).forEach(insumo => {
+                                insumosUnicos.add(insumo);
+                            });
+                        });
+                    });
+                }
+                
+                // Actualizar la interfaz
+                document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
+                document.getElementById('totalInsumos').textContent = insumosUnicos.size;
+                document.getElementById('totalTiposUnidad').textContent = tiposUnidad.length;
+                document.getElementById('totalTiposSolucion').textContent = tiposSolucionUnicos.size;
+                
+                console.log('✅ Estadísticas actualizadas desde Supabase:');
+                console.log(`  - Combinaciones: ${totalCombinaciones}`);
+                console.log(`  - Insumos únicos: ${insumosUnicos.size}`);
+                console.log(`  - Tipos de unidad: ${tiposUnidad.length}`);
+                console.log(`  - Tipos de solución: ${tiposSolucionUnicos.size}`);
+                
+            } catch (error) {
+                console.error('❌ Error actualizando estadísticas:', error);
+                mostrarAlerta('Error actualizando estadísticas', 'danger');
+            }
+        }
+
         function editarCombinacion(tipoUnidad, tipoSolucion) {
             combinacionEditando = { tipoUnidad, tipoSolucion };
-            
             document.getElementById('editTipoUnidad').value = tipoUnidad;
             document.getElementById('editTipoSolucion').value = tipoSolucion;
             
@@ -1398,47 +804,11 @@
                 contenedor.appendChild(div);
             });
 
-            // Botón para agregar nuevo insumo
-            const divAgregar = document.createElement('div');
-            divAgregar.className = 'row mt-3';
-            divAgregar.innerHTML = `
-                <div class="col-md-12">
-                    <button class="btn btn-success btn-sm" onclick="agregarInsumoAEdicion()">
-                        <i class="bi bi-plus"></i> Agregar Insumo
-                    </button>
-                </div>
-            `;
-            contenedor.appendChild(divAgregar);
-
+            // Mostrar modal
             new bootstrap.Modal(document.getElementById('modalEditarCombinacion')).show();
         }
 
-        function agregarInsumoAEdicion() {
-            const contenedor = document.getElementById('editInsumos');
-            const div = document.createElement('div');
-            div.className = 'row mb-2';
-            div.innerHTML = `
-                <div class="col-md-8">
-                    <select class="form-control">
-                        <option value="">Seleccionar insumo...</option>
-                        ${listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" class="form-control" placeholder="Cantidad">
-                </div>
-                <div class="col-md-1">
-                    <button class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            `;
-            contenedor.insertBefore(div, contenedor.lastElementChild);
-        }
-
         async function guardarEdicionCombinacion() {
-            if (!combinacionEditando) return;
-
             const { tipoUnidad, tipoSolucion } = combinacionEditando;
             const contenedor = document.getElementById('editInsumos');
             const nuevosInsumos = {};
@@ -1458,7 +828,9 @@
             // Actualizar almacén
             if (!almacenInsumos[tipoUnidad]) almacenInsumos[tipoUnidad] = {};
             almacenInsumos[tipoUnidad][tipoSolucion] = nuevosInsumos;
+            
             try {
+                // Sincronizar con Supabase si está activo
                 if (modoCentralizado) {
                     const id = `${tipoUnidad}::${tipoSolucion}`;
                     await window.dataService.upsertAlmacenInsumoById(id, {
@@ -1468,25 +840,30 @@
                         insumos: nuevosInsumos,
                     });
                 } else {
+                    // Guardar en localStorage
                     localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
                 }
+                
+                // Actualizar interfaz
+                cargarTablaAlmacen();
+                await actualizarEstadisticas();
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalEditarCombinacion')).hide();
+                
+                mostrarAlerta(`Combinación ${tipoUnidad} - ${tipoSolucion} actualizada`, 'success');
             } catch (error) {
-                console.warn('No se pudo guardar cambios', error);
+                console.error('❌ Error guardando edición:', error);
+                mostrarAlerta('Error al guardar los cambios', 'danger');
             }
-            
-            // Actualizar tabla y estadísticas
-            cargarTablaAlmacen();
-            actualizarEstadisticas();
-            
-            // Cerrar modal
-            bootstrap.Modal.getInstance(document.getElementById('modalEditarCombinacion')).hide();
-            
-            mostrarAlerta(`Combinación ${tipoUnidad} - ${tipoSolucion} actualizada`, 'success');
         }
 
         async function eliminarCombinacion(tipoUnidad, tipoSolucion) {
-            if (confirm(`¿Está seguro de eliminar la combinación ${tipoUnidad} - ${tipoSolucion}?`)) {
-                delete almacenInsumos[tipoUnidad][tipoSolucion];
+            if (confirm(`¿Estás seguro de que quieres eliminar la combinación ${tipoUnidad} - ${tipoSolucion}?`)) {
+                // Eliminar del almacén local
+                if (almacenInsumos[tipoUnidad] && almacenInsumos[tipoUnidad][tipoSolucion]) {
+                    delete almacenInsumos[tipoUnidad][tipoSolucion];
+                }
                 
                 // Si no quedan soluciones para este tipo de unidad, eliminar el tipo
                 if (Object.keys(almacenInsumos[tipoUnidad]).length === 0) {
@@ -1511,10 +888,34 @@
             }
         }
 
-        // ===== NUEVA COMBINACIÓN =====
+        async function actualizarListasEnModalNuevaCombinacion() {
+            try {
+                // Cargar tipos existentes
+                await cargarTiposExistentes();
+                
+                // Actualizar select de tipos de unidad
+                const selectUnidad = document.getElementById('nuevoTipoUnidad');
+                selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>';
+                tiposUnidadExistentes.forEach(tipo => {
+                    selectUnidad.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                });
+                
+                // Actualizar select de tipos de solución
+                const selectSolucion = document.getElementById('nuevoTipoSolucion');
+                selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>';
+                tiposSolucionExistentes.forEach(tipo => {
+                    selectSolucion.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                });
+                
+                console.log('✅ Listas actualizadas en modal nueva combinación');
+            } catch (error) {
+                console.error('❌ Error actualizando listas:', error);
+                throw error;
+            }
+        }
+
         async function agregarNuevaCombinacion() {
             try {
-                // Actualizar las listas de opciones
                 await actualizarListasEnModalNuevaCombinacion();
 
                 // Limpiar campos
@@ -1538,8 +939,8 @@
             div.className = 'row mb-2';
             div.innerHTML = `
                 <div class="col-md-8">
-                    <select class="form-control">
-                        <option value="">Seleccionar insumo...</option>
+                    <select class="form-control" onchange="this.nextElementSibling.value = this.value">
+                        <option value="">Seleccionar insumo</option>
                         ${listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('')}
                     </select>
                 </div>
@@ -1556,8 +957,9 @@
         }
 
         async function guardarNuevaCombinacion() {
-            const tipoUnidad = document.getElementById('nuevoTipoUnidad').value.trim();
-            const tipoSolucion = document.getElementById('nuevoTipoSolucion').value.trim();
+            const tipoUnidad = document.getElementById('nuevoTipoUnidad').value;
+            const tipoSolucion = document.getElementById('nuevoTipoSolucion').value;
+            
             if (!tipoUnidad || !tipoSolucion) {
                 mostrarAlerta('Especifique tipo de unidad y tipo de solución', 'warning');
                 return;
@@ -1578,466 +980,37 @@
                 return;
             }
 
+            // Agregar al almacén
             if (!almacenInsumos[tipoUnidad]) {
                 almacenInsumos[tipoUnidad] = {};
             }
             almacenInsumos[tipoUnidad][tipoSolucion] = nuevosInsumos;
-
+            
             try {
+                // Sincronizar con Supabase si está activo
                 if (modoCentralizado) {
                     const id = `${tipoUnidad}::${tipoSolucion}`;
-                    const record = {
+                    await window.dataService.upsertAlmacenInsumoById(id, {
                         id,
                         tipoUnidad,
                         tipoSolucion,
                         insumos: nuevosInsumos,
-                    };
-                    
-                    const resultado = await window.dataService.upsertAlmacenInsumoById(id, record);
-                    
-                    if (resultado) {
-                        console.log('✅ Combinación guardada exitosamente en Supabase');
-                    } else {
-                        console.error('❌ Error guardando combinación en Supabase');
-                    }
-                } else {
-                    localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
-                }
-            } catch (e) {
-                console.error('❌ Error guardando combinación:', e);
-            }
-
-            cargarFiltros();
-            cargarTablaAlmacen();
-            actualizarEstadisticas();
-            bootstrap.Modal.getInstance(document.getElementById('modalNuevaCombinacion')).hide();
-            mostrarAlerta(`Combinación ${tipoUnidad} - ${tipoSolucion} creada`, 'success');
-        }
-
-        function guardarCambios() {
-            if (modoCentralizado) {
-                mostrarAlerta('Los cambios ya se guardan automáticamente en Supabase', 'info');
-            } else {
-                localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
-                mostrarAlerta('Cambios guardados en el navegador', 'success');
-            }
-        }
-
-        function exportarAlmacen() {
-            const dataStr = JSON.stringify(almacenInsumos, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'almacen_insumos.json';
-            link.click();
-            URL.revokeObjectURL(url);
-            
-            mostrarAlerta('Almacén exportado correctamente', 'success');
-        }
-
-        function importarAlmacen(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const almacenImportado = JSON.parse(e.target.result);
-                    almacenInsumos = almacenImportado;
-                    
-                    await cargarFiltros();
-                    cargarTablaAlmacen();
-                    await actualizarEstadisticas();
-                    
-                    mostrarAlerta('Almacén importado correctamente', 'success');
-                } catch (error) {
-                    mostrarAlerta('Error al importar el archivo', 'danger');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        async function resetearAlmacen() {
-            if (confirm('¿Está seguro de resetear el almacén a los valores por defecto del CSV?')) {
-                localStorage.removeItem('almacen_insumos');
-                cargarMatrizCompletaCSV().then(async matriz => {
-                    almacenInsumos = matriz;
-                    await cargarFiltros();
-                    cargarTablaAlmacen();
-                    await actualizarEstadisticas();
-                    mostrarAlerta('Almacén reseteado a valores del CSV', 'success');
-                });
-            }
-        }
-
-        let actualizacionEnProgreso = false;
-        let timeoutActualizacion = null;
-
-        function suscribirRealtimeAlmacen() {
-            if (!modoCentralizado) return;
-            window.dataService.subscribeAlmacenInsumos(async (payload) => {
-                // Evitar actualizaciones múltiples simultáneas
-                if (actualizacionEnProgreso) {
-                    console.log('🔄 Actualización ya en progreso, omitiendo...');
-                    return;
-                }
-
-                // Debounce: cancelar actualización anterior si hay una nueva
-                if (timeoutActualizacion) {
-                    clearTimeout(timeoutActualizacion);
-                }
-
-                timeoutActualizacion = setTimeout(async () => {
-                    actualizacionEnProgreso = true;
-                    try {
-                        console.log('🔄 Actualizando desde Realtime...');
-                        await cargarDesdeSupabase();
-                        await cargarFiltros();
-                        cargarTablaAlmacen();
-                        await actualizarEstadisticas();
-                        console.log('✅ Actualización Realtime completada');
-                    } catch (e) {
-                        console.warn('Realtime almacen refresco fallido', e);
-                    } finally {
-                        actualizacionEnProgreso = false;
-                    }
-                }, 500); // Esperar 500ms antes de actualizar
-            });
-        }
-
-        // ===== FUNCIONES PARA AGREGAR NUEVOS TIPOS =====
-        
-        let tipoActualAgregando = null; // 'vehiculo', 'solucion', o 'insumo'
-
-        function mostrarModalNuevoTipo(tipo) {
-            tipoActualAgregando = tipo;
-            const modal = document.getElementById('modalNuevoTipo');
-            const titulo = document.getElementById('modalNuevoTipoTitulo');
-            const label = document.getElementById('modalNuevoTipoLabel');
-            const descripcion = document.getElementById('modalNuevoTipoDescripcion');
-            const input = document.getElementById('nuevoTipoNombre');
-            
-            input.value = '';
-            
-            if (tipo === 'vehiculo') {
-                titulo.textContent = 'Agregar Nuevo Tipo de Vehículo';
-                label.textContent = 'Nombre del nuevo tipo de vehículo:';
-                input.placeholder = 'Ej. Camión de carga, Furgón, etc.';
-                descripcion.textContent = 'Este nuevo tipo de vehículo estará disponible inmediatamente para usar en las combinaciones.';
-            } else if (tipo === 'solucion') {
-                titulo.textContent = 'Agregar Nuevo Tipo de Solución';
-                label.textContent = 'Nombre del nuevo tipo de solución:';
-                input.placeholder = 'Ej. GPS Avanzado, Sistema de Monitoreo, etc.';
-                descripcion.textContent = 'Este nuevo tipo de solución estará disponible inmediatamente para usar en las combinaciones.';
-            }
-            
-            new bootstrap.Modal(modal).show();
-        }
-
-        function mostrarModalNuevoInsumo() {
-            const modal = document.getElementById('modalNuevoInsumo');
-            const input = document.getElementById('nuevoInsumoNombre');
-            const categoria = document.getElementById('nuevoInsumoCategoria');
-            
-            input.value = '';
-            categoria.value = '';
-            
-            new bootstrap.Modal(modal).show();
-        }
-
-        async function guardarNuevoTipo() {
-            const nombre = document.getElementById('nuevoTipoNombre').value.trim();
-            
-            if (!nombre) {
-                mostrarAlerta('Por favor ingrese un nombre para el nuevo tipo', 'warning');
-                return;
-            }
-
-            try {
-                if (tipoActualAgregando === 'vehiculo') {
-                    // Verificar si ya existe en Supabase
-                    const tiposExistentes = await window.dataService.fetchTiposUnidad();
-                    const existeEnSupabase = tiposExistentes.some(tipo => 
-                        tipo.nombre.toLowerCase() === nombre.toLowerCase()
-                    );
-                    
-                    if (existeEnSupabase) {
-                        mostrarAlerta('Ya existe un tipo de vehículo con ese nombre en Supabase', 'warning');
-                        return;
-                    }
-                    
-                    // Agregar nuevo tipo de vehículo a Supabase
-                    await window.dataService.upsertTipoUnidad(nombre, `Tipo de vehículo: ${nombre}`);
-                    almacenInsumos[nombre] = {};
-                    console.log(`✅ Nuevo tipo de vehículo agregado: ${nombre}`);
-                    mostrarAlerta(`Tipo de vehículo "${nombre}" agregado exitosamente`, 'success');
-                    
-                } else if (tipoActualAgregando === 'solucion') {
-                    // Verificar si ya existe en Supabase
-                    const tiposExistentes = await window.dataService.fetchTiposSolucion();
-                    const existeEnSupabase = tiposExistentes.some(tipo => 
-                        tipo.nombre.toLowerCase() === nombre.toLowerCase()
-                    );
-                    
-                    if (existeEnSupabase) {
-                        mostrarAlerta('Ya existe un tipo de solución con ese nombre en Supabase', 'warning');
-                        return;
-                    }
-                    
-                    // Agregar nuevo tipo de solución a Supabase
-                    await window.dataService.upsertTipoSolucion(nombre, `Tipo de solución: ${nombre}`, 'General');
-                    console.log(`✅ Nuevo tipo de solución agregado: ${nombre}`);
-                    mostrarAlerta(`Tipo de solución "${nombre}" agregado exitosamente. Se agregará cuando crees una nueva combinación.`, 'success');
-                }
-
-                // Guardar cambios
-                if (modoCentralizado) {
-                    // En modo centralizado, actualizar Supabase
-                    await actualizarAlmacenEnSupabase();
-                } else {
-                    // En modo localStorage
-                    localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
-                }
-
-                // Actualizar la interfaz (con debounce para evitar bucles)
-                if (timeoutActualizacion) {
-                    clearTimeout(timeoutActualizacion);
-                }
-                timeoutActualizacion = setTimeout(async () => {
-                    await cargarFiltros();
-                    cargarTablaAlmacen();
-                    await actualizarEstadisticas();
-                }, 300);
-                
-                // Actualizar las listas en el modal de nueva combinación
-                await actualizarListasEnModalNuevaCombinacion();
-                
-                // Si estamos en el modal de nueva combinación, actualizar el select correspondiente
-                if (tipoActualAgregando === 'vehiculo') {
-                    const selectUnidad = document.getElementById('nuevoTipoUnidad');
-                    if (selectUnidad) {
-                        selectUnidad.value = nombre;
-                    }
-                } else if (tipoActualAgregando === 'solucion') {
-                    const selectSolucion = document.getElementById('nuevoTipoSolucion');
-                    if (selectSolucion) {
-                        selectSolucion.value = nombre;
-                    }
-                }
-                
-                // Forzar actualización adicional después de un breve delay
-                setTimeout(async () => {
-                    await actualizarListasEnModalNuevaCombinacion();
-                }, 200);
-                
-                // Cerrar modal
-                document.getElementById('nuevoTipoNombre').blur();
-                bootstrap.Modal.getInstance(document.getElementById('modalNuevoTipo')).hide();
-                
-            } catch (error) {
-                console.error('❌ Error guardando nuevo tipo:', error);
-                mostrarAlerta('Error al guardar el nuevo tipo', 'danger');
-            }
-        }
-
-        async function guardarNuevoInsumo() {
-            const nombre = document.getElementById('nuevoInsumoNombre').value.trim();
-            const categoria = document.getElementById('nuevoInsumoCategoria').value;
-            
-            if (!nombre) {
-                mostrarAlerta('Por favor ingrese un nombre para el nuevo insumo', 'warning');
-                return;
-            }
-
-            try {
-                // Verificar si ya existe en Supabase
-                const tiposExistentes = await window.dataService.fetchTiposInsumo();
-                const existeEnSupabase = tiposExistentes.some(tipo => 
-                    tipo.nombre.toLowerCase() === nombre.toLowerCase()
-                );
-                
-                if (existeEnSupabase) {
-                    mostrarAlerta('Ya existe un insumo con ese nombre en Supabase', 'warning');
-                    return;
-                }
-
-                // Agregar nuevo insumo a Supabase
-                await window.dataService.upsertTipoInsumo(nombre, `Tipo de insumo: ${nombre}`, categoria || 'General', 'piezas');
-                
-                // Agregar a la lista de insumos (actualizar la constante)
-                listaInsumos.push(nombre);
-                listaInsumos.sort(); // Mantener ordenado
-                
-                console.log(`✅ Nuevo insumo agregado: ${nombre}`);
-                mostrarAlerta(`Insumo "${nombre}" agregado exitosamente`, 'success');
-                
-                // Actualizar la interfaz (con debounce para evitar bucles)
-                if (timeoutActualizacion) {
-                    clearTimeout(timeoutActualizacion);
-                }
-                timeoutActualizacion = setTimeout(async () => {
-                    await cargarFiltros();
-                    cargarTablaAlmacen();
-                    await actualizarEstadisticas();
-                }, 300);
-                
-                // Actualizar las listas en el modal de nueva combinación
-                await actualizarListasEnModalNuevaCombinacion();
-                
-                // Forzar actualización adicional después de un breve delay
-                setTimeout(async () => {
-                    await actualizarListasEnModalNuevaCombinacion();
-                }, 200);
-                
-                // Cerrar modal
-                document.getElementById('nuevoInsumoNombre').blur();
-                bootstrap.Modal.getInstance(document.getElementById('modalNuevoInsumo')).hide();
-                
-            } catch (error) {
-                console.error('❌ Error guardando nuevo insumo:', error);
-                mostrarAlerta('Error al guardar el nuevo insumo', 'danger');
-            }
-        }
-
-        async function sincronizarTiposConModulos(tipo, nombre) {
-            try {
-                // Ya no necesitamos sincronizar con localStorage
-                // Los tipos se guardan directamente en las tablas de Supabase
-                console.log(`✅ Tipo ${tipo} "${nombre}" guardado en Supabase`);
-                
-            } catch (error) {
-                console.error('❌ Error sincronizando tipos:', error);
-            }
-        }
-
-        // Función para limpiar soluciones duplicadas (ya no necesaria con Supabase)
-        function limpiarSolucionesDuplicadas() {
-            // Ya no necesitamos limpiar duplicados porque usamos Supabase
-            console.log('✅ Usando Supabase - no se necesitan limpiezas de duplicados');
-        }
-
-        async function actualizarListasEnModalNuevaCombinacion() {
-            try {
-                console.log('🔄 Actualizando listas desde Supabase...');
-                
-                // Cargar tipos desde las nuevas tablas de Supabase
-                const [tiposUnidad, tiposSolucion, tiposInsumo] = await Promise.all([
-                    window.dataService.fetchTiposUnidad(),
-                    window.dataService.fetchTiposSolucion(),
-                    window.dataService.fetchTiposInsumo()
-                ]);
-                
-                // Extraer solo los nombres de los tipos
-                const nombresUnidad = tiposUnidad.map(t => t.nombre).sort();
-                const nombresSolucion = tiposSolucion.map(t => t.nombre).sort();
-                const nombresInsumo = tiposInsumo.map(t => t.nombre).sort();
-                
-                
-                // Actualizar lista de tipos de vehículo
-                const selectUnidad = document.getElementById('nuevoTipoUnidad');
-                if (selectUnidad) {
-                    selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>' + 
-                        nombresUnidad.map(t => `<option value="${t}">${t}</option>`).join('');
-                    console.log('✅ Select unidad actualizado con', nombresUnidad.length, 'opciones');
-                } else {
-                    console.warn('⚠️ Select unidad no encontrado');
-                }
-                
-                // Actualizar lista de tipos de solución
-                const selectSolucion = document.getElementById('nuevoTipoSolucion');
-                if (selectSolucion) {
-                    selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
-                        nombresSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
-                    console.log('✅ Select solución actualizado con', nombresSolucion.length, 'opciones');
-                } else {
-                    console.warn('⚠️ Select solución no encontrado');
-                }
-                
-                // Actualizar lista de insumos
-                listaInsumos = nombresInsumo;
-                console.log('✅ Lista de insumos actualizada con', listaInsumos.length, 'elementos');
-                
-                // Actualizar lista de insumos en todos los selects existentes
-                const contenedorInsumos = document.getElementById('nuevoInsumos');
-                if (contenedorInsumos) {
-                    const selects = contenedorInsumos.querySelectorAll('select');
-                    selects.forEach((select, index) => {
-                        const valorActual = select.value;
-                        select.innerHTML = '<option value="">Seleccionar insumo...</option>' + 
-                            listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('');
-                        // Mantener el valor seleccionado si aún existe
-                        if (valorActual && listaInsumos.includes(valorActual)) {
-                            select.value = valorActual;
-                        }
                     });
                 } else {
-                    console.warn('⚠️ Contenedor de insumos no encontrado');
+                    // Guardar en localStorage
+                    localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
                 }
                 
+                // Actualizar interfaz
+                cargarTablaAlmacen();
+                await actualizarEstadisticas();
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalNuevaCombinacion')).hide();
+                mostrarAlerta(`Combinación ${tipoUnidad} - ${tipoSolucion} creada`, 'success');
             } catch (error) {
-                console.error('❌ Error actualizando listas desde Supabase:', error);
-                // Fallback a localStorage si hay error
-                console.log('🔄 Usando fallback a localStorage...');
-                const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
-                
-                // Actualizar con datos de localStorage como fallback
-                const selectUnidad = document.getElementById('nuevoTipoUnidad');
-                if (selectUnidad) {
-                    const tiposUnidad = [...new Set([...Object.keys(almacenInsumos), ...(tiposGlobales.vehiculos || [])])].sort();
-                    selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>' + 
-                        tiposUnidad.map(t => `<option value="${t}">${t}</option>`).join('');
-                }
-                
-                const selectSolucion = document.getElementById('nuevoTipoSolucion');
-                if (selectSolucion) {
-                    const tiposSolucion = [...new Set([...(tiposGlobales.soluciones || [])])].sort();
-                    selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
-                        tiposSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
-                }
-                
-                listaInsumos = [...(tiposGlobales.insumos || [])];
-            }
-        }
-
-        async function actualizarAlmacenEnSupabase() {
-            try {
-                // Actualizar todas las combinaciones en Supabase
-                const tareas = [];
-                for (const [tipoUnidad, soluciones] of Object.entries(almacenInsumos)) {
-                    // Si el tipo de vehículo está vacío, crear una entrada básica
-                    if (Object.keys(soluciones).length === 0) {
-                        const id = `${tipoUnidad}::_placeholder`;
-                        tareas.push(window.dataService.upsertAlmacenInsumoById(id, {
-                            id,
-                            tipoUnidad,
-                            tipoSolucion: '_placeholder',
-                            insumos: {},
-                        }));
-                    } else {
-                        // Procesar soluciones existentes
-                        for (const [tipoSolucion, insumos] of Object.entries(soluciones)) {
-                            const id = `${tipoUnidad}::${tipoSolucion}`;
-                            tareas.push(window.dataService.upsertAlmacenInsumoById(id, {
-                                id,
-                                tipoUnidad,
-                                tipoSolucion,
-                                insumos: insumos || {},
-                            }));
-                        }
-                    }
-                }
-                
-                // Ejecutar en lotes de 25
-                for (let i = 0; i < tareas.length; i += 25) {
-                    const slice = tareas.slice(i, i + 25);
-                    await Promise.all(slice);
-                }
-                
-                console.log('✅ Almacén actualizado en Supabase');
-            } catch (error) {
-                console.error('❌ Error actualizando almacén en Supabase:', error);
-                throw error;
+                console.error('❌ Error guardando nueva combinación:', error);
+                mostrarAlerta('Error al guardar la nueva combinación', 'danger');
             }
         }
 
@@ -2058,7 +1031,6 @@
             }, 5000);
         }
 
-        // ============================================
         // ===== FUNCIONES DE CARGA MASIVA =====
         
         let datosCargaMasiva = [];
@@ -2067,15 +1039,17 @@
         let tiposInsumoExistentes = [];
 
         function mostrarModalCargaMasiva() {
-            // Limpiar datos anteriores
-            datosCargaMasiva = [];
+            console.log('🔧 Abriendo modal de carga masiva...');
+            
+            // Limpiar el input de archivo
             document.getElementById('archivoCargaMasiva').value = '';
+            
+            // Ocultar preview y errores
             document.getElementById('previewCargaMasiva').classList.add('d-none');
             document.getElementById('erroresCargaMasiva').classList.add('d-none');
-            document.getElementById('btnConfirmarCarga').disabled = true;
             
-            // Cargar tipos existentes para validación
-            cargarTiposExistentes();
+            // Deshabilitar botón de confirmar
+            document.getElementById('btnConfirmarCarga').disabled = true;
             
             // Mostrar modal
             new bootstrap.Modal(document.getElementById('modalCargaMasiva')).show();
@@ -2094,6 +1068,10 @@
                 tiposInsumoExistentes = tiposInsumo.map(t => t.nombre);
                 
                 console.log('✅ Tipos existentes cargados para validación');
+                console.log('📋 Tipos cargados:');
+                console.log('  - Tipos de unidad:', tiposUnidadExistentes);
+                console.log('  - Tipos de solución:', tiposSolucionExistentes);
+                console.log('  - Tipos de insumo:', tiposInsumoExistentes);
             } catch (error) {
                 console.error('❌ Error cargando tipos existentes:', error);
             }
@@ -2103,19 +1081,26 @@
             const file = event.target.files[0];
             if (!file) return;
 
+            console.log('📁 Archivo seleccionado:', file.name);
+            
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
+                    console.log('📄 Procesando archivo...');
                     const data = JSON.parse(e.target.result);
-                    validarYCargarDatos(data);
+                    console.log('📊 Datos del archivo:', data);
+                    await validarYCargarDatos(data);
                 } catch (error) {
+                    console.error('❌ Error procesando archivo:', error);
                     mostrarError('Error al parsear el archivo JSON: ' + error.message);
                 }
             };
             reader.readAsText(file);
         }
 
-        function validarYCargarDatos(data) {
+        async function validarYCargarDatos(data) {
+            console.log('🚀 Iniciando validación de datos...');
+            
             // Limpiar errores anteriores
             document.getElementById('erroresCargaMasiva').classList.add('d-none');
             document.getElementById('previewCargaMasiva').classList.add('d-none');
@@ -2130,21 +1115,108 @@
                 return;
             }
             
-            // Validar cada combinación
+            // Cargar tipos existentes antes de validar
+            console.log('🔄 Cargando tipos existentes...');
+            await cargarTiposExistentes();
+            
+            console.log('📋 Tipos existentes cargados:');
+            console.log('  - Tipos de unidad:', tiposUnidadExistentes.length);
+            console.log('  - Tipos de solución:', tiposSolucionExistentes.length);
+            console.log('  - Tipos de insumo:', tiposInsumoExistentes.length);
+            
+            // Verificar que los tipos se cargaron correctamente
+            if (tiposUnidadExistentes.length === 0 && tiposSolucionExistentes.length === 0 && tiposInsumoExistentes.length === 0) {
+                console.warn('⚠️ No se cargaron tipos existentes. Verificando conexión con Supabase...');
+                return;
+            }
+            
+            // Recopilar todos los tipos únicos que necesitamos crear
+            const tiposUnidadNuevos = new Set();
+            const tiposSolucionNuevos = new Set();
+            const insumosNuevos = new Set();
+            
+            // Primera pasada: identificar qué necesita ser creado
+            data.combinaciones.forEach((combinacion, index) => {
+                if (combinacion.tipoUnidad && !tiposUnidadExistentes.includes(combinacion.tipoUnidad)) {
+                    tiposUnidadNuevos.add(combinacion.tipoUnidad);
+                    console.log(`🆕 Tipo de unidad nuevo: ${combinacion.tipoUnidad}`);
+                }
+                
+                if (combinacion.tipoSolucion && !tiposSolucionExistentes.includes(combinacion.tipoSolucion)) {
+                    tiposSolucionNuevos.add(combinacion.tipoSolucion);
+                    console.log(`🆕 Tipo de solución nuevo: ${combinacion.tipoSolucion}`);
+                }
+                
+                if (combinacion.insumos && typeof combinacion.insumos === 'object') {
+                    Object.keys(combinacion.insumos).forEach(insumo => {
+                        if (!tiposInsumoExistentes.includes(insumo)) {
+                            insumosNuevos.add(insumo);
+                            console.log(`🆕 Insumo nuevo: ${insumo}`);
+                        }
+                    });
+                }
+            });
+            
+            console.log(`📊 Resumen de tipos nuevos a crear:`);
+            console.log(`  - Tipos de unidad: ${tiposUnidadNuevos.size}`);
+            console.log(`  - Tipos de solución: ${tiposSolucionNuevos.size}`);
+            console.log(`  - Insumos: ${insumosNuevos.size}`);
+            
+            // Crear automáticamente los tipos que no existen
+            if (tiposUnidadNuevos.size > 0 || tiposSolucionNuevos.size > 0 || insumosNuevos.size > 0) {
+                console.log('🔄 Creando tipos automáticamente...');
+                try {
+                    // Crear tipos de unidad
+                    for (const tipoUnidad of tiposUnidadNuevos) {
+                        console.log(`🔄 Creando tipo de unidad: ${tipoUnidad}`);
+                        await window.dataService.upsertTipoUnidad(tipoUnidad, `Tipo de vehículo: ${tipoUnidad}`, 'vehiculo');
+                        tiposUnidadExistentes.push(tipoUnidad);
+                    }
+                    
+                    // Crear tipos de solución
+                    for (const tipoSolucion of tiposSolucionNuevos) {
+                        console.log(`🔄 Creando tipo de solución: ${tipoSolucion}`);
+                        await window.dataService.upsertTipoSolucion(tipoSolucion, `Tipo de solución: ${tipoSolucion}`, 'solucion');
+                        tiposSolucionExistentes.push(tipoSolucion);
+                    }
+                    
+                    // Crear insumos
+                    for (const insumo of insumosNuevos) {
+                        console.log(`🔄 Creando insumo: ${insumo}`);
+                        await window.dataService.upsertTipoInsumo(insumo, `Insumo: ${insumo}`, 'General', 'piezas');
+                        tiposInsumoExistentes.push(insumo);
+                        listaInsumos.push(insumo);
+                    }
+                    
+                    // Ordenar listas
+                    tiposUnidadExistentes.sort();
+                    tiposSolucionExistentes.sort();
+                    tiposInsumoExistentes.sort();
+                    listaInsumos.sort();
+                    
+                    console.log(`✅ Creados automáticamente: ${tiposUnidadNuevos.size} tipos de unidad, ${tiposSolucionNuevos.size} tipos de solución, ${insumosNuevos.size} insumos`);
+                    
+                } catch (error) {
+                    console.error('❌ Error creando tipos automáticamente:', error);
+                    errores.push(`Error creando tipos automáticamente: ${error.message}`);
+                    mostrarError(errores.join('<br>'));
+                    return;
+                }
+            } else {
+                console.log('ℹ️ No hay tipos nuevos que crear');
+            }
+            
+            // Segunda pasada: validar combinaciones (ahora todos los tipos deberían existir)
             data.combinaciones.forEach((combinacion, index) => {
                 const erroresCombinacion = [];
                 
                 // Validar campos requeridos
                 if (!combinacion.tipoUnidad) {
                     erroresCombinacion.push('tipoUnidad es requerido');
-                } else if (!tiposUnidadExistentes.includes(combinacion.tipoUnidad)) {
-                    erroresCombinacion.push(`tipoUnidad "${combinacion.tipoUnidad}" no existe en el sistema`);
                 }
                 
                 if (!combinacion.tipoSolucion) {
                     erroresCombinacion.push('tipoSolucion es requerido');
-                } else if (!tiposSolucionExistentes.includes(combinacion.tipoSolucion)) {
-                    erroresCombinacion.push(`tipoSolucion "${combinacion.tipoSolucion}" no existe en el sistema`);
                 }
                 
                 if (!combinacion.insumos || typeof combinacion.insumos !== 'object') {
@@ -2152,9 +1224,6 @@
                 } else {
                     // Validar insumos
                     Object.keys(combinacion.insumos).forEach(insumo => {
-                        if (!tiposInsumoExistentes.includes(insumo)) {
-                            erroresCombinacion.push(`insumo "${insumo}" no existe en el sistema`);
-                        }
                         const cantidad = combinacion.insumos[insumo];
                         if (!cantidad || isNaN(parseFloat(cantidad)) || parseFloat(cantidad) <= 0) {
                             erroresCombinacion.push(`cantidad inválida para insumo "${insumo}": ${cantidad}`);
@@ -2250,27 +1319,29 @@
                     }
                 }
                 
+                // Mostrar resultados
+                if (exitosas > 0) {
+                    mostrarAlerta(`✅ Carga completada: ${exitosas} combinaciones cargadas exitosamente`, 'success');
+                }
+                
+                if (fallidas > 0) {
+                    mostrarAlerta(`⚠️ ${fallidas} combinaciones fallaron. Revisa la consola para más detalles.`, 'warning');
+                    console.error('Errores de carga:', errores);
+                }
+                
                 // Actualizar interfaz
                 await cargarFiltros();
                 cargarTablaAlmacen();
                 await actualizarEstadisticas();
                 
-                // Mostrar resultado
-                if (fallidas === 0) {
-                    mostrarAlerta(`✅ Carga masiva exitosa: ${exitosas} combinaciones cargadas`, 'success');
-                    bootstrap.Modal.getInstance(document.getElementById('modalCargaMasiva')).hide();
-                } else {
-                    mostrarAlerta(`⚠️ Carga parcial: ${exitosas} exitosas, ${fallidas} fallidas`, 'warning');
-                    if (errores.length > 0) {
-                        console.error('Errores de carga:', errores);
-                    }
-                }
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalCargaMasiva')).hide();
                 
             } catch (error) {
-                console.error('Error en carga masiva:', error);
-                mostrarAlerta('❌ Error durante la carga masiva', 'danger');
+                console.error('❌ Error durante la carga masiva:', error);
+                mostrarAlerta('Error durante la carga masiva: ' + error.message, 'danger');
             } finally {
-                btnConfirmar.disabled = false;
+                // Restaurar botón
                 btnConfirmar.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Carga';
             }
         }
@@ -2278,6 +1349,15 @@
         function descargarPlantilla() {
             const plantilla = {
                 "combinaciones": [
+                    {
+                        "tipoUnidad": "Tracto",
+                        "tipoSolucion": "VPC",
+                        "insumos": {
+                            "Cable 4 pin 5 m": "1",
+                            "Cable 4 pin 7 m": "2",
+                            "Silicon": "0.1"
+                        }
+                    },
                     {
                         "tipoUnidad": "Tracto",
                         "tipoSolucion": "Rastreo avanzado",
@@ -2302,15 +1382,14 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'plantilla_carga_masiva.json';
+            a.download = 'plantilla_combinaciones.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        // FUNCIONES DE MIGRACIÓN A TABLAS SEPARADAS
-        // ============================================
+        // ===== FUNCIONES DE MIGRACIÓN =====
         
         async function migrarATablasSeparadas() {
             console.log('🚀 Iniciando migración a tablas separadas...');
@@ -2385,7 +1464,6 @@
             }
         }
 
-        // Función para probar las nuevas tablas
         async function probarTablasSeparadas() {
             console.log('🧪 Probando tablas separadas...');
             
@@ -2411,7 +1489,7 @@
                     console.log('📦 Ejemplo de insumo:', insumos[0]);
                 }
                 
-                mostrarAlerta(`✅ Prueba completada: ${vehiculos.length} vehículos, ${soluciones.length} soluciones, ${insumos.length} insumos`, 'success');
+                mostrarAlerta('✅ Prueba completada. Revisa la consola para ver los resultados.', 'success');
                 return true;
                 
             } catch (error) {
@@ -2421,11 +1499,11 @@
             }
         }
 
-        // Auto-ejecutar migración al cargar la página
+        // ===== INICIALIZACIÓN =====
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar si ya se migró
-            const migracionCompletada = localStorage.getItem('migracion_tablas_separadas');
-            if (!migracionCompletada) {
+            // Mostrar funciones de migración disponibles
+            if (modoCentralizado) {
                 console.log('🔧 Funciones de migración disponibles:');
                 console.log('1. migrarATablasSeparadas() - Migra datos de localStorage a las nuevas tablas');
                 console.log('2. probarTablasSeparadas() - Prueba que las tablas funcionen correctamente');
