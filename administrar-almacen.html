@@ -68,6 +68,9 @@
                 <button class="btn btn-warning" onclick="restaurarAlmacen()">
                     <i class="bi bi-arrow-clockwise"></i> Restaurar Almacén
                 </button>
+                <button class="btn btn-info" onclick="mostrarModalCargaMasiva()">
+                    <i class="bi bi-upload"></i> Carga Masiva
+                </button>
 
                 
                 <div class="mt-4">
@@ -347,6 +350,68 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Supabase + dataService -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Modal Carga Masiva -->
+    <div class="modal fade" id="modalCargaMasiva" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-upload"></i> Carga Masiva de Combinaciones
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="archivoCargaMasiva" class="form-label">Seleccionar archivo JSON:</label>
+                        <input type="file" class="form-control" id="archivoCargaMasiva" accept=".json" onchange="procesarArchivoCargaMasiva(event)">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Plantilla de ejemplo:</label>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="descargarPlantilla()">
+                            <i class="bi bi-download"></i> Descargar Plantilla
+                        </button>
+                    </div>
+
+                    <div id="previewCargaMasiva" class="d-none">
+                        <h6>Vista previa de la carga:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo Unidad</th>
+                                        <th>Tipo Solución</th>
+                                        <th>Insumos</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaPreviewCarga">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>Resumen:</strong>
+                            <span id="resumenCargaMasiva"></span>
+                        </div>
+                    </div>
+
+                    <div id="erroresCargaMasiva" class="d-none">
+                        <h6 class="text-danger">Errores encontrados:</h6>
+                        <div id="listaErroresCarga" class="alert alert-danger">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarCarga" onclick="confirmarCargaMasiva()" disabled>
+                        <i class="bi bi-check-circle"></i> Confirmar Carga
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="./dataService.js"></script>
     <script src="./accessGuard.js"></script>
 
@@ -1994,6 +2059,256 @@
         }
 
         // ============================================
+        // ===== FUNCIONES DE CARGA MASIVA =====
+        
+        let datosCargaMasiva = [];
+        let tiposUnidadExistentes = [];
+        let tiposSolucionExistentes = [];
+        let tiposInsumoExistentes = [];
+
+        function mostrarModalCargaMasiva() {
+            // Limpiar datos anteriores
+            datosCargaMasiva = [];
+            document.getElementById('archivoCargaMasiva').value = '';
+            document.getElementById('previewCargaMasiva').classList.add('d-none');
+            document.getElementById('erroresCargaMasiva').classList.add('d-none');
+            document.getElementById('btnConfirmarCarga').disabled = true;
+            
+            // Cargar tipos existentes para validación
+            cargarTiposExistentes();
+            
+            // Mostrar modal
+            new bootstrap.Modal(document.getElementById('modalCargaMasiva')).show();
+        }
+
+        async function cargarTiposExistentes() {
+            try {
+                const [tiposUnidad, tiposSolucion, tiposInsumo] = await Promise.all([
+                    window.dataService.fetchTiposUnidad(),
+                    window.dataService.fetchTiposSolucion(),
+                    window.dataService.fetchTiposInsumo()
+                ]);
+                
+                tiposUnidadExistentes = tiposUnidad.map(t => t.nombre);
+                tiposSolucionExistentes = tiposSolucion.map(t => t.nombre);
+                tiposInsumoExistentes = tiposInsumo.map(t => t.nombre);
+                
+                console.log('✅ Tipos existentes cargados para validación');
+            } catch (error) {
+                console.error('❌ Error cargando tipos existentes:', error);
+            }
+        }
+
+        function procesarArchivoCargaMasiva(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    validarYCargarDatos(data);
+                } catch (error) {
+                    mostrarError('Error al parsear el archivo JSON: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function validarYCargarDatos(data) {
+            // Limpiar errores anteriores
+            document.getElementById('erroresCargaMasiva').classList.add('d-none');
+            document.getElementById('previewCargaMasiva').classList.add('d-none');
+            
+            const errores = [];
+            const combinacionesValidas = [];
+            
+            // Validar estructura del JSON
+            if (!data.combinaciones || !Array.isArray(data.combinaciones)) {
+                errores.push('El archivo debe contener un array "combinaciones"');
+                mostrarError(errores.join('<br>'));
+                return;
+            }
+            
+            // Validar cada combinación
+            data.combinaciones.forEach((combinacion, index) => {
+                const erroresCombinacion = [];
+                
+                // Validar campos requeridos
+                if (!combinacion.tipoUnidad) {
+                    erroresCombinacion.push('tipoUnidad es requerido');
+                } else if (!tiposUnidadExistentes.includes(combinacion.tipoUnidad)) {
+                    erroresCombinacion.push(`tipoUnidad "${combinacion.tipoUnidad}" no existe en el sistema`);
+                }
+                
+                if (!combinacion.tipoSolucion) {
+                    erroresCombinacion.push('tipoSolucion es requerido');
+                } else if (!tiposSolucionExistentes.includes(combinacion.tipoSolucion)) {
+                    erroresCombinacion.push(`tipoSolucion "${combinacion.tipoSolucion}" no existe en el sistema`);
+                }
+                
+                if (!combinacion.insumos || typeof combinacion.insumos !== 'object') {
+                    erroresCombinacion.push('insumos debe ser un objeto');
+                } else {
+                    // Validar insumos
+                    Object.keys(combinacion.insumos).forEach(insumo => {
+                        if (!tiposInsumoExistentes.includes(insumo)) {
+                            erroresCombinacion.push(`insumo "${insumo}" no existe en el sistema`);
+                        }
+                        const cantidad = combinacion.insumos[insumo];
+                        if (!cantidad || isNaN(parseFloat(cantidad)) || parseFloat(cantidad) <= 0) {
+                            erroresCombinacion.push(`cantidad inválida para insumo "${insumo}": ${cantidad}`);
+                        }
+                    });
+                }
+                
+                if (erroresCombinacion.length > 0) {
+                    errores.push(`Combinación ${index + 1}: ${erroresCombinacion.join(', ')}`);
+                } else {
+                    combinacionesValidas.push({
+                        ...combinacion,
+                        index: index + 1,
+                        estado: 'Válida'
+                    });
+                }
+            });
+            
+            if (errores.length > 0) {
+                mostrarError(errores.join('<br>'));
+                return;
+            }
+            
+            // Mostrar preview si todo está bien
+            datosCargaMasiva = combinacionesValidas;
+            mostrarPreviewCarga();
+        }
+
+        function mostrarError(mensaje) {
+            document.getElementById('listaErroresCarga').innerHTML = mensaje;
+            document.getElementById('erroresCargaMasiva').classList.remove('d-none');
+            document.getElementById('btnConfirmarCarga').disabled = true;
+        }
+
+        function mostrarPreviewCarga() {
+            const tbody = document.getElementById('tablaPreviewCarga');
+            tbody.innerHTML = '';
+            
+            datosCargaMasiva.forEach(combinacion => {
+                const row = document.createElement('tr');
+                const insumosText = Object.entries(combinacion.insumos)
+                    .map(([insumo, cantidad]) => `${insumo}: ${cantidad}`)
+                    .join(', ');
+                
+                row.innerHTML = `
+                    <td>${combinacion.tipoUnidad}</td>
+                    <td>${combinacion.tipoSolucion}</td>
+                    <td>${insumosText}</td>
+                    <td><span class="badge bg-success">${combinacion.estado}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Mostrar resumen
+            document.getElementById('resumenCargaMasiva').textContent = 
+                `Se cargarán ${datosCargaMasiva.length} combinaciones válidas`;
+            
+            document.getElementById('previewCargaMasiva').classList.remove('d-none');
+            document.getElementById('btnConfirmarCarga').disabled = false;
+        }
+
+        async function confirmarCargaMasiva() {
+            if (datosCargaMasiva.length === 0) return;
+            
+            const btnConfirmar = document.getElementById('btnConfirmarCarga');
+            btnConfirmar.disabled = true;
+            btnConfirmar.innerHTML = '<i class="bi bi-hourglass-split"></i> Cargando...';
+            
+            let exitosas = 0;
+            let fallidas = 0;
+            const errores = [];
+            
+            try {
+                for (const combinacion of datosCargaMasiva) {
+                    try {
+                        const id = `${combinacion.tipoUnidad}::${combinacion.tipoSolucion}`;
+                        const resultado = await window.dataService.upsertAlmacenInsumoById(id, {
+                            id,
+                            tipoUnidad: combinacion.tipoUnidad,
+                            tipoSolucion: combinacion.tipoSolucion,
+                            insumos: combinacion.insumos,
+                        });
+                        
+                        if (resultado) {
+                            exitosas++;
+                        } else {
+                            fallidas++;
+                            errores.push(`Error guardando ${combinacion.tipoUnidad} - ${combinacion.tipoSolucion}`);
+                        }
+                    } catch (error) {
+                        fallidas++;
+                        errores.push(`Error en ${combinacion.tipoUnidad} - ${combinacion.tipoSolucion}: ${error.message}`);
+                    }
+                }
+                
+                // Actualizar interfaz
+                await cargarFiltros();
+                cargarTablaAlmacen();
+                await actualizarEstadisticas();
+                
+                // Mostrar resultado
+                if (fallidas === 0) {
+                    mostrarAlerta(`✅ Carga masiva exitosa: ${exitosas} combinaciones cargadas`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('modalCargaMasiva')).hide();
+                } else {
+                    mostrarAlerta(`⚠️ Carga parcial: ${exitosas} exitosas, ${fallidas} fallidas`, 'warning');
+                    if (errores.length > 0) {
+                        console.error('Errores de carga:', errores);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error en carga masiva:', error);
+                mostrarAlerta('❌ Error durante la carga masiva', 'danger');
+            } finally {
+                btnConfirmar.disabled = false;
+                btnConfirmar.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Carga';
+            }
+        }
+
+        function descargarPlantilla() {
+            const plantilla = {
+                "combinaciones": [
+                    {
+                        "tipoUnidad": "Tracto",
+                        "tipoSolucion": "Rastreo avanzado",
+                        "insumos": {
+                            "Cable 4 vias": "6",
+                            "Cincho mediado": "15",
+                            "Poliflex 3/8": "8"
+                        }
+                    },
+                    {
+                        "tipoUnidad": "SUV",
+                        "tipoSolucion": "Dashcam",
+                        "insumos": {
+                            "SD 256 Gb": "1",
+                            "Cable 4 pin 3 m": "2"
+                        }
+                    }
+                ]
+            };
+            
+            const blob = new Blob([JSON.stringify(plantilla, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'plantilla_carga_masiva.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         // FUNCIONES DE MIGRACIÓN A TABLAS SEPARADAS
         // ============================================
         
