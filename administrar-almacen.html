@@ -1066,8 +1066,6 @@
                 const nombresUnidad = tiposUnidad.map(t => t.nombre).sort();
                 const nombresSolucion = tiposSolucion.map(t => t.nombre).sort();
                 
-                console.log('🔍 DEBUG: Tipos de unidad para filtros:', nombresUnidad);
-                console.log('🔍 DEBUG: Tipos de solución para filtros:', nombresSolucion);
 
                 // Cargar filtro de tipos de unidad
                 const selectUnidad = document.getElementById('filtroTipoUnidad');
@@ -1177,22 +1175,11 @@
                 const tiposSolucionUnicos = new Set();
                 
                 // Procesar datos según el esquema devuelto por Supabase
-                console.log('🔍 DEBUG: Iniciando procesamiento de datos...');
                 if (Array.isArray(almacenData)) {
                     // Esquema por filas (más común)
-                    console.log('🔍 DEBUG: Procesando array de', almacenData.length, 'registros');
                     almacenData.forEach((row, index) => {
-                        console.log(`🔍 DEBUG: Procesando registro ${index}:`, {
-                            hasInsumos: !!row.insumos,
-                            hasTipoUnidad: !!row.tipoUnidad,
-                            hasTipoSolucion: !!row.tipoSolucion,
-                            insumosType: typeof row.insumos,
-                            keys: Object.keys(row)
-                        });
-                        
                         if (row.tipoUnidad && row.tipoSolucion) {
                             // Esquema por columnas: {tipoUnidad, tipoSolucion, insumos}
-                            console.log(`🔍 DEBUG: Procesando combinación: ${row.tipoUnidad} + ${row.tipoSolucion}`);
                             tiposSolucionUnicos.add(row.tipoSolucion);
                             totalCombinaciones++;
                             
@@ -1250,21 +1237,6 @@
                 console.log(`  - Insumos únicos: ${insumosUnicos.size}`);
                 console.log(`  - Tipos de unidad: ${tiposUnidad.length}`);
                 console.log(`  - Tipos de solución: ${tiposSolucion.length}`);
-                console.log('🔍 DEBUG: Datos de almacenData:', almacenData);
-                console.log('🔍 DEBUG: Esquema detectado:', Array.isArray(almacenData) ? 'Array' : 'Object');
-                console.log('🔍 DEBUG: Primer registro:', almacenData[0]);
-                console.log('🔍 DEBUG: Total registros:', almacenData.length);
-                
-                // Log detallado de cada registro
-                almacenData.forEach((row, index) => {
-                    console.log(`🔍 DEBUG: Registro ${index}:`, {
-                        hasInsumos: !!row.insumos,
-                        hasTipoUnidad: !!row.tipoUnidad,
-                        hasTipoSolucion: !!row.tipoSolucion,
-                        insumosType: typeof row.insumos,
-                        keys: Object.keys(row)
-                    });
-                });
                 
             } catch (error) {
                 console.error('❌ Error actualizando estadísticas desde Supabase:', error);
@@ -1556,9 +1528,7 @@
                         insumos: nuevosInsumos,
                     };
                     
-                    console.log('🔍 DEBUG: Guardando combinación en Supabase:', record);
                     const resultado = await window.dataService.upsertAlmacenInsumoById(id, record);
-                    console.log('🔍 DEBUG: Resultado de guardado:', resultado);
                     
                     if (resultado) {
                         console.log('✅ Combinación guardada exitosamente en Supabase');
@@ -1867,9 +1837,6 @@
                 const nombresSolucion = tiposSolucion.map(t => t.nombre).sort();
                 const nombresInsumo = tiposInsumo.map(t => t.nombre).sort();
                 
-                console.log('🔍 DEBUG: Tipos de unidad desde Supabase:', nombresUnidad);
-                console.log('🔍 DEBUG: Tipos de solución desde Supabase:', nombresSolucion);
-                console.log('🔍 DEBUG: Tipos de insumo desde Supabase:', nombresInsumo);
                 
                 // Actualizar lista de tipos de vehículo
                 const selectUnidad = document.getElementById('nuevoTipoUnidad');
@@ -1896,11 +1863,9 @@
                 console.log('✅ Lista de insumos actualizada con', listaInsumos.length, 'elementos');
                 
                 // Actualizar lista de insumos en todos los selects existentes
-                console.log('🔍 DEBUG: Lista de insumos actual:', listaInsumos);
                 const contenedorInsumos = document.getElementById('nuevoInsumos');
                 if (contenedorInsumos) {
                     const selects = contenedorInsumos.querySelectorAll('select');
-                    console.log('🔍 DEBUG: Selects de insumos encontrados:', selects.length);
                     selects.forEach((select, index) => {
                         const valorActual = select.value;
                         select.innerHTML = '<option value="">Seleccionar insumo...</option>' + 
@@ -1909,7 +1874,6 @@
                         if (valorActual && listaInsumos.includes(valorActual)) {
                             select.value = valorActual;
                         }
-                        console.log(`🔍 DEBUG: Select ${index} actualizado con ${listaInsumos.length} insumos`);
                     });
                 } else {
                     console.warn('⚠️ Contenedor de insumos no encontrado');
