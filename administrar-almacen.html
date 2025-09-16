@@ -923,7 +923,7 @@
                 
                 await cargarFiltros();
                 cargarTablaAlmacen();
-                actualizarEstadisticas();
+                await actualizarEstadisticas();
             } catch (error) {
                 console.error('❌ Error inicializando almacén:', error);
                 mostrarAlerta('Error al inicializar el almacén', 'danger');
@@ -946,7 +946,7 @@
 
                 await cargarFiltros();
                 cargarTablaAlmacen();
-                actualizarEstadisticas();
+                await actualizarEstadisticas();
                 console.log('✅ Almacén restaurado');
             } catch (error) {
                 console.error('❌ Error al restaurar almacén:', error);
@@ -1159,26 +1159,69 @@
                 `Mostrando ${combinaciones.length} combinaciones`;
         }
 
-        function actualizarEstadisticas() {
-            const totalCombinaciones = Object.values(almacenInsumos)
-                .reduce((total, soluciones) => total + Object.keys(soluciones).length, 0);
-            
-            const insumosUnicos = new Set();
-            Object.values(almacenInsumos).forEach(soluciones => {
-                Object.values(soluciones).forEach(insumos => {
-                    Object.keys(insumos).forEach(insumo => insumosUnicos.add(insumo));
+        async function actualizarEstadisticas() {
+            try {
+                console.log('🔄 Actualizando estadísticas desde Supabase...');
+                
+                // Cargar datos desde Supabase
+                const [tiposUnidad, tiposSolucion, tiposInsumo, almacenData] = await Promise.all([
+                    window.dataService.fetchTiposUnidad(),
+                    window.dataService.fetchTiposSolucion(),
+                    window.dataService.fetchTiposInsumo(),
+                    window.dataService.fetchAlmacenInsumos()
+                ]);
+                
+                // Calcular estadísticas reales
+                const totalCombinaciones = Object.values(almacenData)
+                    .reduce((total, soluciones) => total + Object.keys(soluciones).length, 0);
+                
+                const insumosUnicos = new Set();
+                Object.values(almacenData).forEach(soluciones => {
+                    Object.values(soluciones).forEach(insumos => {
+                        Object.keys(insumos).forEach(insumo => insumosUnicos.add(insumo));
+                    });
                 });
-            });
 
-            const tiposSolucionUnicos = new Set();
-            Object.values(almacenInsumos).forEach(soluciones => {
-                Object.keys(soluciones).forEach(tipo => tiposSolucionUnicos.add(tipo));
-            });
+                const tiposSolucionUnicos = new Set();
+                Object.values(almacenData).forEach(soluciones => {
+                    Object.keys(soluciones).forEach(tipo => tiposSolucionUnicos.add(tipo));
+                });
 
-            document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
-            document.getElementById('totalInsumos').textContent = insumosUnicos.size;
-            document.getElementById('totalTiposUnidad').textContent = Object.keys(almacenInsumos).length;
-            document.getElementById('totalTiposSolucion').textContent = tiposSolucionUnicos.size;
+                // Actualizar UI con datos reales de Supabase
+                document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
+                document.getElementById('totalInsumos').textContent = insumosUnicos.size;
+                document.getElementById('totalTiposUnidad').textContent = tiposUnidad.length;
+                document.getElementById('totalTiposSolucion').textContent = tiposSolucion.length;
+                
+                console.log('✅ Estadísticas actualizadas desde Supabase:');
+                console.log(`  - Combinaciones: ${totalCombinaciones}`);
+                console.log(`  - Insumos únicos: ${insumosUnicos.size}`);
+                console.log(`  - Tipos de unidad: ${tiposUnidad.length}`);
+                console.log(`  - Tipos de solución: ${tiposSolucion.length}`);
+                
+            } catch (error) {
+                console.error('❌ Error actualizando estadísticas desde Supabase:', error);
+                // Fallback a datos locales si hay error
+                const totalCombinaciones = Object.values(almacenInsumos)
+                    .reduce((total, soluciones) => total + Object.keys(soluciones).length, 0);
+                
+                const insumosUnicos = new Set();
+                Object.values(almacenInsumos).forEach(soluciones => {
+                    Object.values(soluciones).forEach(insumos => {
+                        Object.keys(insumos).forEach(insumo => insumosUnicos.add(insumo));
+                    });
+                });
+
+                const tiposSolucionUnicos = new Set();
+                Object.values(almacenInsumos).forEach(soluciones => {
+                    Object.keys(soluciones).forEach(tipo => tiposSolucionUnicos.add(tipo));
+                });
+
+                document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
+                document.getElementById('totalInsumos').textContent = insumosUnicos.size;
+                document.getElementById('totalTiposUnidad').textContent = Object.keys(almacenInsumos).length;
+                document.getElementById('totalTiposSolucion').textContent = tiposSolucionUnicos.size;
+            }
         }
 
         function aplicarFiltros() {
@@ -1358,7 +1401,7 @@
                 
                 await cargarFiltros();
                 cargarTablaAlmacen();
-                actualizarEstadisticas();
+                await actualizarEstadisticas();
                 
                 mostrarAlerta(`Combinación eliminada`, 'success');
             }
@@ -1493,7 +1536,7 @@
                     
                     await cargarFiltros();
                     cargarTablaAlmacen();
-                    actualizarEstadisticas();
+                    await actualizarEstadisticas();
                     
                     mostrarAlerta('Almacén importado correctamente', 'success');
                 } catch (error) {
@@ -1510,7 +1553,7 @@
                     almacenInsumos = matriz;
                     await cargarFiltros();
                     cargarTablaAlmacen();
-                    actualizarEstadisticas();
+                    await actualizarEstadisticas();
                     mostrarAlerta('Almacén reseteado a valores del CSV', 'success');
                 });
             }
@@ -1523,7 +1566,7 @@
                     await cargarDesdeSupabase();
                     await cargarFiltros();
                     cargarTablaAlmacen();
-                    actualizarEstadisticas();
+                    await actualizarEstadisticas();
                 } catch (e) {
                     console.warn('Realtime almacen refresco fallido', e);
                 }
@@ -1627,7 +1670,7 @@
                 // Actualizar la interfaz
                 await cargarFiltros();
                 cargarTablaAlmacen();
-                actualizarEstadisticas();
+                await actualizarEstadisticas();
                 
                 // Actualizar las listas en el modal de nueva combinación
                 await actualizarListasEnModalNuevaCombinacion();
@@ -1694,7 +1737,7 @@
                 // Actualizar la interfaz
                 await cargarFiltros();
                 cargarTablaAlmacen();
-                actualizarEstadisticas();
+                await actualizarEstadisticas();
                 
                 // Actualizar las listas en el modal de nueva combinación
                 await actualizarListasEnModalNuevaCombinacion();
