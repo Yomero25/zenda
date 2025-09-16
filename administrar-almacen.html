@@ -65,9 +65,6 @@
                     <i class="bi bi-plus-circle"></i> Nueva Combinación
                 </button>
                 
-                <button class="btn btn-warning" onclick="restaurarAlmacen()">
-                    <i class="bi bi-arrow-clockwise"></i> Restaurar Almacén
-                </button>
                 <button class="btn btn-info" onclick="mostrarModalCargaMasiva()">
                     <i class="bi bi-upload"></i> Carga Masiva
                 </button>
@@ -490,29 +487,6 @@
             return Promise.resolve({});
         }
 
-        // Función para restaurar almacén si se perdió
-        async function restaurarAlmacen() {
-            console.log('🔄 Restaurando almacén...');
-            try {
-                almacenInsumos = await cargarMatrizCompletaCSV();
-                console.log(`✅ Matriz restaurada: ${Object.keys(almacenInsumos).length} tipos de unidad`);
-                // Sincronizar con Supabase si está activo: sembrar por filas (tipo_unidad/tipo_solucion)
-                try {
-                    if (modoCentralizado) {
-                        await migrarAlmacenLocalASupabase(almacenInsumos);
-                        console.log('✅ Almacén restaurado en Supabase (por filas)');
-                    }
-                } catch (e) { console.warn('⚠️ Error sincronizando almacén en Supabase', e); }
-
-                await cargarFiltros();
-                cargarTablaAlmacen();
-                await actualizarEstadisticas();
-                console.log('✅ Almacén restaurado');
-            } catch (error) {
-                console.error('❌ Error al restaurar almacén:', error);
-                mostrarAlerta('Error al restaurar el almacén', 'danger');
-            }
-        }
 
         async function cargarDesdeSupabase() {
             try {
