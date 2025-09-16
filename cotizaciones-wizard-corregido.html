@@ -2399,30 +2399,32 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             // Nota: Se elimina 'Silicon' de las reglas fijas. Solo se sugiere
             // en soluciones con cámaras laterales y encadenamiento de señal.
             const reglasFijas = tipoVenta === 'instalacion' ? {
-                'Cinta de tela': 75,
-                'Cinta de aislar': 75
+                'Cinta de tela': 0.5,
+                'Cinta de aislar': 0.5
             } : {};
             
-            // Aplicar reglas fijas (por lote, no por unidad)
+            // Aplicar reglas fijas (por unidad)
             Object.keys(reglasFijas).forEach(insumo => {
-                const cantidadFija = reglasFijas[insumo]; // No multiplicar por cantidadUnidades
+                const cantidadPorUnidad = reglasFijas[insumo];
+                const cantidadTotal = cantidadPorUnidad * cantidadUnidades;
+                
                 if (todosLosInsumos[insumo]) {
-                    // Si ya existe, reemplazar con la cantidad fija
-                    todosLosInsumos[insumo].cantidad = cantidadFija;
-                    todosLosInsumos[insumo].unidades = [`Regla fija: ${cantidadFija} por ${cantidadUnidades} unidades`];
+                    // Si ya existe, reemplazar con la cantidad calculada
+                    todosLosInsumos[insumo].cantidad = cantidadTotal;
+                    todosLosInsumos[insumo].unidades = [`Regla fija: ${cantidadPorUnidad} por unidad x ${cantidadUnidades} unidades`];
                     todosLosInsumos[insumo].reglaFija = true;
-                    console.log(`🔧 DEBUG: Regla fija aplicada: ${insumo} = ${cantidadFija}`);
+                    console.log(`🔧 DEBUG: Regla fija aplicada: ${insumo} = ${cantidadPorUnidad} x ${cantidadUnidades} = ${cantidadTotal}`);
                 } else {
-                    // Si no existe, crear con la cantidad fija
+                    // Si no existe, crear con la cantidad calculada
                     todosLosInsumos[insumo] = {
                         nombre: insumo,
-                        cantidad: cantidadFija,
-                        unidades: [`Regla fija: ${cantidadFija} por ${cantidadUnidades} unidades`],
+                        cantidad: cantidadTotal,
+                        unidades: [`Regla fija: ${cantidadPorUnidad} por unidad x ${cantidadUnidades} unidades`],
                         sugerido: true,
                         categoria: 'insumos',
                         reglaFija: true
                     };
-                    console.log(`🔧 DEBUG: Regla fija creada: ${insumo} = ${cantidadFija}`);
+                    console.log(`🔧 DEBUG: Regla fija creada: ${insumo} = ${cantidadPorUnidad} x ${cantidadUnidades} = ${cantidadTotal}`);
                 }
             });
             
