@@ -610,23 +610,27 @@
             });
 
             // Agregar insumos sugeridos globales (array)
+            // NOTA: Los insumos sugeridos ya vienen multiplicados por cantidad de unidades desde el wizard
             if (cotizacion.insumosSugeridos && Array.isArray(cotizacion.insumosSugeridos)) {
                 console.log('📋 Procesando insumos sugeridos globales (array):', cotizacion.insumosSugeridos);
                 cotizacion.insumosSugeridos.forEach(item => {
                     if (item && item.nombre && item.cantidad > 0) {
-                        elementosNecesarios[item.nombre] = (elementosNecesarios[item.nombre] || 0) + item.cantidad;
-                        console.log(`✅ Agregado insumo: ${item.nombre} = ${item.cantidad} (total: ${elementosNecesarios[item.nombre]})`);
+                        // Los insumos ya vienen multiplicados por cantidad de unidades, no sumar
+                        elementosNecesarios[item.nombre] = item.cantidad;
+                        console.log(`✅ Agregado insumo: ${item.nombre} = ${item.cantidad} (ya multiplicado por unidades)`);
                     }
                 });
             }
 
             // Agregar accesorios sugeridos globales (array)
+            // NOTA: Los accesorios sugeridos ya vienen multiplicados por cantidad de unidades desde el wizard
             if (cotizacion.accesoriosSugeridos && Array.isArray(cotizacion.accesoriosSugeridos)) {
                 console.log('🔧 Procesando accesorios sugeridos globales (array):', cotizacion.accesoriosSugeridos);
                 cotizacion.accesoriosSugeridos.forEach(item => {
                     if (item && item.nombre && item.cantidad > 0) {
-                        elementosNecesarios[item.nombre] = (elementosNecesarios[item.nombre] || 0) + item.cantidad;
-                        console.log(`✅ Agregado accesorio: ${item.nombre} = ${item.cantidad} (total: ${elementosNecesarios[item.nombre]})`);
+                        // Los accesorios ya vienen multiplicados por cantidad de unidades, no sumar
+                        elementosNecesarios[item.nombre] = item.cantidad;
+                        console.log(`✅ Agregado accesorio: ${item.nombre} = ${item.cantidad} (ya multiplicado por unidades)`);
                     }
                 });
             }
