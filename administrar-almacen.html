@@ -1606,17 +1606,38 @@
             }
         }
 
+        let actualizacionEnProgreso = false;
+        let timeoutActualizacion = null;
+
         function suscribirRealtimeAlmacen() {
             if (!modoCentralizado) return;
             window.dataService.subscribeAlmacenInsumos(async (payload) => {
-                try {
-                    await cargarDesdeSupabase();
-                    await cargarFiltros();
-                    cargarTablaAlmacen();
-                    await actualizarEstadisticas();
-                } catch (e) {
-                    console.warn('Realtime almacen refresco fallido', e);
+                // Evitar actualizaciones múltiples simultáneas
+                if (actualizacionEnProgreso) {
+                    console.log('🔄 Actualización ya en progreso, omitiendo...');
+                    return;
                 }
+
+                // Debounce: cancelar actualización anterior si hay una nueva
+                if (timeoutActualizacion) {
+                    clearTimeout(timeoutActualizacion);
+                }
+
+                timeoutActualizacion = setTimeout(async () => {
+                    actualizacionEnProgreso = true;
+                    try {
+                        console.log('🔄 Actualizando desde Realtime...');
+                        await cargarDesdeSupabase();
+                        await cargarFiltros();
+                        cargarTablaAlmacen();
+                        await actualizarEstadisticas();
+                        console.log('✅ Actualización Realtime completada');
+                    } catch (e) {
+                        console.warn('Realtime almacen refresco fallido', e);
+                    } finally {
+                        actualizacionEnProgreso = false;
+                    }
+                }, 500); // Esperar 500ms antes de actualizar
             });
         }
 
@@ -1714,10 +1735,15 @@
                     localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
                 }
 
-                // Actualizar la interfaz
-                await cargarFiltros();
-                cargarTablaAlmacen();
-                await actualizarEstadisticas();
+                // Actualizar la interfaz (con debounce para evitar bucles)
+                if (timeoutActualizacion) {
+                    clearTimeout(timeoutActualizacion);
+                }
+                timeoutActualizacion = setTimeout(async () => {
+                    await cargarFiltros();
+                    cargarTablaAlmacen();
+                    await actualizarEstadisticas();
+                }, 300);
                 
                 // Actualizar las listas en el modal de nueva combinación
                 await actualizarListasEnModalNuevaCombinacion();
@@ -1781,10 +1807,15 @@
                 console.log(`✅ Nuevo insumo agregado: ${nombre}`);
                 mostrarAlerta(`Insumo "${nombre}" agregado exitosamente`, 'success');
                 
-                // Actualizar la interfaz
-                await cargarFiltros();
-                cargarTablaAlmacen();
-                await actualizarEstadisticas();
+                // Actualizar la interfaz (con debounce para evitar bucles)
+                if (timeoutActualizacion) {
+                    clearTimeout(timeoutActualizacion);
+                }
+                timeoutActualizacion = setTimeout(async () => {
+                    await cargarFiltros();
+                    cargarTablaAlmacen();
+                    await actualizarEstadisticas();
+                }, 300);
                 
                 // Actualizar las listas en el modal de nueva combinación
                 await actualizarListasEnModalNuevaCombinacion();
