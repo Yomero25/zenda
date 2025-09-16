@@ -1190,7 +1190,18 @@
                             keys: Object.keys(row)
                         });
                         
-                        if (row.insumos && typeof row.insumos === 'object') {
+                        if (row.tipoUnidad && row.tipoSolucion) {
+                            // Esquema por columnas: {tipoUnidad, tipoSolucion, insumos}
+                            console.log(`🔍 DEBUG: Procesando combinación: ${row.tipoUnidad} + ${row.tipoSolucion}`);
+                            tiposSolucionUnicos.add(row.tipoSolucion);
+                            totalCombinaciones++;
+                            
+                            if (row.insumos && typeof row.insumos === 'object') {
+                                Object.keys(row.insumos).forEach(insumo => {
+                                    insumosUnicos.add(insumo);
+                                });
+                            }
+                        } else if (row.insumos && typeof row.insumos === 'object') {
                             // Esquema: {tipoUnidad: {tipoSolucion: {insumos: {}}}}
                             Object.values(row.insumos).forEach(soluciones => {
                                 if (typeof soluciones === 'object') {
@@ -1207,16 +1218,6 @@
                                     });
                                 }
                             });
-                        } else if (row.tipoUnidad && row.tipoSolucion) {
-                            // Esquema por columnas: {tipoUnidad, tipoSolucion, insumos}
-                            tiposSolucionUnicos.add(row.tipoSolucion);
-                            totalCombinaciones++;
-                            
-                            if (row.insumos && typeof row.insumos === 'object') {
-                                Object.keys(row.insumos).forEach(insumo => {
-                                    insumosUnicos.add(insumo);
-                                });
-                            }
                         }
                     });
                 } else if (typeof almacenData === 'object') {
