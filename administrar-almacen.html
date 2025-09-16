@@ -1171,21 +1171,62 @@
                     window.dataService.fetchAlmacenInsumos()
                 ]);
                 
-                // Calcular estadísticas reales
-                const totalCombinaciones = Object.values(almacenData)
-                    .reduce((total, soluciones) => total + Object.keys(soluciones).length, 0);
-                
+                // Calcular estadísticas reales desde datos de Supabase
+                let totalCombinaciones = 0;
                 const insumosUnicos = new Set();
-                Object.values(almacenData).forEach(soluciones => {
-                    Object.values(soluciones).forEach(insumos => {
-                        Object.keys(insumos).forEach(insumo => insumosUnicos.add(insumo));
-                    });
-                });
-
                 const tiposSolucionUnicos = new Set();
-                Object.values(almacenData).forEach(soluciones => {
-                    Object.keys(soluciones).forEach(tipo => tiposSolucionUnicos.add(tipo));
-                });
+                
+                // Procesar datos según el esquema devuelto por Supabase
+                if (Array.isArray(almacenData)) {
+                    // Esquema por filas (más común)
+                    almacenData.forEach(row => {
+                        if (row.insumos && typeof row.insumos === 'object') {
+                            // Esquema: {tipoUnidad: {tipoSolucion: {insumos: {}}}}
+                            Object.values(row.insumos).forEach(soluciones => {
+                                if (typeof soluciones === 'object') {
+                                    Object.keys(soluciones).forEach(tipoSolucion => {
+                                        tiposSolucionUnicos.add(tipoSolucion);
+                                        totalCombinaciones++;
+                                        
+                                        const insumos = soluciones[tipoSolucion];
+                                        if (typeof insumos === 'object') {
+                                            Object.keys(insumos).forEach(insumo => {
+                                                insumosUnicos.add(insumo);
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        } else if (row.tipoUnidad && row.tipoSolucion) {
+                            // Esquema por columnas: {tipoUnidad, tipoSolucion, insumos}
+                            tiposSolucionUnicos.add(row.tipoSolucion);
+                            totalCombinaciones++;
+                            
+                            if (row.insumos && typeof row.insumos === 'object') {
+                                Object.keys(row.insumos).forEach(insumo => {
+                                    insumosUnicos.add(insumo);
+                                });
+                            }
+                        }
+                    });
+                } else if (typeof almacenData === 'object') {
+                    // Esquema de documento único
+                    Object.values(almacenData).forEach(soluciones => {
+                        if (typeof soluciones === 'object') {
+                            Object.keys(soluciones).forEach(tipoSolucion => {
+                                tiposSolucionUnicos.add(tipoSolucion);
+                                totalCombinaciones++;
+                                
+                                const insumos = soluciones[tipoSolucion];
+                                if (typeof insumos === 'object') {
+                                    Object.keys(insumos).forEach(insumo => {
+                                        insumosUnicos.add(insumo);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
 
                 // Actualizar UI con datos reales de Supabase
                 document.getElementById('totalCombinaciones').textContent = totalCombinaciones;
@@ -1198,6 +1239,8 @@
                 console.log(`  - Insumos únicos: ${insumosUnicos.size}`);
                 console.log(`  - Tipos de unidad: ${tiposUnidad.length}`);
                 console.log(`  - Tipos de solución: ${tiposSolucion.length}`);
+                console.log('🔍 DEBUG: Datos de almacenData:', almacenData);
+                console.log('🔍 DEBUG: Esquema detectado:', Array.isArray(almacenData) ? 'Array' : 'Object');
                 
             } catch (error) {
                 console.error('❌ Error actualizando estadísticas desde Supabase:', error);
