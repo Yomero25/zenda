@@ -3642,11 +3642,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         const cantidadBadge = row.querySelector('.badge');
                         const cantidadText = cantidadBadge ? cantidadBadge.textContent.trim() : '1';
                         
+                        // Usar parseFloat para manejar decimales correctamente
+                        const cantidad = parseFloat(cantidadText) || 1;
+                        
                         cotizacionData.insumosSugeridos.push({
                             nombre: checkbox.value,
-                            cantidad: parseInt(cantidadText) || 1,
+                            cantidad: cantidad,
                             sugerido: true
                         });
+                        
+                        console.log(`💾 Guardando insumo: ${checkbox.value} = ${cantidad}`);
                     });
                     
                     // Guardar insumos adicionales
@@ -3673,11 +3678,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         const cantidadBadge = row.querySelector('.badge');
                         const cantidadText = cantidadBadge ? cantidadBadge.textContent.trim() : '1';
                         
+                        // Usar parseFloat para manejar decimales correctamente
+                        const cantidad = parseFloat(cantidadText) || 1;
+                        
                         cotizacionData.accesoriosSugeridos.push({
                             nombre: checkbox.value,
-                            cantidad: parseInt(cantidadText) || 1,
+                            cantidad: cantidad,
                             sugerido: true
                         });
+                        
+                        console.log(`💾 Guardando accesorio: ${checkbox.value} = ${cantidad}`);
                     });
                     break;
             }
