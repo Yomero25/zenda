@@ -2275,8 +2275,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                         const categoria = obtenerCategoriaInsumo(insumo.nombre);
                                         
                                         // Saltar relevadores si ya los manejamos de manera especial
-                                        if (key === 'Relevador' && tieneBloqueo) {
-                                            console.log(`⏭️ DEBUG: Saltando relevador (ya manejado por bloqueo)`);
+                                        if ((key === 'Relevador' || key === 'Relevador 12v') && tieneBloqueo) {
+                                            console.log(`⏭️ DEBUG: Saltando ${key} (ya manejado por bloqueo)`);
                                             return;
                                         }
                                         
@@ -2302,7 +2302,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                         }
                                         
                                         if (todosLosInsumos[key]) {
-                                            if (typeof cantidadFinal === 'string' && cantidadFinal.includes('/')) {
+                                            // Para botones, reemplazar en lugar de sumar
+                                            if (key === 'Boton membrana') {
+                                                todosLosInsumos[key].cantidad = cantidadFinal;
+                                                console.log(`📊 DEBUG: Reemplazando botones: ${key} = ${cantidadFinal}`);
+                                            } else if (typeof cantidadFinal === 'string' && cantidadFinal.includes('/')) {
                                                 todosLosInsumos[key].cantidad = cantidadFinal;
                                             } else {
                                                 todosLosInsumos[key].cantidad += cantidadFinal;
