@@ -1549,17 +1549,27 @@
             try {
                 if (modoCentralizado) {
                     const id = `${tipoUnidad}::${tipoSolucion}`;
-                    await window.dataService.upsertAlmacenInsumoById(id, {
+                    const record = {
                         id,
                         tipoUnidad,
                         tipoSolucion,
                         insumos: nuevosInsumos,
-                    });
+                    };
+                    
+                    console.log('🔍 DEBUG: Guardando combinación en Supabase:', record);
+                    const resultado = await window.dataService.upsertAlmacenInsumoById(id, record);
+                    console.log('🔍 DEBUG: Resultado de guardado:', resultado);
+                    
+                    if (resultado) {
+                        console.log('✅ Combinación guardada exitosamente en Supabase');
+                    } else {
+                        console.error('❌ Error guardando combinación en Supabase');
+                    }
                 } else {
                     localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
                 }
             } catch (e) {
-                console.warn('No se pudo guardar combinación', e);
+                console.error('❌ Error guardando combinación:', e);
             }
 
             cargarFiltros();

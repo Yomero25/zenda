@@ -537,13 +537,36 @@
           tipo_solucion: record.tipoSolucion,
           insumos: record.insumos || {},
         };
-        // Upsert por conflicto en (tipo_unidad, tipo_solucion) si existe; si no, caerá en update/select
-        const { error } = await client
+        
+        // Verificar si ya existe una combinación con el mismo tipo_unidad y tipo_solucion
+        const { data: existing } = await client
           .from('almacen_insumos')
-          .upsert(payload, { onConflict: 'tipo_unidad,tipo_solucion' });
-        if (!error) return true;
+          .select('id')
+          .eq('tipo_unidad', record.tipoUnidad)
+          .eq('tipo_solucion', record.tipoSolucion)
+          .limit(1)
+          .maybeSingle();
+        
+        if (existing) {
+          // Actualizar registro existente
+          const { error } = await client
+            .from('almacen_insumos')
+            .update(payload)
+            .eq('id', existing.id);
+          if (error) { console.error('❌ Supabase upsertAlmacenInsumoById(update):', error); return false; }
+        } else {
+          // Insertar nuevo registro
+          const { error } = await client
+            .from('almacen_insumos')
+            .insert(payload);
+          if (error) { console.error('❌ Supabase upsertAlmacenInsumoById(insert):', error); return false; }
+        }
+        return true;
       }
-    } catch (e) { /* caer a otros esquemas */ }
+    } catch (e) { 
+      console.error('❌ Error en upsertAlmacenInsumoById:', e);
+      return false;
+    }
 
     // Intento 2: documento único en columna "insumos": actualizar todo el documento
     try {
