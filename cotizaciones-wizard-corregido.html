@@ -2120,12 +2120,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 });
                                 console.log(`✅ DEBUG: SOS Bloqueo detectado`);
                             }
+                            
+                            // Verificar si hay algún tipo de bloqueo para agregar relevador
+                            let tieneBloqueo = false;
                             if (configs.bloqueo_normal === true) {
                                 solucionesCompatibles.push({
                                     nombre: 'Bloqueo normal',
                                     cantidad: 1
                                 });
                                 console.log(`✅ DEBUG: Bloqueo normal detectado`);
+                                tieneBloqueo = true;
                             }
                             if (configs.bloqueo_gradual === true) {
                                 solucionesCompatibles.push({
@@ -2133,6 +2137,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     cantidad: 1
                                 });
                                 console.log(`✅ DEBUG: Bloqueo gradual detectado`);
+                                tieneBloqueo = true;
                             }
                             if (configs.bloqueo_cortacorriente === true) {
                                 solucionesCompatibles.push({
@@ -2140,6 +2145,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     cantidad: 1
                                 });
                                 console.log(`✅ DEBUG: Bloqueo cortacorriente detectado`);
+                                tieneBloqueo = true;
                             }
                             if (configs.bloqueo_cc === true) {
                                 solucionesCompatibles.push({
@@ -2147,6 +2153,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     cantidad: 1
                                 });
                                 console.log(`✅ DEBUG: Bloqueo CC detectado`);
+                                tieneBloqueo = true;
                             }
                             
                             // Procesar sensores
@@ -2210,21 +2217,46 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 const key = 'Boton membrana';
                                 const categoria = 'accesorios';
                                 
-                                console.log(`🔘 DEBUG: Agregando botón membrana x${cantidadBotones}`);
+                                console.log(`🔘 DEBUG: Agregando botón membrana x${cantidadBotones} por unidad`);
                                 
                                 if (todosLosInsumos[key]) {
-                                    todosLosInsumos[key].cantidad += cantidadBotones;
-                                    todosLosInsumos[key].unidades.push(`Unidad ${unidadIndex + 1} (Rastreo - Botones x${cantidadBotones})`);
-                                    console.log(`📊 DEBUG: Sumando: ${key} = ${todosLosInsumos[key].cantidad}`);
+                                    // Los botones se multiplican por unidad, no se suman
+                                    todosLosInsumos[key].cantidad = cantidadBotones; // Se multiplicará después por cantidadUnidades
+                                    todosLosInsumos[key].unidades = [`Unidad ${unidadIndex + 1} (Rastreo - Botones x${cantidadBotones})`];
+                                    console.log(`📊 DEBUG: Configurando: ${key} = ${cantidadBotones} por unidad`);
                                 } else {
                                     todosLosInsumos[key] = {
                                         nombre: 'Boton membrana',
-                                        cantidad: cantidadBotones,
+                                        cantidad: cantidadBotones, // Se multiplicará después por cantidadUnidades
                                         unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Botones x${cantidadBotones})`],
                                         sugerido: true,
                                         categoria: categoria
                                     };
-                                    console.log(`✨ DEBUG: Nuevo insumo: ${key} = ${cantidadBotones}`);
+                                    console.log(`✨ DEBUG: Nuevo insumo: ${key} = ${cantidadBotones} por unidad`);
+                                }
+                            }
+                            
+                            // Agregar relevador si hay algún tipo de bloqueo (1 por unidad)
+                            if (tieneBloqueo) {
+                                const key = 'Relevador';
+                                const categoria = 'insumos';
+                                
+                                console.log(`🔌 DEBUG: Agregando relevador x1 por unidad (hay bloqueo)`);
+                                
+                                if (todosLosInsumos[key]) {
+                                    // El relevador se multiplica por unidad, no se suman múltiples
+                                    todosLosInsumos[key].cantidad = 1; // Se multiplicará después por cantidadUnidades
+                                    todosLosInsumos[key].unidades = [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`];
+                                    console.log(`📊 DEBUG: Configurando: ${key} = 1 por unidad`);
+                                } else {
+                                    todosLosInsumos[key] = {
+                                        nombre: 'Relevador',
+                                        cantidad: 1, // Se multiplicará después por cantidadUnidades
+                                        unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`],
+                                        sugerido: true,
+                                        categoria: categoria
+                                    };
+                                    console.log(`✨ DEBUG: Nuevo insumo: ${key} = 1 por unidad`);
                                 }
                             }
                             
@@ -2241,6 +2273,12 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     insumosCompatible.forEach(insumo => {
                                         const key = insumo.nombre;
                                         const categoria = obtenerCategoriaInsumo(insumo.nombre);
+                                        
+                                        // Saltar relevadores si ya los manejamos de manera especial
+                                        if (key === 'Relevador' && tieneBloqueo) {
+                                            console.log(`⏭️ DEBUG: Saltando relevador (ya manejado por bloqueo)`);
+                                            return;
+                                        }
                                         
                                         // Multiplicar la cantidad del insumo por la cantidad de la solución
                                         let cantidadInsumo = insumo.cantidad;
