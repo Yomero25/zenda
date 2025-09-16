@@ -2341,17 +2341,18 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             // Nota: Se elimina 'Silicon' de las reglas fijas. Solo se sugiere
             // en soluciones con cámaras laterales y encadenamiento de señal.
             const reglasFijas = tipoVenta === 'instalacion' ? {
-                'Cinta de tela': 0.5,
-                'Cinta de aislar': 0.5
+                'Cinta de tela': 75,
+                'Cinta de aislar': 75
             } : {};
             
-            // Aplicar reglas fijas
+            // Aplicar reglas fijas (por lote, no por unidad)
             Object.keys(reglasFijas).forEach(insumo => {
-                const cantidadFija = reglasFijas[insumo] * cantidadUnidades;
+                const cantidadFija = reglasFijas[insumo]; // No multiplicar por cantidadUnidades
                 if (todosLosInsumos[insumo]) {
                     // Si ya existe, reemplazar con la cantidad fija
                     todosLosInsumos[insumo].cantidad = cantidadFija;
                     todosLosInsumos[insumo].unidades = [`Regla fija: ${cantidadFija} por ${cantidadUnidades} unidades`];
+                    todosLosInsumos[insumo].reglaFija = true;
                     console.log(`🔧 DEBUG: Regla fija aplicada: ${insumo} = ${cantidadFija}`);
                 } else {
                     // Si no existe, crear con la cantidad fija
