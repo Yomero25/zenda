@@ -1580,9 +1580,14 @@
 
             try {
                 if (tipoActualAgregando === 'vehiculo') {
-                    // Verificar si ya existe
-                    if (almacenInsumos[nombre]) {
-                        mostrarAlerta('Ya existe un tipo de vehículo con ese nombre', 'warning');
+                    // Verificar si ya existe en Supabase
+                    const tiposExistentes = await window.dataService.fetchTiposUnidad();
+                    const existeEnSupabase = tiposExistentes.some(tipo => 
+                        tipo.nombre.toLowerCase() === nombre.toLowerCase()
+                    );
+                    
+                    if (existeEnSupabase) {
+                        mostrarAlerta('Ya existe un tipo de vehículo con ese nombre en Supabase', 'warning');
                         return;
                     }
                     
@@ -1593,10 +1598,14 @@
                     mostrarAlerta(`Tipo de vehículo "${nombre}" agregado exitosamente`, 'success');
                     
                 } else if (tipoActualAgregando === 'solucion') {
-                    // Verificar si ya existe en algún vehículo
-                    const existe = Object.values(almacenInsumos).some(vehiculo => vehiculo[nombre]);
-                    if (existe) {
-                        mostrarAlerta('Ya existe un tipo de solución con ese nombre', 'warning');
+                    // Verificar si ya existe en Supabase
+                    const tiposExistentes = await window.dataService.fetchTiposSolucion();
+                    const existeEnSupabase = tiposExistentes.some(tipo => 
+                        tipo.nombre.toLowerCase() === nombre.toLowerCase()
+                    );
+                    
+                    if (existeEnSupabase) {
+                        mostrarAlerta('Ya existe un tipo de solución con ese nombre en Supabase', 'warning');
                         return;
                     }
                     
@@ -1661,14 +1670,19 @@
             }
 
             try {
-                // Verificar si ya existe
-                if (listaInsumos.includes(nombre)) {
-                    mostrarAlerta('Ya existe un insumo con ese nombre', 'warning');
+                // Verificar si ya existe en Supabase
+                const tiposExistentes = await window.dataService.fetchTiposInsumo();
+                const existeEnSupabase = tiposExistentes.some(tipo => 
+                    tipo.nombre.toLowerCase() === nombre.toLowerCase()
+                );
+                
+                if (existeEnSupabase) {
+                    mostrarAlerta('Ya existe un insumo con ese nombre en Supabase', 'warning');
                     return;
                 }
 
                 // Agregar nuevo insumo a Supabase
-                await window.dataService.upsertTipoInsumo(nombre, `Tipo de insumo: ${nombre}`, 'General', 'piezas');
+                await window.dataService.upsertTipoInsumo(nombre, `Tipo de insumo: ${nombre}`, categoria || 'General', 'piezas');
                 
                 // Agregar a la lista de insumos (actualizar la constante)
                 listaInsumos.push(nombre);
