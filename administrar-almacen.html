@@ -1332,7 +1332,7 @@
         function agregarNuevaCombinacion() {
             try {
                 // Actualizar las listas de opciones
-                actualizarListasEnModalNuevaCombinacion();
+                await actualizarListasEnModalNuevaCombinacion();
 
                 // Limpiar campos
                 document.getElementById('nuevoTipoUnidad').value = '';
@@ -1550,13 +1550,11 @@
                         return;
                     }
                     
-                    // Agregar nuevo tipo de vehículo
+                    // Agregar nuevo tipo de vehículo a Supabase
+                    await window.dataService.upsertTipoUnidad(nombre, `Tipo de vehículo: ${nombre}`);
                     almacenInsumos[nombre] = {};
                     console.log(`✅ Nuevo tipo de vehículo agregado: ${nombre}`);
                     mostrarAlerta(`Tipo de vehículo "${nombre}" agregado exitosamente`, 'success');
-                    
-                    // Sincronizar con todos los módulos
-                    await sincronizarTiposConModulos('vehiculo', nombre);
                     
                 } else if (tipoActualAgregando === 'solucion') {
                     // Verificar si ya existe en algún vehículo
@@ -1566,13 +1564,10 @@
                         return;
                     }
                     
-                    // NO agregar automáticamente a todos los vehículos
-                    // Solo agregar a los vehículos que el usuario seleccione en el modal de nueva combinación
+                    // Agregar nuevo tipo de solución a Supabase
+                    await window.dataService.upsertTipoSolucion(nombre, `Tipo de solución: ${nombre}`, 'General');
                     console.log(`✅ Nuevo tipo de solución agregado: ${nombre}`);
                     mostrarAlerta(`Tipo de solución "${nombre}" agregado exitosamente. Se agregará cuando crees una nueva combinación.`, 'success');
-                    
-                    // Sincronizar con todos los módulos
-                    await sincronizarTiposConModulos('solucion', nombre);
                 }
 
                 // Guardar cambios
@@ -1590,7 +1585,7 @@
                 actualizarEstadisticas();
                 
                 // Actualizar las listas en el modal de nueva combinación
-                actualizarListasEnModalNuevaCombinacion();
+                await actualizarListasEnModalNuevaCombinacion();
                 
                 // Si estamos en el modal de nueva combinación, actualizar el select correspondiente
                 if (tipoActualAgregando === 'vehiculo') {
@@ -1607,7 +1602,7 @@
                 
                 // Forzar actualización adicional después de un breve delay
                 setTimeout(() => {
-                    actualizarListasEnModalNuevaCombinacion();
+                    await actualizarListasEnModalNuevaCombinacion();
                 }, 200);
                 
                 // Cerrar modal
@@ -1636,6 +1631,9 @@
                     return;
                 }
 
+                // Agregar nuevo insumo a Supabase
+                await window.dataService.upsertTipoInsumo(nombre, `Tipo de insumo: ${nombre}`, 'General', 'piezas');
+                
                 // Agregar a la lista de insumos (actualizar la constante)
                 listaInsumos.push(nombre);
                 listaInsumos.sort(); // Mantener ordenado
@@ -1643,20 +1641,17 @@
                 console.log(`✅ Nuevo insumo agregado: ${nombre}`);
                 mostrarAlerta(`Insumo "${nombre}" agregado exitosamente`, 'success');
                 
-                // Sincronizar con todos los módulos
-                await sincronizarTiposConModulos('insumo', nombre);
-                
                 // Actualizar la interfaz
                 cargarFiltros();
                 cargarTablaAlmacen();
                 actualizarEstadisticas();
                 
                 // Actualizar las listas en el modal de nueva combinación
-                actualizarListasEnModalNuevaCombinacion();
+                await actualizarListasEnModalNuevaCombinacion();
                 
                 // Forzar actualización adicional después de un breve delay
                 setTimeout(() => {
-                    actualizarListasEnModalNuevaCombinacion();
+                    await actualizarListasEnModalNuevaCombinacion();
                 }, 200);
                 
                 // Cerrar modal
@@ -1745,73 +1740,92 @@
             console.log('🧹 Soluciones duplicadas limpiadas');
         }
 
-        function actualizarListasEnModalNuevaCombinacion() {
-            // Obtener tipos globales una sola vez
-            const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
-            
-            // Actualizar lista de tipos de vehículo
-            const tiposUnidadAlmacen = [...new Set(Object.keys(almacenInsumos))];
-            const tiposVehiculoGlobales = tiposGlobales.vehiculos || [];
-            
-            // Combinar y eliminar duplicados
-            const tiposUnidad = [...new Set([...tiposUnidadAlmacen, ...tiposVehiculoGlobales])].sort();
-            
-            console.log('🔍 DEBUG: Tipos de unidad del almacén:', tiposUnidadAlmacen);
-            console.log('🔍 DEBUG: Tipos de vehículo globales:', tiposVehiculoGlobales);
-            console.log('🔍 DEBUG: Tipos de unidad combinados:', tiposUnidad);
-            console.log('🔍 DEBUG: AlmacenInsumos keys:', Object.keys(almacenInsumos));
-            
-            const selectUnidad = document.getElementById('nuevoTipoUnidad');
-            if (selectUnidad) {
-                selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>' + 
-                    tiposUnidad.map(t => `<option value="${t}">${t}</option>`).join('');
-                console.log('🔍 DEBUG: Select unidad actualizado con', tiposUnidad.length, 'opciones');
-            } else {
-                console.warn('⚠️ Select unidad no encontrado');
-            }
-            
-            // Actualizar lista de tipos de solución
-            const tiposSolucionAlmacen = [...new Set(
-                Object.values(almacenInsumos).flatMap(obj => Object.keys(obj))
-            )];
-            
-            // Obtener tipos de solución de tipos_globales (ya declarado arriba)
-            const tiposSolucionGlobales = tiposGlobales.soluciones || [];
-            
-            // Combinar y eliminar duplicados
-            const tiposSolucion = [...new Set([...tiposSolucionAlmacen, ...tiposSolucionGlobales])].sort();
-            
-            console.log('🔍 DEBUG: Tipos de solución del almacén:', tiposSolucionAlmacen);
-            console.log('🔍 DEBUG: Tipos de solución globales:', tiposSolucionGlobales);
-            console.log('🔍 DEBUG: Tipos de solución combinados:', tiposSolucion);
-            
-            const selectSolucion = document.getElementById('nuevoTipoSolucion');
-            if (selectSolucion) {
-                selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
-                    tiposSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
-                console.log('🔍 DEBUG: Select solución actualizado con', tiposSolucion.length, 'opciones');
-            } else {
-                console.warn('⚠️ Select solución no encontrado');
-            }
-            
-            // Actualizar lista de insumos en todos los selects existentes
-            console.log('🔍 DEBUG: Lista de insumos actual:', listaInsumos);
-            const contenedorInsumos = document.getElementById('nuevoInsumos');
-            if (contenedorInsumos) {
-                const selects = contenedorInsumos.querySelectorAll('select');
-                console.log('🔍 DEBUG: Selects de insumos encontrados:', selects.length);
-                selects.forEach((select, index) => {
-                    const valorActual = select.value;
-                    select.innerHTML = '<option value="">Seleccionar insumo...</option>' + 
-                        listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('');
-                    // Mantener el valor seleccionado si aún existe
-                    if (valorActual && listaInsumos.includes(valorActual)) {
-                        select.value = valorActual;
-                    }
-                    console.log(`🔍 DEBUG: Select ${index} actualizado con ${listaInsumos.length} insumos`);
-                });
-            } else {
-                console.warn('⚠️ Contenedor de insumos no encontrado');
+        async function actualizarListasEnModalNuevaCombinacion() {
+            try {
+                console.log('🔄 Actualizando listas desde Supabase...');
+                
+                // Cargar tipos desde las nuevas tablas de Supabase
+                const [tiposUnidad, tiposSolucion, tiposInsumo] = await Promise.all([
+                    window.dataService.fetchTiposUnidad(),
+                    window.dataService.fetchTiposSolucion(),
+                    window.dataService.fetchTiposInsumo()
+                ]);
+                
+                // Extraer solo los nombres de los tipos
+                const nombresUnidad = tiposUnidad.map(t => t.nombre).sort();
+                const nombresSolucion = tiposSolucion.map(t => t.nombre).sort();
+                const nombresInsumo = tiposInsumo.map(t => t.nombre).sort();
+                
+                console.log('🔍 DEBUG: Tipos de unidad desde Supabase:', nombresUnidad);
+                console.log('🔍 DEBUG: Tipos de solución desde Supabase:', nombresSolucion);
+                console.log('🔍 DEBUG: Tipos de insumo desde Supabase:', nombresInsumo);
+                
+                // Actualizar lista de tipos de vehículo
+                const selectUnidad = document.getElementById('nuevoTipoUnidad');
+                if (selectUnidad) {
+                    selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>' + 
+                        nombresUnidad.map(t => `<option value="${t}">${t}</option>`).join('');
+                    console.log('✅ Select unidad actualizado con', nombresUnidad.length, 'opciones');
+                } else {
+                    console.warn('⚠️ Select unidad no encontrado');
+                }
+                
+                // Actualizar lista de tipos de solución
+                const selectSolucion = document.getElementById('nuevoTipoSolucion');
+                if (selectSolucion) {
+                    selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
+                        nombresSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
+                    console.log('✅ Select solución actualizado con', nombresSolucion.length, 'opciones');
+                } else {
+                    console.warn('⚠️ Select solución no encontrado');
+                }
+                
+                // Actualizar lista de insumos
+                listaInsumos = nombresInsumo;
+                console.log('✅ Lista de insumos actualizada con', listaInsumos.length, 'elementos');
+                
+                // Actualizar lista de insumos en todos los selects existentes
+                console.log('🔍 DEBUG: Lista de insumos actual:', listaInsumos);
+                const contenedorInsumos = document.getElementById('nuevoInsumos');
+                if (contenedorInsumos) {
+                    const selects = contenedorInsumos.querySelectorAll('select');
+                    console.log('🔍 DEBUG: Selects de insumos encontrados:', selects.length);
+                    selects.forEach((select, index) => {
+                        const valorActual = select.value;
+                        select.innerHTML = '<option value="">Seleccionar insumo...</option>' + 
+                            listaInsumos.map(insumo => `<option value="${insumo}">${insumo}</option>`).join('');
+                        // Mantener el valor seleccionado si aún existe
+                        if (valorActual && listaInsumos.includes(valorActual)) {
+                            select.value = valorActual;
+                        }
+                        console.log(`🔍 DEBUG: Select ${index} actualizado con ${listaInsumos.length} insumos`);
+                    });
+                } else {
+                    console.warn('⚠️ Contenedor de insumos no encontrado');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error actualizando listas desde Supabase:', error);
+                // Fallback a localStorage si hay error
+                console.log('🔄 Usando fallback a localStorage...');
+                const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
+                
+                // Actualizar con datos de localStorage como fallback
+                const selectUnidad = document.getElementById('nuevoTipoUnidad');
+                if (selectUnidad) {
+                    const tiposUnidad = [...new Set([...Object.keys(almacenInsumos), ...(tiposGlobales.vehiculos || [])])].sort();
+                    selectUnidad.innerHTML = '<option value="">Seleccionar tipo de unidad...</option>' + 
+                        tiposUnidad.map(t => `<option value="${t}">${t}</option>`).join('');
+                }
+                
+                const selectSolucion = document.getElementById('nuevoTipoSolucion');
+                if (selectSolucion) {
+                    const tiposSolucion = [...new Set([...(tiposGlobales.soluciones || [])])].sort();
+                    selectSolucion.innerHTML = '<option value="">Seleccionar tipo de solución...</option>' + 
+                        tiposSolucion.map(t => `<option value="${t}">${t}</option>`).join('');
+                }
+                
+                listaInsumos = [...(tiposGlobales.insumos || [])];
             }
         }
 
