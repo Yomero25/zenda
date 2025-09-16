@@ -2238,25 +2238,44 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             
                             // Agregar relevador si hay algún tipo de bloqueo (1 por unidad)
                             if (tieneBloqueo) {
-                                const key = 'Relevador';
+                                // Obtener voltaje de la unidad actual
+                                const voltaje = vehiculo.voltaje || '12v'; // Default a 12v si no se especifica
+                                const keyRelevador = voltaje === '24v' ? 'Relevador 24v' : 'Relevador 12v';
+                                const keyPortarelevador = 'Portarelevador';
                                 const categoria = 'insumos';
                                 
-                                console.log(`🔌 DEBUG: Agregando relevador x1 por unidad (hay bloqueo)`);
+                                console.log(`🔌 DEBUG: Agregando relevador ${voltaje} x1 por unidad (hay bloqueo)`);
                                 
-                                if (todosLosInsumos[key]) {
-                                    // El relevador se multiplica por unidad, no se suman múltiples
-                                    todosLosInsumos[key].cantidad = 1; // Se multiplicará después por cantidadUnidades
-                                    todosLosInsumos[key].unidades = [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`];
-                                    console.log(`📊 DEBUG: Configurando: ${key} = 1 por unidad`);
+                                // Agregar relevador según voltaje
+                                if (todosLosInsumos[keyRelevador]) {
+                                    todosLosInsumos[keyRelevador].cantidad = 1; // Se multiplicará después por cantidadUnidades
+                                    todosLosInsumos[keyRelevador].unidades = [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`];
+                                    console.log(`📊 DEBUG: Configurando: ${keyRelevador} = 1 por unidad`);
                                 } else {
-                                    todosLosInsumos[key] = {
-                                        nombre: 'Relevador',
+                                    todosLosInsumos[keyRelevador] = {
+                                        nombre: keyRelevador,
                                         cantidad: 1, // Se multiplicará después por cantidadUnidades
                                         unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`],
                                         sugerido: true,
                                         categoria: categoria
                                     };
-                                    console.log(`✨ DEBUG: Nuevo insumo: ${key} = 1 por unidad`);
+                                    console.log(`✨ DEBUG: Nuevo insumo: ${keyRelevador} = 1 por unidad`);
+                                }
+                                
+                                // Agregar portarelevador automáticamente
+                                if (todosLosInsumos[keyPortarelevador]) {
+                                    todosLosInsumos[keyPortarelevador].cantidad = 1; // Se multiplicará después por cantidadUnidades
+                                    todosLosInsumos[keyPortarelevador].unidades = [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`];
+                                    console.log(`📊 DEBUG: Configurando: ${keyPortarelevador} = 1 por unidad`);
+                                } else {
+                                    todosLosInsumos[keyPortarelevador] = {
+                                        nombre: keyPortarelevador,
+                                        cantidad: 1, // Se multiplicará después por cantidadUnidades
+                                        unidades: [`Unidad ${unidadIndex + 1} (Rastreo - Bloqueo x1)`],
+                                        sugerido: true,
+                                        categoria: categoria
+                                    };
+                                    console.log(`✨ DEBUG: Nuevo insumo: ${keyPortarelevador} = 1 por unidad`);
                                 }
                             }
                             
@@ -2275,7 +2294,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                         const categoria = obtenerCategoriaInsumo(insumo.nombre);
                                         
                                         // Saltar relevadores si ya los manejamos de manera especial
-                                        if ((key === 'Relevador' || key === 'Relevador 12v') && tieneBloqueo) {
+                                        if ((key === 'Relevador' || key === 'Relevador 12v' || key === 'Relevador 24v') && tieneBloqueo) {
                                             console.log(`⏭️ DEBUG: Saltando ${key} (ya manejado por bloqueo)`);
                                             return;
                                         }
