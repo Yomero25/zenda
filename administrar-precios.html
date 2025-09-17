@@ -1421,6 +1421,16 @@
                     seccionServicios.setAttribute('style', 'display: block !important; visibility: visible; opacity: 1;');
                     console.log('🔄 DEBUG: Visibilidad forzada después del delay');
                     console.log('🔄 DEBUG: Display final:', seccionServicios.style.display);
+                    
+                    // Verificar si la tabla está visible
+                    const tabla = seccionServicios.querySelector('table');
+                    if (tabla) {
+                        console.log('🔄 DEBUG: Tabla encontrada:', tabla);
+                        console.log('🔄 DEBUG: Tabla visible:', tabla.offsetHeight > 0);
+                        console.log('🔄 DEBUG: Tabla display:', window.getComputedStyle(tabla).display);
+                    } else {
+                        console.log('❌ DEBUG: No se encontró la tabla en seccionServicios');
+                    }
                 }
             }, 100);
             
@@ -1502,6 +1512,8 @@
                 tbody.appendChild(row);
             });
             console.log('✅ DEBUG: Renderizado de servicios completado');
+            console.log('🔄 DEBUG: Contenido del tbody:', tbody.innerHTML.substring(0, 200) + '...');
+            console.log('🔄 DEBUG: Número de filas en tbody:', tbody.children.length);
         }
 
         function actualizarEstadisticasServicios() {
