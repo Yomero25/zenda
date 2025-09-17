@@ -5726,6 +5726,13 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             const tipoSolucion = select.value;
             const solucionId = select.name.replace('_tipo', '');
             
+            // Extraer índices del solucionId (formato: wizard_unidad_${unidadId}_solucion_${solucionIndex})
+            const match = solucionId.match(/wizard_unidad_(\d+)_solucion_(\d+)/);
+            const unidadIndex = match ? parseInt(match[1]) - 1 : 0; // Convertir a índice base 0
+            const solucionIndex = match ? parseInt(match[2]) - 1 : 0; // Convertir a índice base 0
+            
+            console.log(`🔧 DEBUG: Configurando solución - Unidad: ${unidadIndex + 1}, Solución: ${solucionIndex + 1}`);
+            
             if (!tipoSolucion) {
                 container.innerHTML = '<p class="text-muted">Selecciona un tipo de solución para ver las configuraciones disponibles.</p>';
                 return;
