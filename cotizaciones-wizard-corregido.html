@@ -1660,7 +1660,13 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             }
             
             if (configs.teclado_sencillo || configs.teclado_dinamico) {
-                entradasUsadas.push(3); // Teclado usa entrada 3
+                // Teclado usa entrada 3, pero si sensores independientes ya la usa, necesitamos otra entrada
+                if (configs.sensores_puertas === 'independientes') {
+                    // Si sensores independientes ya usa entrada 3, teclado no puede usarla
+                    console.log('⚠️ Teclado no puede usarse con sensores independientes (ambos necesitan entrada 3)');
+                } else {
+                    entradasUsadas.push(3); // Teclado usa entrada 3
+                }
             }
             
             if (configs.bloqueo_normal || configs.bloqueo_gradual || configs.bloqueo_cortacorriente) {
@@ -1681,6 +1687,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 const entradaLibre = [1, 2, 3].find(entrada => !entradasUsadas.includes(entrada));
                 if (entradaLibre) {
                     entradasUsadas.push(entradaLibre);
+                } else {
+                    console.log('⚠️ No hay entradas libres para detección jammer');
                 }
             }
             
@@ -1688,7 +1696,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             const entradasUnicas = [...new Set(entradasUsadas)];
             const salidasUnicas = [...new Set(salidasUsadas)];
             
+            console.log(`🔍 DEBUG: Validación GPS - Entradas usadas: [${entradasUnicas.join(', ')}], Salidas usadas: [${salidasUnicas.join(', ')}]`);
+            console.log(`🔍 DEBUG: Configuraciones actuales:`, configs);
+            
             if (entradasUnicas.length > 3 || salidasUnicas.length > 3) {
+                console.log(`❌ DEBUG: Excede capacidades - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
                 return {
                     valido: false,
                     entradasUsadas: entradasUnicas,
@@ -1697,6 +1709,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 };
             }
             
+            console.log(`✅ DEBUG: Configuración válida - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
             return { valido: true };
         }
         
@@ -1969,6 +1982,25 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     if (tecladoDinamico) tecladoDinamico.disabled = false;
                 } else if (elementoModificado === 'teclado_dinamico' && tecladoDinamico && !tecladoDinamico.checked) {
                     if (tecladoSencillo) tecladoSencillo.disabled = false;
+                }
+            }
+            
+            // Reglas de exclusión para sensores de puertas
+            if (elementoModificado === 'sensores_puertas') {
+                const sensoresJuntos = document.getElementById(`${solucionId}_sensores_juntos`);
+                const sensoresIndependientes = document.getElementById(`${solucionId}_sensores_independientes`);
+                
+                // Los sensores de puertas son radio buttons, por lo que son mutuamente excluyentes por naturaleza
+                // Solo necesitamos actualizar la configuración
+                if (sensoresJuntos && sensoresJuntos.checked) {
+                    configs.sensores_puertas = 'juntos';
+                    console.log(`🔧 DEBUG: Sensores configurados como juntos`);
+                } else if (sensoresIndependientes && sensoresIndependientes.checked) {
+                    configs.sensores_puertas = 'independientes';
+                    console.log(`🔧 DEBUG: Sensores configurados como independientes`);
+                } else {
+                    configs.sensores_puertas = null;
+                    console.log(`🔧 DEBUG: Sensores deseleccionados`);
                 }
             }
             
