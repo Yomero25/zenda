@@ -1681,14 +1681,20 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 }
             }
             
-            if (configs.deteccion_jammer === 'alerta_bloqueo') {
-                salidasUsadas.push(3); // Detección jammer usa salida 3
-                // Buscar entrada libre para jammer
+            if (configs.deteccion_jammer === 'alerta' || configs.deteccion_jammer === 'alerta_bloqueo') {
+                // Detección jammer siempre usa una entrada
                 const entradaLibre = [1, 2, 3].find(entrada => !entradasUsadas.includes(entrada));
                 if (entradaLibre) {
                     entradasUsadas.push(entradaLibre);
+                    console.log(`🔍 DEBUG: Detección jammer usando entrada ${entradaLibre}`);
                 } else {
                     console.log('⚠️ No hay entradas libres para detección jammer');
+                }
+                
+                // Si es alerta y bloqueo, también usa salida 3
+                if (configs.deteccion_jammer === 'alerta_bloqueo') {
+                    salidasUsadas.push(3);
+                    console.log(`🔍 DEBUG: Detección jammer con bloqueo usando salida 3`);
                 }
             }
             
@@ -1699,6 +1705,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             console.log(`🔍 DEBUG: Validación GPS - Entradas usadas: [${entradasUnicas.join(', ')}], Salidas usadas: [${salidasUnicas.join(', ')}]`);
             console.log(`🔍 DEBUG: Configuraciones actuales:`, configs);
             
+            // Verificar si excede las capacidades (más de 3 entradas o salidas)
             if (entradasUnicas.length > 3 || salidasUnicas.length > 3) {
                 console.log(`❌ DEBUG: Excede capacidades - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
                 return {
@@ -1707,6 +1714,36 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     salidasUsadas: salidasUnicas,
                     mensaje: 'Las configuraciones seleccionadas exceden las capacidades físicas del GPS GV310LAU (3 entradas, 3 salidas).'
                 };
+            }
+            
+            // Verificar conflictos específicos que requieren Insider
+            const conflictos = [];
+            
+            // Conflicto: Sensores independientes + Teclado (ambos necesitan entrada 3)
+            if (configs.sensores_puertas === 'independientes' && (configs.teclado_sencillo || configs.teclado_dinamico)) {
+                conflictos.push('Sensores independientes y teclado requieren la misma entrada (3)');
+            }
+            
+            // Conflicto: Bloqueo con apertura independientes + Detección jammer con bloqueo (ambos necesitan salida 3)
+            if (configs.sensores_puertas === 'independientes' && configs.bloqueo_apertura && configs.deteccion_jammer === 'alerta_bloqueo') {
+                conflictos.push('Bloqueo con apertura independientes y detección jammer con bloqueo requieren la misma salida (3)');
+            }
+            
+            // Si hay conflictos, mostrar modal
+            if (conflictos.length > 0) {
+                console.log(`❌ DEBUG: Conflictos detectados: ${conflictos.join(', ')}`);
+                return {
+                    valido: false,
+                    entradasUsadas: entradasUnicas,
+                    salidasUsadas: salidasUnicas,
+                    mensaje: `Conflictos detectados: ${conflictos.join(', ')}. Se requiere un módulo Insider para resolver estos conflictos.`
+                };
+            }
+            
+            // Verificar si está al límite (exactamente 3 entradas o salidas)
+            if (entradasUnicas.length === 3 || salidasUnicas.length === 3) {
+                console.log(`⚠️ DEBUG: Al límite de capacidades - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
+                // No es un error, pero es una advertencia
             }
             
             console.log(`✅ DEBUG: Configuración válida - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
@@ -2109,9 +2146,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             const validacion = validarEntradasSalidasGPS(unidadIndex, solucionIndex);
             
             if (!validacion.valido) {
-                console.log(`⚠️ DEBUG: Configuración no válida: ${validacion.mensaje}`);
+                console.log(`🚨 DEBUG: Mostrando modal de advertencia GPS - ${validacion.mensaje}`);
                 mostrarModalAdvertenciaGPS(unidadIndex, solucionIndex, validacion);
             } else {
+                console.log(`✅ DEBUG: Configuración válida, no se muestra modal`);
                 console.log(`✅ DEBUG: Configuración válida`);
             }
             
