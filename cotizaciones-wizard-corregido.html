@@ -3187,7 +3187,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 // Buscar en todas las soluciones si alguna tiene módulo Insider activado
                 const tieneInsider = vehiculo.soluciones?.some(sol => {
                     const tieneModulo = sol.configuraciones?.modulo_insider === true;
-                    console.log(`🔍 DEBUG: Solución ${sol.tipo_solucion} - modulo_insider: ${sol.configuraciones?.modulo_insider}, tieneModulo: ${tieneModulo}`);
+                    console.log(`🚨 CRÍTICO: Solución ${sol.tipo_solucion} - modulo_insider: ${sol.configuraciones?.modulo_insider}, tieneModulo: ${tieneModulo}`);
+                    console.log(`🚨 CRÍTICO: Configuraciones COMPLETAS:`, sol.configuraciones);
+                    console.log(`🚨 CRÍTICO: Object.keys(configuraciones):`, Object.keys(sol.configuraciones || {}));
                     return tieneModulo;
                 }) || false;
                 
