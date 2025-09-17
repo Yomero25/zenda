@@ -1391,9 +1391,7 @@
                 console.log('🔄 DEBUG: Sección precios ocultada');
             }
             if (seccionServicios) {
-                seccionServicios.style.display = 'block !important';
-                seccionServicios.style.visibility = 'visible';
-                seccionServicios.style.opacity = '1';
+                seccionServicios.setAttribute('style', 'display: block !important; visibility: visible; opacity: 1;');
                 console.log('🔄 DEBUG: Sección servicios mostrada');
                 console.log('🔄 DEBUG: Display style:', seccionServicios.style.display);
                 console.log('🔄 DEBUG: Visibility style:', seccionServicios.style.visibility);
@@ -1420,10 +1418,9 @@
             // Forzar visibilidad después de un pequeño delay
             setTimeout(() => {
                 if (seccionServicios) {
-                    seccionServicios.style.display = 'block';
-                    seccionServicios.style.visibility = 'visible';
-                    seccionServicios.style.opacity = '1';
+                    seccionServicios.setAttribute('style', 'display: block !important; visibility: visible; opacity: 1;');
                     console.log('🔄 DEBUG: Visibilidad forzada después del delay');
+                    console.log('🔄 DEBUG: Display final:', seccionServicios.style.display);
                 }
             }, 100);
             
