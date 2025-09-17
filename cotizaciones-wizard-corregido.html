@@ -1839,7 +1839,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             actualizarInterfazSoluciones(unidadIndex);
             
             // Mostrar mensaje de éxito
-            alert('✅ Módulo Insider agregado exitosamente');
+            mostrarAlerta('✅ Módulo Insider agregado exitosamente', 'success');
             
             // Cerrar el modal
             const modal = document.getElementById('modalAdvertenciaGPS');
@@ -3166,10 +3166,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             // Verificar módulos Insider en todas las unidades
             vehiculos.forEach((vehiculo, unidadIndex) => {
+                console.log(`🔍 DEBUG: Verificando Insider en Unidad ${unidadIndex + 1}:`, vehiculo.soluciones);
+                
                 // Buscar en todas las soluciones si alguna tiene módulo Insider activado
-                const tieneInsider = vehiculo.soluciones?.some(sol => 
-                    sol.configuraciones?.modulo_insider === true
-                ) || false;
+                const tieneInsider = vehiculo.soluciones?.some(sol => {
+                    const tieneModulo = sol.configuraciones?.modulo_insider === true;
+                    console.log(`🔍 DEBUG: Solución ${sol.tipo_solucion} - modulo_insider: ${sol.configuraciones?.modulo_insider}, tieneModulo: ${tieneModulo}`);
+                    return tieneModulo;
+                }) || false;
+                
+                console.log(`🔍 DEBUG: Unidad ${unidadIndex + 1} tiene Insider: ${tieneInsider}`);
                 
                 if (tieneInsider) {
                     const keyInsider = 'Módulo Insider';
@@ -3180,6 +3186,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         sugerido: true,
                         categoria: 'equipos'
                     };
+                    console.log(`✅ DEBUG: Módulo Insider agregado a insumos para Unidad ${unidadIndex + 1}`);
                 }
             });
 
