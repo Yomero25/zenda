@@ -1826,8 +1826,12 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         
         // Función para agregar módulo Insider
         function agregarModuloInsider(unidadIndex, solucionIndex) {
+            console.log(`🚨 EJECUTANDO agregarModuloInsider - unidadIndex: ${unidadIndex}, solucionIndex: ${solucionIndex}`);
+            
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
             const solucion = vehiculo.soluciones[solucionIndex];
+            
+            console.log(`🚨 ANTES - solucion.configuraciones:`, solucion.configuraciones);
             
             // Marcar el módulo Insider como activo en la configuración
             if (!solucion.configuraciones) {
@@ -1835,12 +1839,18 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             }
             solucion.configuraciones.modulo_insider = true;
             
+            console.log(`🚨 DESPUÉS - solucion.configuraciones:`, solucion.configuraciones);
+            console.log(`🚨 VERIFICACIÓN - cotizacionData.vehiculos[${unidadIndex}].soluciones[${solucionIndex}].configuraciones:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
+            
             // NO llamar actualizarInterfazSoluciones aquí porque está perdiendo el valor
             // En su lugar, actualizar directamente el checkbox si existe
             const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
             const moduloInsiderElement = document.getElementById(`${solucionId}_modulo_insider`);
             if (moduloInsiderElement) {
                 moduloInsiderElement.checked = true;
+                console.log(`🚨 Checkbox marcado: ${solucionId}_modulo_insider`);
+            } else {
+                console.log(`🚨 NO se encontró checkbox: ${solucionId}_modulo_insider`);
             }
             
             // Mostrar mensaje de éxito
