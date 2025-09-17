@@ -1455,7 +1455,9 @@
                 return;
             }
 
-            serviciosDatos.forEach(servicio => {
+            console.log('🔄 DEBUG: Iniciando renderizado de servicios...');
+            serviciosDatos.forEach((servicio, index) => {
+                console.log(`🔄 DEBUG: Procesando servicio ${index + 1}:`, servicio);
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${servicio.nombre}</strong></td>
@@ -1478,8 +1480,10 @@
                         </button>
                     </td>
                 `;
+                console.log(`🔄 DEBUG: Agregando fila ${index + 1} al tbody`);
                 tbody.appendChild(row);
             });
+            console.log('✅ DEBUG: Renderizado de servicios completado');
         }
 
         function actualizarEstadisticasServicios() {
