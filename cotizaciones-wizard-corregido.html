@@ -1837,15 +1837,28 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             if (!solucion.configuraciones) {
                 solucion.configuraciones = {};
             }
+            
+            // MÚLTIPLES MÉTODOS DE ASIGNACIÓN PARA FORZAR
+            console.log(`🚨 ANTES de asignar - configuraciones:`, JSON.stringify(solucion.configuraciones));
+            
+            // Método 1: Asignación directa
             solucion.configuraciones.modulo_insider = true;
+            console.log(`🚨 MÉTODO 1 - Después de asignación directa:`, JSON.stringify(solucion.configuraciones));
+            
+            // Método 2: Object.assign
+            solucion.configuraciones = Object.assign(solucion.configuraciones, { modulo_insider: true });
+            console.log(`🚨 MÉTODO 2 - Después de Object.assign:`, JSON.stringify(solucion.configuraciones));
+            
+            // Método 3: Spread operator
+            solucion.configuraciones = { ...solucion.configuraciones, modulo_insider: true };
+            console.log(`🚨 MÉTODO 3 - Después de spread:`, JSON.stringify(solucion.configuraciones));
+            
+            // Método 4: Forzar en cotizacionData directamente
+            cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones.modulo_insider = true;
+            console.log(`🚨 MÉTODO 4 - Después de forzar directo:`, JSON.stringify(cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones));
             
             console.log(`🚨 DESPUÉS - solucion.configuraciones:`, solucion.configuraciones);
             console.log(`🚨 VERIFICACIÓN - cotizacionData.vehiculos[${unidadIndex}].soluciones[${solucionIndex}].configuraciones:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
-            
-            // FORZAR que se guarde correctamente por si hay referencia perdida
-            cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones.modulo_insider = true;
-            
-            console.log(`🚨 FORZADO FINAL:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
             
             // NO llamar actualizarInterfazSoluciones aquí porque está perdiendo el valor
             // En su lugar, actualizar directamente el checkbox si existe
