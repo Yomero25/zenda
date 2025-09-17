@@ -1810,145 +1810,184 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             const solucion = vehiculo.soluciones[solucionIndex];
             const configs = solucion.configuraciones || {};
             
+            // Construir el prefijo correcto del ID
+            const unidadId = unidadIndex + 1; // Convertir a base 1
+            const solucionId = `wizard_unidad_${unidadId}_solucion_${solucionIndex + 1}`;
+            
+            console.log(`🔧 DEBUG: Aplicando reglas de exclusión para ${solucionId}, elemento: ${elementoModificado}`);
+            
             // Reglas de exclusión para SOS
             if (elementoModificado.includes('sos_')) {
-                const sosSimple = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sos_simple`);
-                const sosLlamada = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sos_llamada`);
-                const sosBloqueo = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sos_bloqueo`);
+                const sosSimple = document.getElementById(`${solucionId}_sos_simple`);
+                const sosLlamada = document.getElementById(`${solucionId}_sos_llamada`);
+                const sosBloqueo = document.getElementById(`${solucionId}_sos_bloqueo`);
                 
-                if (elementoModificado === 'sos_simple' && sosSimple.checked) {
+                if (elementoModificado === 'sos_simple' && sosSimple && sosSimple.checked) {
                     // Si se selecciona SOS simple, deshabilitar SOS llamada
-                    sosLlamada.disabled = true;
-                    if (sosLlamada.checked) {
-                        sosLlamada.checked = false;
-                        configs.sos_llamada = false;
+                    if (sosLlamada) {
+                        sosLlamada.disabled = true;
+                        if (sosLlamada.checked) {
+                            sosLlamada.checked = false;
+                            configs.sos_llamada = false;
+                        }
                     }
-                } else if (elementoModificado === 'sos_llamada' && sosLlamada.checked) {
+                } else if (elementoModificado === 'sos_llamada' && sosLlamada && sosLlamada.checked) {
                     // Si se selecciona SOS llamada, deshabilitar SOS simple
-                    sosSimple.disabled = true;
-                    if (sosSimple.checked) {
-                        sosSimple.checked = false;
-                        configs.sos_simple = false;
+                    if (sosSimple) {
+                        sosSimple.disabled = true;
+                        if (sosSimple.checked) {
+                            sosSimple.checked = false;
+                            configs.sos_simple = false;
+                        }
                     }
-                } else if (elementoModificado === 'sos_simple' && !sosSimple.checked) {
+                } else if (elementoModificado === 'sos_simple' && sosSimple && !sosSimple.checked) {
                     // Si se deselecciona SOS simple, habilitar SOS llamada
-                    sosLlamada.disabled = false;
-                } else if (elementoModificado === 'sos_llamada' && !sosLlamada.checked) {
+                    if (sosLlamada) {
+                        sosLlamada.disabled = false;
+                    }
+                } else if (elementoModificado === 'sos_llamada' && sosLlamada && !sosLlamada.checked) {
                     // Si se deselecciona SOS llamada, habilitar SOS simple
-                    sosSimple.disabled = false;
+                    if (sosSimple) {
+                        sosSimple.disabled = false;
+                    }
                 }
             }
             
             // Reglas de exclusión para bloqueo
             if (elementoModificado.includes('bloqueo_')) {
-                const bloqueoNormal = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_normal`);
-                const bloqueoGradual = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_gradual`);
-                const bloqueoCortacorriente = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_cortacorriente`);
+                const bloqueoNormal = document.getElementById(`${solucionId}_bloqueo_normal`);
+                const bloqueoGradual = document.getElementById(`${solucionId}_bloqueo_gradual`);
+                const bloqueoCortacorriente = document.getElementById(`${solucionId}_bloqueo_cortacorriente`);
                 
-                if (elementoModificado === 'bloqueo_normal' && bloqueoNormal.checked) {
-                    bloqueoGradual.disabled = true;
-                    bloqueoCortacorriente.disabled = true;
-                    if (bloqueoGradual.checked) {
-                        bloqueoGradual.checked = false;
-                        configs.bloqueo_gradual = false;
+                if (elementoModificado === 'bloqueo_normal' && bloqueoNormal && bloqueoNormal.checked) {
+                    if (bloqueoGradual) {
+                        bloqueoGradual.disabled = true;
+                        if (bloqueoGradual.checked) {
+                            bloqueoGradual.checked = false;
+                            configs.bloqueo_gradual = false;
+                        }
                     }
-                    if (bloqueoCortacorriente.checked) {
-                        bloqueoCortacorriente.checked = false;
-                        configs.bloqueo_cortacorriente = false;
+                    if (bloqueoCortacorriente) {
+                        bloqueoCortacorriente.disabled = true;
+                        if (bloqueoCortacorriente.checked) {
+                            bloqueoCortacorriente.checked = false;
+                            configs.bloqueo_cortacorriente = false;
+                        }
                     }
-                } else if (elementoModificado === 'bloqueo_gradual' && bloqueoGradual.checked) {
-                    bloqueoNormal.disabled = true;
-                    bloqueoCortacorriente.disabled = true;
-                    if (bloqueoNormal.checked) {
-                        bloqueoNormal.checked = false;
-                        configs.bloqueo_normal = false;
+                } else if (elementoModificado === 'bloqueo_gradual' && bloqueoGradual && bloqueoGradual.checked) {
+                    if (bloqueoNormal) {
+                        bloqueoNormal.disabled = true;
+                        if (bloqueoNormal.checked) {
+                            bloqueoNormal.checked = false;
+                            configs.bloqueo_normal = false;
+                        }
                     }
-                    if (bloqueoCortacorriente.checked) {
-                        bloqueoCortacorriente.checked = false;
-                        configs.bloqueo_cortacorriente = false;
+                    if (bloqueoCortacorriente) {
+                        bloqueoCortacorriente.disabled = true;
+                        if (bloqueoCortacorriente.checked) {
+                            bloqueoCortacorriente.checked = false;
+                            configs.bloqueo_cortacorriente = false;
+                        }
                     }
-                } else if (elementoModificado === 'bloqueo_cortacorriente' && bloqueoCortacorriente.checked) {
-                    bloqueoNormal.disabled = true;
-                    bloqueoGradual.disabled = true;
-                    if (bloqueoNormal.checked) {
-                        bloqueoNormal.checked = false;
-                        configs.bloqueo_normal = false;
+                } else if (elementoModificado === 'bloqueo_cortacorriente' && bloqueoCortacorriente && bloqueoCortacorriente.checked) {
+                    if (bloqueoNormal) {
+                        bloqueoNormal.disabled = true;
+                        if (bloqueoNormal.checked) {
+                            bloqueoNormal.checked = false;
+                            configs.bloqueo_normal = false;
+                        }
                     }
-                    if (bloqueoGradual.checked) {
-                        bloqueoGradual.checked = false;
-                        configs.bloqueo_gradual = false;
+                    if (bloqueoGradual) {
+                        bloqueoGradual.disabled = true;
+                        if (bloqueoGradual.checked) {
+                            bloqueoGradual.checked = false;
+                            configs.bloqueo_gradual = false;
+                        }
                     }
-                } else if (elementoModificado === 'bloqueo_normal' && !bloqueoNormal.checked) {
-                    bloqueoGradual.disabled = false;
-                    bloqueoCortacorriente.disabled = false;
-                } else if (elementoModificado === 'bloqueo_gradual' && !bloqueoGradual.checked) {
-                    bloqueoNormal.disabled = false;
-                    bloqueoCortacorriente.disabled = false;
-                } else if (elementoModificado === 'bloqueo_cortacorriente' && !bloqueoCortacorriente.checked) {
-                    bloqueoNormal.disabled = false;
-                    bloqueoGradual.disabled = false;
+                } else if (elementoModificado === 'bloqueo_normal' && bloqueoNormal && !bloqueoNormal.checked) {
+                    if (bloqueoGradual) bloqueoGradual.disabled = false;
+                    if (bloqueoCortacorriente) bloqueoCortacorriente.disabled = false;
+                } else if (elementoModificado === 'bloqueo_gradual' && bloqueoGradual && !bloqueoGradual.checked) {
+                    if (bloqueoNormal) bloqueoNormal.disabled = false;
+                    if (bloqueoCortacorriente) bloqueoCortacorriente.disabled = false;
+                } else if (elementoModificado === 'bloqueo_cortacorriente' && bloqueoCortacorriente && !bloqueoCortacorriente.checked) {
+                    if (bloqueoNormal) bloqueoNormal.disabled = false;
+                    if (bloqueoGradual) bloqueoGradual.disabled = false;
                 }
             }
             
             // Reglas de exclusión para audio en cabina
             if (elementoModificado.includes('audio_')) {
-                const audioBidireccional = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_audio_bidireccional`);
-                const audioEspia = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_audio_espia`);
+                const audioBidireccional = document.getElementById(`${solucionId}_audio_bidireccional`);
+                const audioEspia = document.getElementById(`${solucionId}_audio_espia`);
                 
-                if (elementoModificado === 'audio_bidireccional' && audioBidireccional.checked) {
-                    audioEspia.disabled = true;
-                    if (audioEspia.checked) {
-                        audioEspia.checked = false;
-                        configs.audio_espia = false;
+                if (elementoModificado === 'audio_bidireccional' && audioBidireccional && audioBidireccional.checked) {
+                    if (audioEspia) {
+                        audioEspia.disabled = true;
+                        if (audioEspia.checked) {
+                            audioEspia.checked = false;
+                            configs.audio_espia = false;
+                        }
                     }
-                } else if (elementoModificado === 'audio_espia' && audioEspia.checked) {
-                    audioBidireccional.disabled = true;
-                    if (audioBidireccional.checked) {
-                        audioBidireccional.checked = false;
-                        configs.audio_bidireccional = false;
+                } else if (elementoModificado === 'audio_espia' && audioEspia && audioEspia.checked) {
+                    if (audioBidireccional) {
+                        audioBidireccional.disabled = true;
+                        if (audioBidireccional.checked) {
+                            audioBidireccional.checked = false;
+                            configs.audio_bidireccional = false;
+                        }
                     }
-                } else if (elementoModificado === 'audio_bidireccional' && !audioBidireccional.checked) {
-                    audioEspia.disabled = false;
-                } else if (elementoModificado === 'audio_espia' && !audioEspia.checked) {
-                    audioBidireccional.disabled = false;
+                } else if (elementoModificado === 'audio_bidireccional' && audioBidireccional && !audioBidireccional.checked) {
+                    if (audioEspia) audioEspia.disabled = false;
+                } else if (elementoModificado === 'audio_espia' && audioEspia && !audioEspia.checked) {
+                    if (audioBidireccional) audioBidireccional.disabled = false;
                 }
             }
             
             // Reglas de exclusión para habilitado en cabina
             if (elementoModificado.includes('teclado_')) {
-                const tecladoSencillo = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_teclado_sencillo`);
-                const tecladoDinamico = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_teclado_dinamico`);
+                const tecladoSencillo = document.getElementById(`${solucionId}_teclado_sencillo`);
+                const tecladoDinamico = document.getElementById(`${solucionId}_teclado_dinamico`);
                 
-                if (elementoModificado === 'teclado_sencillo' && tecladoSencillo.checked) {
-                    tecladoDinamico.disabled = true;
-                    if (tecladoDinamico.checked) {
-                        tecladoDinamico.checked = false;
-                        configs.teclado_dinamico = false;
+                if (elementoModificado === 'teclado_sencillo' && tecladoSencillo && tecladoSencillo.checked) {
+                    if (tecladoDinamico) {
+                        tecladoDinamico.disabled = true;
+                        if (tecladoDinamico.checked) {
+                            tecladoDinamico.checked = false;
+                            configs.teclado_dinamico = false;
+                        }
                     }
-                } else if (elementoModificado === 'teclado_dinamico' && tecladoDinamico.checked) {
-                    tecladoSencillo.disabled = true;
-                    if (tecladoSencillo.checked) {
-                        tecladoSencillo.checked = false;
-                        configs.teclado_sencillo = false;
+                } else if (elementoModificado === 'teclado_dinamico' && tecladoDinamico && tecladoDinamico.checked) {
+                    if (tecladoSencillo) {
+                        tecladoSencillo.disabled = true;
+                        if (tecladoSencillo.checked) {
+                            tecladoSencillo.checked = false;
+                            configs.teclado_sencillo = false;
+                        }
                     }
-                } else if (elementoModificado === 'teclado_sencillo' && !tecladoSencillo.checked) {
-                    tecladoDinamico.disabled = false;
-                } else if (elementoModificado === 'teclado_dinamico' && !tecladoDinamico.checked) {
-                    tecladoSencillo.disabled = false;
+                } else if (elementoModificado === 'teclado_sencillo' && tecladoSencillo && !tecladoSencillo.checked) {
+                    if (tecladoDinamico) tecladoDinamico.disabled = false;
+                } else if (elementoModificado === 'teclado_dinamico' && tecladoDinamico && !tecladoDinamico.checked) {
+                    if (tecladoSencillo) tecladoSencillo.disabled = false;
                 }
             }
             
             // Regla para bloqueo con apertura de puertas
             if (elementoModificado === 'bloqueo_apertura') {
-                const bloqueoApertura = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_apertura`);
-                const sensoresJuntos = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sensores_juntos`);
-                const sensoresIndependientes = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sensores_independientes`);
+                const bloqueoApertura = document.getElementById(`${solucionId}_bloqueo_apertura`);
+                const sensoresJuntos = document.getElementById(`${solucionId}_sensores_juntos`);
+                const sensoresIndependientes = document.getElementById(`${solucionId}_sensores_independientes`);
                 
-                if (bloqueoApertura.checked && !sensoresJuntos.checked && !sensoresIndependientes.checked) {
-                    // No se puede seleccionar bloqueo con apertura sin sensores de puertas
-                    bloqueoApertura.checked = false;
-                    configs.bloqueo_apertura = false;
-                    mostrarAlerta('Debe seleccionar sensores de puertas antes de activar el bloqueo con apertura', 'warning');
+                if (bloqueoApertura && bloqueoApertura.checked) {
+                    const tieneSensores = (sensoresJuntos && sensoresJuntos.checked) || 
+                                        (sensoresIndependientes && sensoresIndependientes.checked);
+                    
+                    if (!tieneSensores) {
+                        // No se puede seleccionar bloqueo con apertura sin sensores de puertas
+                        bloqueoApertura.checked = false;
+                        configs.bloqueo_apertura = false;
+                        mostrarAlerta('Debe seleccionar sensores de puertas antes de activar el bloqueo con apertura', 'warning');
+                    }
                 }
             }
         }
