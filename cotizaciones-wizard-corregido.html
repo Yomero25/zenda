@@ -3178,6 +3178,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             // Verificar módulos Insider en todas las unidades
             console.log(`🔍 DEBUG: Verificando módulos Insider en ${vehiculos.length} unidades...`);
+            console.log(`🔍 DEBUG: cotizacionData.vehiculos:`, cotizacionData.vehiculos);
             vehiculos.forEach((vehiculo, unidadIndex) => {
                 console.log(`🔍 DEBUG: Unidad ${unidadIndex + 1} - Soluciones:`, vehiculo.soluciones?.map(s => s.tipo_solucion) || []);
                 const tieneInsider = vehiculo.soluciones?.some(sol => sol.tipo_solucion === 'Insider') || false;
