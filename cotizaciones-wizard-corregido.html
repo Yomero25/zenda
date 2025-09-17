@@ -1671,6 +1671,147 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         let generandoInsumos = false; // Flag para evitar ejecuciones múltiples
         let ultimaGeneracion = 0; // Timestamp de la última generación
         
+        // Función para detectar servicios necesarios según las soluciones
+        function detectarServiciosNecesarios(vehiculos) {
+            const serviciosNecesarios = [];
+            
+            vehiculos.forEach((vehiculo, unidadIndex) => {
+                if (vehiculo.soluciones && vehiculo.soluciones.length > 0) {
+                    vehiculo.soluciones.forEach(solucion => {
+                        const tipoSolucion = solucion.tipo_solucion;
+                        const configuraciones = solucion.configuraciones || {};
+                        
+                        // Detectar servicios según las soluciones y configuraciones
+                        if (configuraciones.hosting) {
+                            // Servicios que requieren hosting
+                            if (tipoSolucion === 'VPC' || tipoSolucion === 'Dashcam' || 
+                                tipoSolucion === 'Encadenamiento de señales' || tipoSolucion === 'Sideview' ||
+                                tipoSolucion === 'MDVR 4 Ch' || tipoSolucion === 'MDVR 8 Ch') {
+                                serviciosNecesarios.push({
+                                    nombre: 'Datos video',
+                                    periodicidad: 'mensual',
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
+                            } else if (tipoSolucion === 'Rastreo basico' || tipoSolucion === 'Rastreo avanzado') {
+                                serviciosNecesarios.push({
+                                    nombre: 'Datos rastreo basico',
+                                    periodicidad: 'mensual',
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
+                            } else if (tipoSolucion === 'Rastreo satelital') {
+                                serviciosNecesarios.push({
+                                    nombre: 'Datos - Satelitales',
+                                    periodicidad: 'anual',
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
+                                serviciosNecesarios.push({
+                                    nombre: 'Activación satelital',
+                                    periodicidad: 'anual',
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
+                            }
+                        }
+                        
+                        // Detectar servicios de voz
+                        if (configuraciones.audio_bidireccional || configuraciones.audio_espia || 
+                            configuraciones.sos_llamada) {
+                            serviciosNecesarios.push({
+                                nombre: 'Datos - Voz',
+                                periodicidad: 'mensual',
+                                cantidad: 1,
+                                unidad: unidadIndex + 1,
+                                solucion: tipoSolucion
+                            });
+                        }
+                        
+                        // Detectar servicios de rastreo avanzado
+                        if (tipoSolucion === 'Rastreo avanzado' && configuraciones.hosting) {
+                            // Reemplazar el servicio básico con el avanzado
+                            const index = serviciosNecesarios.findIndex(s => 
+                                s.nombre === 'Datos rastreo basico' && s.unidad === unidadIndex + 1
+                            );
+                            if (index !== -1) {
+                                serviciosNecesarios[index].nombre = 'Datos rastreo avanzado';
+                            }
+                        }
+                    });
+                }
+            });
+            
+            return serviciosNecesarios;
+        }
+        
+        // Función para detectar SIMs necesarias según los servicios
+        function detectarSIMsNecesarias(vehiculos) {
+            const simsNecesarias = [];
+            
+            vehiculos.forEach((vehiculo, unidadIndex) => {
+                if (vehiculo.soluciones && vehiculo.soluciones.length > 0) {
+                    let tieneVideo = false;
+                    let tieneVoz = false;
+                    let tieneRastreo = false;
+                    
+                    vehiculo.soluciones.forEach(solucion => {
+                        const tipoSolucion = solucion.tipo_solucion;
+                        const configuraciones = solucion.configuraciones || {};
+                        
+                        if (configuraciones.hosting) {
+                            if (tipoSolucion === 'VPC' || tipoSolucion === 'Dashcam' || 
+                                tipoSolucion === 'Encadenamiento de señales' || tipoSolucion === 'Sideview' ||
+                                tipoSolucion === 'MDVR 4 Ch' || tipoSolucion === 'MDVR 8 Ch') {
+                                tieneVideo = true;
+                            } else if (tipoSolucion === 'Rastreo basico' || tipoSolucion === 'Rastreo avanzado') {
+                                tieneRastreo = true;
+                            }
+                        }
+                        
+                        if (configuraciones.audio_bidireccional || configuraciones.audio_espia || 
+                            configuraciones.sos_llamada) {
+                            tieneVoz = true;
+                        }
+                    });
+                    
+                    // Agregar SIMs según los servicios detectados
+                    if (tieneVideo) {
+                        simsNecesarias.push({
+                            nombre: 'SIM video',
+                            cantidad: 1,
+                            unidad: unidadIndex + 1,
+                            razon: 'Servicio de video'
+                        });
+                    }
+                    
+                    if (tieneVoz) {
+                        simsNecesarias.push({
+                            nombre: 'SIM voz',
+                            cantidad: 1,
+                            unidad: unidadIndex + 1,
+                            razon: 'Servicio de voz'
+                        });
+                    }
+                    
+                    if (tieneRastreo) {
+                        simsNecesarias.push({
+                            nombre: 'SIM 5 Mb',
+                            cantidad: 1,
+                            unidad: unidadIndex + 1,
+                            razon: 'Servicio de rastreo'
+                        });
+                    }
+                }
+            });
+            
+            return simsNecesarias;
+        }
+        
         async function generarInsumosSugeridos() {
             console.log('🔄 DEBUG: Iniciando generarInsumosSugeridos()...');
             const container = document.getElementById('insumosSugeridosContainer');
@@ -2353,6 +2494,30 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 }
             });
 
+            // Detectar servicios necesarios
+            const serviciosNecesarios = detectarServiciosNecesarios(vehiculos);
+            const simsNecesarias = detectarSIMsNecesarias(vehiculos);
+            
+            // Agregar SIMs como insumos
+            simsNecesarias.forEach(sim => {
+                const key = sim.nombre;
+                if (todosLosInsumos[key]) {
+                    todosLosInsumos[key].cantidad += sim.cantidad;
+                    todosLosInsumos[key].unidades.push(`Unidad ${sim.unidad} (${sim.razon})`);
+                } else {
+                    todosLosInsumos[key] = {
+                        nombre: sim.nombre,
+                        cantidad: sim.cantidad,
+                        unidades: [`Unidad ${sim.unidad} (${sim.razon})`],
+                        sugerido: true,
+                        categoria: 'insumos'
+                    };
+                }
+            });
+            
+            // Guardar servicios en cotizacionData
+            cotizacionData.serviciosSugeridos = serviciosNecesarios;
+            
             // Aplicar reglas fijas por unidad y multiplicar por cantidad de unidades
             const cantidadUnidades = cotizacionData.cantidadLote || vehiculos.length;
             const tipoVenta = cotizacionData.tipoVenta || 'instalacion';
@@ -2477,7 +2642,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             const totalesPorCategoria = {
                 equipos: insumosPorCategoria.equipos.length,
                 accesorios: insumosPorCategoria.accesorios.length,
-                insumos: insumosPorCategoria.insumos.length
+                insumos: insumosPorCategoria.insumos.length,
+                servicios: serviciosNecesarios.length
             };
 
             let html = `
@@ -2512,6 +2678,12 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <i class="bi bi-tools"></i> Materia Prima <span class="badge bg-warning ms-1">${totalesPorCategoria.insumos}</span>
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="servicios-tab" data-bs-toggle="tab" data-bs-target="#servicios" 
+                                type="button" role="tab" aria-controls="servicios" aria-selected="false">
+                            <i class="bi bi-cloud"></i> Servicios <span class="badge bg-info ms-1">${totalesPorCategoria.servicios}</span>
+                        </button>
+                    </li>
                 </ul>
 
                 <!-- Contenido de las pestañas -->
@@ -2519,14 +2691,95 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             `;
 
             // Generar contenido para cada categoría
-            ['equipos', 'accesorios', 'insumos'].forEach((categoria, categoriaIndex) => {
+            ['equipos', 'accesorios', 'insumos', 'servicios'].forEach((categoria, categoriaIndex) => {
                 const isActive = categoriaIndex === 0 ? 'show active' : '';
                 const iconosCategoria = {
                     equipos: '<i class="bi bi-cpu me-1" style="color: #fb930c;"></i>',
                     accesorios: '<i class="bi bi-puzzle text-success me-1"></i>',
-                    insumos: '<i class="bi bi-tools text-warning me-1"></i>'
+                    insumos: '<i class="bi bi-tools text-warning me-1"></i>',
+                    servicios: '<i class="bi bi-cloud text-info me-1"></i>'
                 };
 
+                // Manejar servicios de manera especial
+                if (categoria === 'servicios') {
+                    html += `
+                        <div class="tab-pane fade ${isActive}" id="${categoria}" role="tabpanel" aria-labelledby="${categoria}-tab">
+                            <div class="mb-4">
+                                <h6 style="color: #17a2b8;">
+                                    ${iconosCategoria[categoria]} Servicios de Datos Sugeridos
+                                    <span class="badge ms-2" style="background-color: #17a2b8;">${serviciosNecesarios.length}</span>
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th width="50">Usar</th>
+                                                <th>Servicio</th>
+                                                <th width="120">Periodicidad</th>
+                                                <th width="80">Cantidad</th>
+                                                <th>Aplicado en</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                    `;
+                    
+                    if (serviciosNecesarios.length === 0) {
+                        html += `
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    <i class="bi bi-info-circle"></i> No se requieren servicios de datos
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        serviciosNecesarios.forEach(servicio => {
+                            const servicioId = `servicio_${servicio.nombre.replace(/\s+/g, '_').toLowerCase()}_${servicio.unidad}`;
+                            html += `
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input servicio-checkbox" type="checkbox" 
+                                                   id="${servicioId}" value="${servicio.nombre}" checked>
+                                        </div>
+                                    </td>
+                                    <td><strong>${servicio.nombre}</strong></td>
+                                    <td>
+                                        <span class="badge ${servicio.periodicidad === 'anual' ? 'bg-danger' : 'bg-primary'}">
+                                            ${servicio.periodicidad}
+                                        </span>
+                                    </td>
+                                    <td><span class="badge bg-secondary">${servicio.cantidad}</span></td>
+                                    <td>
+                                        <small class="text-muted">
+                                            Unidad ${servicio.unidad} (${servicio.solucion})
+                                        </small>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    
+                    html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-2 mb-3">
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-outline-info btn-sm me-2" onclick="seleccionarCategoria('${categoria}', true)">
+                                        <i class="bi bi-check-all"></i> Seleccionar Servicios
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="seleccionarCategoria('${categoria}', false)">
+                                        <i class="bi bi-x-square"></i> Deseleccionar Servicios
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return; // Salir del bucle para servicios
+                }
+                
                 // Separar automáticos de sugeridos por matriz
                 const automaticos = insumosAutomaticos[categoria];
                 const sugeridos = insumosPorCategoria[categoria].filter(insumo => !insumo.sugerido);
