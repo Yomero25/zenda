@@ -5078,8 +5078,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     <label class="form-check-label" for="${solucionId}_grabacion">Grabación</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_transmision" id="${solucionId}_transmision">
-                                    <label class="form-check-label" for="${solucionId}_transmision">Transmisión</label>
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -5265,8 +5265,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     <label class="form-check-label" for="${solucionId}_grabacion">Grabación</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_transmision" id="${solucionId}_transmision">
-                                    <label class="form-check-label" for="${solucionId}_transmision">Transmisión</label>
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
                                 </div>
                             </div>
                         </div>
@@ -5311,6 +5311,15 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <select class="form-select" name="${solucionId}_canal_ip_tipo" disabled>
                                 <option value="digital" selected>Cámara Digital (IP)</option>
                             </select>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <h6 style="color: #fb930c;">Hosting</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                            </div>
                         </div>
                     `;
                     break;
@@ -5360,8 +5369,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-4">
                                 <h6 style="color: #fb930c;">Transmisión</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_transmision" id="${solucionId}_transmision">
-                                    <label class="form-check-label" for="${solucionId}_transmision">Transmisión</label>
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -5396,6 +5405,13 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="${solucionId}_ip67" id="${solucionId}_ip67">
                                     <label class="form-check-label" for="${solucionId}_ip67">IP67 (a prueba de agua)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 style="color: #fb930c;">Hosting</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
                                 </div>
                             </div>
                         </div>
@@ -5509,14 +5525,35 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 <textarea class="form-control" name="${solucionId}_funcionalidad_adicional" rows="2" placeholder="Describe cualquier funcionalidad adicional requerida..."></textarea>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <h6 style="color: #fb930c;">Hosting</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                            </div>
+                        </div>
                     `;
                     break;
                     
                 case 'Rastreo satelital':
                     configuracionesHtml = `
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="${solucionId}_sos" id="${solucionId}_sos">
-                            <label class="form-check-label" for="${solucionId}_sos">SOS</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 style="color: #fb930c;">Funciones</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_sos" id="${solucionId}_sos">
+                                    <label class="form-check-label" for="${solucionId}_sos">SOS</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 style="color: #fb930c;">Hosting</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                            </div>
                         </div>
                     `;
                     break;
@@ -5706,8 +5743,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     <label class="form-check-label" for="${solucionId}_grabacion">Grabación</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_transmision" id="${solucionId}_transmision">
-                                    <label class="form-check-label" for="${solucionId}_transmision">Transmisión</label>
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
                                 </div>
                             </div>
                             <div class="col-md-4">

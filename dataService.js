@@ -1478,6 +1478,75 @@
     }
   }
 
+  // =====================
+  // Servicios de Datos
+  // =====================
+
+  async function fetchServiciosDatos() {
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('servicios_datos')
+        .select('*')
+        .eq('activo', true)
+        .order('nombre, tipo_periodicidad');
+      
+      if (error) {
+        console.error('❌ Error fetchServiciosDatos:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (e) {
+      console.error('❌ Error fetchServiciosDatos:', e);
+      return [];
+    }
+  }
+
+  async function upsertServicioDatos(servicioData) {
+    if (!client) return null;
+    try {
+      const { data, error } = await client
+        .from('servicios_datos')
+        .upsert(servicioData, { 
+          onConflict: 'nombre,tipo_periodicidad',
+          ignoreDuplicates: false 
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Error upsertServicioDatos:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (e) {
+      console.error('❌ Error upsertServicioDatos:', e);
+      return null;
+    }
+  }
+
+  async function deleteServicioDatos(id) {
+    if (!client) return false;
+    try {
+      const { error } = await client
+        .from('servicios_datos')
+        .update({ activo: false })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleteServicioDatos:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (e) {
+      console.error('❌ Error deleteServicioDatos:', e);
+      return false;
+    }
+  }
+
   // Exponer API
   window.dataService = {
     hasSupabase: () => !!client,
@@ -1540,6 +1609,10 @@
     fetchFuncionesRastreo,
     upsertFuncionRastreo,
     deleteFuncionRastreo,
+    // servicios de datos
+    fetchServiciosDatos,
+    upsertServicioDatos,
+    deleteServicioDatos,
     // helpers
     getCotizacionByIdOrFolio: async (idOrFolio) => {
       const found = await getCotizacionRowByIdOrFolio(idOrFolio);
