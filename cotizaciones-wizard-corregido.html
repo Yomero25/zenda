@@ -1842,6 +1842,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             console.log(`🚨 DESPUÉS - solucion.configuraciones:`, solucion.configuraciones);
             console.log(`🚨 VERIFICACIÓN - cotizacionData.vehiculos[${unidadIndex}].soluciones[${solucionIndex}].configuraciones:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
             
+            // FORZAR que se guarde correctamente por si hay referencia perdida
+            cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones.modulo_insider = true;
+            
+            console.log(`🚨 FORZADO FINAL:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
+            
             // NO llamar actualizarInterfazSoluciones aquí porque está perdiendo el valor
             // En su lugar, actualizar directamente el checkbox si existe
             const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
