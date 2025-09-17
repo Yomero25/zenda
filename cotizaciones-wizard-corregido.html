@@ -3170,16 +3170,14 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 }
             });
             
-            // Verificar módulos Insider en todas las unidades
-            vehiculos.forEach((vehiculo, unidadIndex) => {
+            // Verificar módulos Insider en todas las unidades - USAR cotizacionData.vehiculos directamente
+            cotizacionData.vehiculos.forEach((vehiculo, unidadIndex) => {
                 console.log(`🔍 DEBUG: Verificando Insider en Unidad ${unidadIndex + 1}:`, vehiculo.soluciones);
-                console.log(`🔍 DEBUG: cotizacionData.vehiculos[${unidadIndex}]:`, cotizacionData.vehiculos[unidadIndex]);
                 
                 // Buscar en todas las soluciones si alguna tiene módulo Insider activado
                 const tieneInsider = vehiculo.soluciones?.some(sol => {
                     const tieneModulo = sol.configuraciones?.modulo_insider === true;
                     console.log(`🔍 DEBUG: Solución ${sol.tipo_solucion} - modulo_insider: ${sol.configuraciones?.modulo_insider}, tieneModulo: ${tieneModulo}`);
-                    console.log(`🔍 DEBUG: Configuraciones completas:`, sol.configuraciones);
                     return tieneModulo;
                 }) || false;
                 
