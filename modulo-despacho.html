@@ -843,19 +843,56 @@
             `;
 
             if (Object.keys(solicitud.insumos).length > 0) {
-                detalleHTML += `
-                    <div class="detail-section">
-                        <h6><i class="bi bi-box"></i> Insumos Requeridos</h6>
-                        ${Object.entries(solicitud.insumos).map(([insumo, cantidad]) => `
-                            <div class="item-row">
-                                <div class="row">
-                                    <div class="col-md-8">${insumo}</div>
-                                    <div class="col-md-4 text-end"><strong>${cantidad}</strong> unidades</div>
-                                </div>
+                // Separar SIMs de otros insumos
+                const sims = {};
+                const otrosInsumos = {};
+                
+                Object.entries(solicitud.insumos).forEach(([insumo, cantidad]) => {
+                    if (insumo.includes('SIM') || insumo.includes('sim')) {
+                        sims[insumo] = cantidad;
+                    } else {
+                        otrosInsumos[insumo] = cantidad;
+                    }
+                });
+                
+                // Mostrar SIMs en sección especial
+                if (Object.keys(sims).length > 0) {
+                    detalleHTML += `
+                        <div class="detail-section">
+                            <h6><i class="bi bi-sim"></i> SIMs Requeridas</h6>
+                            <div class="alert alert-info mb-3">
+                                <small><i class="bi bi-info-circle"></i> SIMs detectadas automáticamente según los servicios de datos seleccionados</small>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
+                            ${Object.entries(sims).map(([sim, cantidad]) => `
+                                <div class="item-row border-start border-info border-3 ps-3 mb-2">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <span class="badge bg-info me-2">${sim}</span>
+                                        </div>
+                                        <div class="col-md-4 text-end"><strong>${cantidad}</strong> unidades</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                
+                // Mostrar otros insumos
+                if (Object.keys(otrosInsumos).length > 0) {
+                    detalleHTML += `
+                        <div class="detail-section">
+                            <h6><i class="bi bi-box"></i> Insumos Requeridos</h6>
+                            ${Object.entries(otrosInsumos).map(([insumo, cantidad]) => `
+                                <div class="item-row">
+                                    <div class="row">
+                                        <div class="col-md-8">${insumo}</div>
+                                        <div class="col-md-4 text-end"><strong>${cantidad}</strong> unidades</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
             }
 
             if (Object.keys(solicitud.equipos).length > 0) {
