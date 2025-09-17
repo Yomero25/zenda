@@ -118,17 +118,17 @@
         function renderConfigEspecifica(s){
           const det = Array.isArray(s.solucionesDetalladas) ? s.solucionesDetalladas : [];
           const blocks = [];
-          // Dashcam: IA / Transmisión / Memoria
+          // Dashcam: IA / Hosting / Memoria
           const dash = det.find(d => (d.solucion||'').toLowerCase().includes('dashcam'));
           if (dash && dash.configuraciones){
             const ia = dash.configuraciones.ia === true ? 'Sí' : 'No';
-            const tx = dash.configuraciones.transmision === true ? 'Sí' : 'No';
+            const hosting = dash.configuraciones.hosting === true ? 'Sí' : 'No';
             const mem = dash.configuraciones.memoria ? String(dash.configuraciones.memoria) : '';
             blocks.push(`
               <div class="mt-2">
                 <span class="badge bg-dark me-2">Dashcam</span>
                 <span class="badge badge-config me-1">IA: ${ia}</span>
-                <span class="badge badge-config me-1">Transmisión: ${tx}</span>
+                <span class="badge badge-config me-1">Hosting: ${hosting}</span>
                 ${mem ? `<span class="badge badge-config">Memoria: ${mem} Gb</span>` : ''}
               </div>
             `);
@@ -136,7 +136,7 @@
           // Rastreo/GPS: flags principales
           const rast = det.find(d => (d.solucion||'').toLowerCase().includes('rastreo'));
           if (rast && rast.configuraciones){
-            const keys = ['ip67','audio_bidireccional','audio_espia','bloqueo_cc','bloqueo_normal','sos_simple','sos_llamada','sos_bloqueo','alerta'];
+            const keys = ['ip67','audio_bidireccional','audio_espia','bloqueo_cc','bloqueo_normal','sos_simple','sos_llamada','sos_bloqueo','alerta','hosting'];
             const chips = keys.filter(k => !!rast.configuraciones[k]).map(k => k.replace(/_/g, ' '));
             if (chips.length){
               blocks.push(`
@@ -147,20 +147,143 @@
               `);
             }
           }
-          // VPC/Sideview con Grabación/Transmisión
+          // VPC/Sideview con Grabación/Hosting
           const vpc = det.find(d => ['vpc','sideview','encadenamiento'].some(x => (d.solucion||'').toLowerCase().includes(x)));
           if (vpc && vpc.configuraciones){
             const g = vpc.configuraciones.grabacion === true ? 'Sí' : 'No';
-            const t = vpc.configuraciones.transmision === true ? 'Sí' : 'No';
+            const h = vpc.configuraciones.hosting === true ? 'Sí' : 'No';
             blocks.push(`
               <div class="mt-2">
                 <span class="badge bg-dark me-2">VPC/Sideview</span>
                 <span class="badge badge-config me-1">Grabación: ${g}</span>
-                <span class="badge badge-config me-1">Transmisión: ${t}</span>
+                <span class="badge badge-config me-1">Hosting: ${h}</span>
               </div>
             `);
           }
           return blocks.join('');
+        }
+
+        // Helper: detectar servicios necesarios según las soluciones
+        function detectarServiciosNecesarios(s){
+          const det = Array.isArray(s.solucionesDetalladas) ? s.solucionesDetalladas : [];
+          const servicios = [];
+          
+          det.forEach(sd => {
+            const tipoSolucion = sd.solucion || '';
+            const configuraciones = sd.configuraciones || {};
+            
+            // Detectar servicios según las soluciones y configuraciones
+            if (configuraciones.hosting) {
+              // Servicios que requieren hosting
+              if (tipoSolucion === 'VPC' || tipoSolucion === 'Dashcam' || 
+                  tipoSolucion === 'Encadenamiento de señales' || tipoSolucion === 'Sideview' ||
+                  tipoSolucion === 'MDVR 4 Ch' || tipoSolucion === 'MDVR 8 Ch') {
+                servicios.push({
+                  nombre: 'Datos video',
+                  periodicidad: 'mensual',
+                  unidad: sd.unidad || 1
+                });
+              } else if (tipoSolucion === 'Rastreo basico' || tipoSolucion === 'Rastreo avanzado') {
+                servicios.push({
+                  nombre: 'Datos rastreo basico',
+                  periodicidad: 'mensual',
+                  unidad: sd.unidad || 1
+                });
+              } else if (tipoSolucion === 'Rastreo satelital') {
+                servicios.push({
+                  nombre: 'Datos - Satelitales',
+                  periodicidad: 'anual',
+                  unidad: sd.unidad || 1
+                });
+                servicios.push({
+                  nombre: 'Activación satelital',
+                  periodicidad: 'anual',
+                  unidad: sd.unidad || 1
+                });
+              }
+            }
+            
+            // Detectar servicios de voz
+            if (configuraciones.audio_bidireccional || configuraciones.audio_espia || 
+                configuraciones.sos_llamada) {
+              servicios.push({
+                nombre: 'Datos - Voz',
+                periodicidad: 'mensual',
+                unidad: sd.unidad || 1
+              });
+            }
+            
+            // Detectar servicios de rastreo avanzado
+            if (tipoSolucion === 'Rastreo avanzado' && configuraciones.hosting) {
+              // Reemplazar el servicio básico con el avanzado
+              const index = servicios.findIndex(serv => 
+                serv.nombre === 'Datos rastreo basico' && serv.unidad === (sd.unidad || 1)
+              );
+              if (index !== -1) {
+                servicios[index].nombre = 'Datos rastreo avanzado';
+              }
+            }
+          });
+          
+          return servicios;
+        }
+
+        // Helper: detectar SIMs necesarias según los servicios
+        function detectarSIMsNecesarias(s){
+          const det = Array.isArray(s.solucionesDetalladas) ? s.solucionesDetalladas : [];
+          const sims = [];
+          
+          det.forEach(sd => {
+            const tipoSolucion = sd.solucion || '';
+            const configuraciones = sd.configuraciones || {};
+            const unidad = sd.unidad || 1;
+            
+            let tieneVideo = false;
+            let tieneVoz = false;
+            let tieneRastreo = false;
+            
+            if (configuraciones.hosting) {
+              if (tipoSolucion === 'VPC' || tipoSolucion === 'Dashcam' || 
+                  tipoSolucion === 'Encadenamiento de señales' || tipoSolucion === 'Sideview' ||
+                  tipoSolucion === 'MDVR 4 Ch' || tipoSolucion === 'MDVR 8 Ch') {
+                tieneVideo = true;
+              } else if (tipoSolucion === 'Rastreo basico' || tipoSolucion === 'Rastreo avanzado') {
+                tieneRastreo = true;
+              }
+            }
+            
+            if (configuraciones.audio_bidireccional || configuraciones.audio_espia || 
+                configuraciones.sos_llamada) {
+              tieneVoz = true;
+            }
+            
+            // Agregar SIMs según los servicios detectados
+            if (tieneVideo) {
+              sims.push({
+                nombre: 'SIM video',
+                unidad: unidad,
+                razon: 'Servicio de video'
+              });
+            }
+            
+            if (tieneVoz) {
+              sims.push({
+                nombre: 'SIM voz',
+                unidad: unidad,
+                razon: 'Servicio de voz'
+              });
+            }
+            
+            if (tieneRastreo) {
+              sims.push({
+                nombre: 'SIM 5 Mb',
+                unidad: unidad,
+                razon: 'Servicio de rastreo'
+              });
+            }
+          });
+          
+          return sims;
         }
 
         lista.forEach(s => {
@@ -246,6 +369,93 @@
                         <strong>Equipos:</strong> ${Object.entries(s.equipos).map(([k,v])=>`${k} x${v}`).join(', ')}
                       </div>
                     ` : ''}
+                    ${(() => {
+                      const servicios = detectarServiciosNecesarios(s);
+                      const sims = detectarSIMsNecesarias(s);
+                      let html = '';
+                      
+                      if (servicios.length > 0) {
+                        // Agrupar servicios por nombre y periodicidad
+                        const serviciosAgrupados = {};
+                        servicios.forEach(servicio => {
+                          const key = `${servicio.nombre}_${servicio.periodicidad}`;
+                          if (!serviciosAgrupados[key]) {
+                            serviciosAgrupados[key] = {
+                              nombre: servicio.nombre,
+                              periodicidad: servicio.periodicidad,
+                              unidades: []
+                            };
+                          }
+                          serviciosAgrupados[key].unidades.push(servicio.unidad);
+                        });
+                        
+                        const serviciosUnicos = Object.values(serviciosAgrupados);
+                        
+                        html += `
+                          <div class="mt-2">
+                            <div class="alert alert-info py-2 mb-2">
+                              <strong><i class="bi bi-cloud me-1"></i>Servicios de Datos:</strong>
+                              <small class="d-block">Servicios detectados automáticamente según las soluciones seleccionadas</small>
+                            </div>
+                            <div class="row g-1">
+                              ${serviciosUnicos.map(servicio => `
+                                <div class="col-md-6">
+                                  <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                    <div>
+                                      <span class="badge bg-primary me-1">${servicio.nombre}</span>
+                                      <span class="badge ${servicio.periodicidad === 'anual' ? 'bg-danger' : 'bg-info'}">${servicio.periodicidad}</span>
+                                    </div>
+                                    <small class="text-muted">Unidades: ${servicio.unidades.join(', ')}</small>
+                                  </div>
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                        `;
+                      }
+                      
+                      if (sims.length > 0) {
+                        // Agrupar SIMs por nombre
+                        const simsAgrupadas = {};
+                        sims.forEach(sim => {
+                          if (!simsAgrupadas[sim.nombre]) {
+                            simsAgrupadas[sim.nombre] = {
+                              nombre: sim.nombre,
+                              unidades: [],
+                              razones: []
+                            };
+                          }
+                          simsAgrupadas[sim.nombre].unidades.push(sim.unidad);
+                          simsAgrupadas[sim.nombre].razones.push(sim.razon);
+                        });
+                        
+                        const simsUnicas = Object.values(simsAgrupadas);
+                        
+                        html += `
+                          <div class="mt-2">
+                            <div class="alert alert-warning py-2 mb-2">
+                              <strong><i class="bi bi-sim me-1"></i>SIMs Requeridas:</strong>
+                              <small class="d-block">SIMs detectadas automáticamente según los servicios de datos</small>
+                            </div>
+                            <div class="row g-1">
+                              ${simsUnicas.map(sim => `
+                                <div class="col-md-6">
+                                  <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                    <div>
+                                      <span class="badge bg-warning me-1">${sim.nombre}</span>
+                                      <small class="text-muted">${sim.razones[0]}</small>
+                                    </div>
+                                    <small class="text-muted">Unidades: ${sim.unidades.join(', ')}</small>
+                                  </div>
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                        `;
+                      }
+                      
+                      return html;
+                    })()}
                   </div>
                   <div class="text-end">
                     <span class="badge ${s.estado==='pendiente'?'bg-warning': s.estado==='en_configuracion'?'bg-info':'bg-success'}">${s.estado||'pendiente'}</span>
