@@ -2291,6 +2291,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 }
                 
                 // Aplicar estado del módulo Insider
+                const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
                 const moduloInsiderElement = document.getElementById(`${solucionId}_modulo_insider`);
                 if (moduloInsiderElement) {
                     moduloInsiderElement.checked = solucion.configuraciones.modulo_insider || false;
