@@ -1957,11 +1957,50 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         function manejarCambioConfiguracion(solucionId, configKey, unidadIndex, solucionIndex) {
             console.log(`🔄 DEBUG: Cambio en configuración: ${configKey} para ${solucionId}`);
             
+            // Verificar que cotizacionData.vehiculos esté inicializado
+            if (!cotizacionData.vehiculos || !Array.isArray(cotizacionData.vehiculos)) {
+                console.warn('⚠️ cotizacionData.vehiculos no está inicializado, inicializando...');
+                cotizacionData.vehiculos = [];
+            }
+            
+            // Verificar que el índice de unidad sea válido
+            if (unidadIndex >= cotizacionData.vehiculos.length) {
+                console.warn(`⚠️ Unidad ${unidadIndex} no existe, creando...`);
+                // Crear vehículo básico si no existe
+                cotizacionData.vehiculos[unidadIndex] = {
+                    soluciones: []
+                };
+            }
+            
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            
+            // Verificar que el vehículo tenga soluciones
+            if (!vehiculo.soluciones || !Array.isArray(vehiculo.soluciones)) {
+                console.warn(`⚠️ Soluciones no inicializadas para unidad ${unidadIndex}, inicializando...`);
+                vehiculo.soluciones = [];
+            }
+            
+            // Verificar que el índice de solución sea válido
+            if (solucionIndex >= vehiculo.soluciones.length) {
+                console.warn(`⚠️ Solución ${solucionIndex} no existe para unidad ${unidadIndex}, creando...`);
+                // Crear solución básica si no existe
+                vehiculo.soluciones[solucionIndex] = {
+                    tipo_solucion: '',
+                    configuraciones: {}
+                };
+            }
+            
             const solucion = vehiculo.soluciones[solucionIndex];
             
-            if (!solucion || !solucion.configuraciones) {
+            if (!solucion.configuraciones) {
                 solucion.configuraciones = {};
+            }
+            
+            // Actualizar el tipo de solución si es necesario
+            const tipoSelect = document.getElementById(`${solucionId}_tipo`);
+            if (tipoSelect && tipoSelect.value) {
+                solucion.tipo_solucion = tipoSelect.value;
+                console.log(`🔧 DEBUG: Tipo de solución actualizado: ${tipoSelect.value}`);
             }
             
             // Actualizar la configuración en el objeto de datos
