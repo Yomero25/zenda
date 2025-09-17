@@ -2117,7 +2117,24 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             }
             
             // Actualizar la configuración en el objeto de datos
-            const elemento = document.getElementById(`${solucionId}_${configKey}`);
+            let elemento;
+            
+            // Para detección jammer, buscar el radio button seleccionado del grupo
+            if (configKey === 'deteccion_jammer') {
+                const jammerAlerta = document.getElementById(`${solucionId}_jammer_alerta`);
+                const jammerAlertaBloqueo = document.getElementById(`${solucionId}_jammer_alerta_bloqueo`);
+                
+                if (jammerAlertaBloqueo && jammerAlertaBloqueo.checked) {
+                    elemento = jammerAlertaBloqueo;
+                } else if (jammerAlerta && jammerAlerta.checked) {
+                    elemento = jammerAlerta;
+                } else {
+                    elemento = null;
+                }
+            } else {
+                elemento = document.getElementById(`${solucionId}_${configKey}`);
+            }
+            
             if (elemento) {
                 if (elemento.type === 'checkbox') {
                     solucion.configuraciones[configKey] = elemento.checked;
@@ -2127,6 +2144,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             solucion.configuraciones[configKey] = elemento.value;
                         } else if (configKey === 'deteccion_jammer') {
                             solucion.configuraciones[configKey] = elemento.value;
+                            console.log(`🔧 DEBUG: Detección jammer guardada: ${elemento.value}`);
                         } else if (configKey === 'audio_bidireccional') {
                             solucion.configuraciones[configKey] = true;
                             solucion.configuraciones['audio_espia'] = false;
