@@ -1428,6 +1428,21 @@
                         console.log('🔄 DEBUG: Tabla encontrada:', tabla);
                         console.log('🔄 DEBUG: Tabla visible:', tabla.offsetHeight > 0);
                         console.log('🔄 DEBUG: Tabla display:', window.getComputedStyle(tabla).display);
+                        console.log('🔄 DEBUG: Tabla height:', tabla.offsetHeight);
+                        console.log('🔄 DEBUG: Tabla width:', tabla.offsetWidth);
+                        console.log('🔄 DEBUG: Tabla position:', tabla.offsetTop, tabla.offsetLeft);
+                        console.log('🔄 DEBUG: Sección height:', seccionServicios.offsetHeight);
+                        console.log('🔄 DEBUG: Sección width:', seccionServicios.offsetWidth);
+                        
+                        // Verificar si hay CSS que esté ocultando la tabla
+                        const computedStyle = window.getComputedStyle(tabla);
+                        console.log('🔄 DEBUG: Tabla visibility:', computedStyle.visibility);
+                        console.log('🔄 DEBUG: Tabla opacity:', computedStyle.opacity);
+                        console.log('🔄 DEBUG: Tabla z-index:', computedStyle.zIndex);
+                        
+                        // Forzar visibilidad de la tabla
+                        tabla.setAttribute('style', 'display: table !important; visibility: visible !important; opacity: 1 !important;');
+                        console.log('🔄 DEBUG: Estilos forzados en la tabla');
                     } else {
                         console.log('❌ DEBUG: No se encontró la tabla en seccionServicios');
                     }
