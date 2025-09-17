@@ -1633,6 +1633,392 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             return equiposAutomaticos;
         }
 
+        // ===== VALIDACIONES DE ENTRADAS/SALIDAS GPS GV310LAU =====
+        
+        // Función para validar entradas y salidas del GPS
+        function validarEntradasSalidasGPS(unidadIndex, solucionIndex) {
+            const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            const solucion = vehiculo.soluciones[solucionIndex];
+            
+            if (!solucion || solucion.tipo_solucion !== 'Rastreo avanzado') {
+                return { valido: true };
+            }
+            
+            const configs = solucion.configuraciones || {};
+            const entradasUsadas = [];
+            const salidasUsadas = [];
+            
+            // Mapear configuraciones a entradas/salidas
+            if (configs.sos_simple || configs.sos_llamada || configs.sos_bloqueo) {
+                entradasUsadas.push(1); // SOS usa entrada 1
+            }
+            
+            if (configs.sensores_puertas === 'juntos') {
+                entradasUsadas.push(2); // Sensores juntos usa entrada 2
+            } else if (configs.sensores_puertas === 'independientes') {
+                entradasUsadas.push(2, 3); // Sensores independientes usa entradas 2 y 3
+            }
+            
+            if (configs.teclado_sencillo || configs.teclado_dinamico) {
+                entradasUsadas.push(3); // Teclado usa entrada 3
+            }
+            
+            if (configs.bloqueo_normal || configs.bloqueo_gradual || configs.bloqueo_cortacorriente) {
+                salidasUsadas.push(1); // Bloqueo usa salida 1
+            }
+            
+            if (configs.bloqueo_apertura) {
+                if (configs.sensores_puertas === 'juntos') {
+                    salidasUsadas.push(2); // Bloqueo por puertas juntos usa salida 2
+                } else if (configs.sensores_puertas === 'independientes') {
+                    salidasUsadas.push(2, 3); // Bloqueo por puertas independientes usa salidas 2 y 3
+                }
+            }
+            
+            if (configs.deteccion_jammer === 'alerta_bloqueo') {
+                salidasUsadas.push(3); // Detección jammer usa salida 3
+                // Buscar entrada libre para jammer
+                const entradaLibre = [1, 2, 3].find(entrada => !entradasUsadas.includes(entrada));
+                if (entradaLibre) {
+                    entradasUsadas.push(entradaLibre);
+                }
+            }
+            
+            // Verificar si excede las capacidades del GPS (3 entradas, 3 salidas)
+            const entradasUnicas = [...new Set(entradasUsadas)];
+            const salidasUnicas = [...new Set(salidasUsadas)];
+            
+            if (entradasUnicas.length > 3 || salidasUnicas.length > 3) {
+                return {
+                    valido: false,
+                    entradasUsadas: entradasUnicas,
+                    salidasUsadas: salidasUnicas,
+                    mensaje: 'Las configuraciones seleccionadas exceden las capacidades físicas del GPS GV310LAU (3 entradas, 3 salidas).'
+                };
+            }
+            
+            return { valido: true };
+        }
+        
+        // Función para mostrar modal de advertencia
+        function mostrarModalAdvertenciaGPS(unidadIndex, solucionIndex, validacion) {
+            const modalHtml = `
+                <div class="modal fade" id="modalAdvertenciaGPS" tabindex="-1" aria-labelledby="modalAdvertenciaGPSLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning">
+                                <h5 class="modal-title" id="modalAdvertenciaGPSLabel">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Advertencia - Capacidades del GPS
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <h6><i class="bi bi-info-circle me-2"></i>Configuración no compatible</h6>
+                                    <p class="mb-0">${validacion.mensaje}</p>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Entradas utilizadas: ${validacion.entradasUsadas.length}/3</h6>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            ${validacion.entradasUsadas.map(entrada => 
+                                                `<span class="badge bg-primary">Entrada ${entrada}</span>`
+                                            ).join('')}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Salidas utilizadas: ${validacion.salidasUsadas.length}/3</h6>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            ${validacion.salidasUsadas.map(salida => 
+                                                `<span class="badge bg-success">Salida ${salida}</span>`
+                                            ).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h6>Opciones disponibles:</h6>
+                                <ul>
+                                    <li><strong>Agregar módulo Insider:</strong> Permite expandir las capacidades del sistema</li>
+                                    <li><strong>Editar configuración:</strong> Modificar las opciones seleccionadas</li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-pencil-square me-1"></i>Editar configuración
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="agregarModuloInsider(${unidadIndex}, ${solucionIndex})">
+                                    <i class="bi bi-plus-circle me-1"></i>Agregar módulo Insider
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal existente si existe
+            const modalExistente = document.getElementById('modalAdvertenciaGPS');
+            if (modalExistente) {
+                modalExistente.remove();
+            }
+            
+            // Agregar nuevo modal al DOM
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalAdvertenciaGPS'));
+            modal.show();
+        }
+        
+        // Función para agregar módulo Insider
+        function agregarModuloInsider(unidadIndex, solucionIndex) {
+            const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            
+            // Verificar si ya existe solución Insider
+            const yaExisteInsider = vehiculo.soluciones.some(sol => sol.tipo_solucion === 'Insider');
+            
+            if (!yaExisteInsider) {
+                // Agregar solución Insider
+                const nuevaSolucionInsider = {
+                    tipo_solucion: 'Insider',
+                    configuraciones: {
+                        // Configuraciones básicas del módulo Insider
+                        activo: true
+                    }
+                };
+                
+                vehiculo.soluciones.push(nuevaSolucionInsider);
+                
+                // Actualizar la interfaz
+                actualizarInterfazSoluciones(unidadIndex);
+                
+                // Mostrar mensaje de confirmación
+                mostrarAlerta('Módulo Insider agregado exitosamente', 'success');
+            } else {
+                mostrarAlerta('El módulo Insider ya está agregado para esta unidad', 'info');
+            }
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAdvertenciaGPS'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+        
+        // Función para aplicar reglas de exclusión
+        function aplicarReglasExclusion(unidadIndex, solucionIndex, elementoModificado) {
+            const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            const solucion = vehiculo.soluciones[solucionIndex];
+            const configs = solucion.configuraciones || {};
+            
+            // Reglas de exclusión para SOS
+            if (elementoModificado.includes('sos_')) {
+                const sosSimple = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sos_simple`);
+                const sosLlamada = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sos_llamada`);
+                const sosBloqueo = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sos_bloqueo`);
+                
+                if (elementoModificado === 'sos_simple' && sosSimple.checked) {
+                    // Si se selecciona SOS simple, deshabilitar SOS llamada
+                    sosLlamada.disabled = true;
+                    if (sosLlamada.checked) {
+                        sosLlamada.checked = false;
+                        configs.sos_llamada = false;
+                    }
+                } else if (elementoModificado === 'sos_llamada' && sosLlamada.checked) {
+                    // Si se selecciona SOS llamada, deshabilitar SOS simple
+                    sosSimple.disabled = true;
+                    if (sosSimple.checked) {
+                        sosSimple.checked = false;
+                        configs.sos_simple = false;
+                    }
+                } else if (elementoModificado === 'sos_simple' && !sosSimple.checked) {
+                    // Si se deselecciona SOS simple, habilitar SOS llamada
+                    sosLlamada.disabled = false;
+                } else if (elementoModificado === 'sos_llamada' && !sosLlamada.checked) {
+                    // Si se deselecciona SOS llamada, habilitar SOS simple
+                    sosSimple.disabled = false;
+                }
+            }
+            
+            // Reglas de exclusión para bloqueo
+            if (elementoModificado.includes('bloqueo_')) {
+                const bloqueoNormal = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_normal`);
+                const bloqueoGradual = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_gradual`);
+                const bloqueoCortacorriente = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_cortacorriente`);
+                
+                if (elementoModificado === 'bloqueo_normal' && bloqueoNormal.checked) {
+                    bloqueoGradual.disabled = true;
+                    bloqueoCortacorriente.disabled = true;
+                    if (bloqueoGradual.checked) {
+                        bloqueoGradual.checked = false;
+                        configs.bloqueo_gradual = false;
+                    }
+                    if (bloqueoCortacorriente.checked) {
+                        bloqueoCortacorriente.checked = false;
+                        configs.bloqueo_cortacorriente = false;
+                    }
+                } else if (elementoModificado === 'bloqueo_gradual' && bloqueoGradual.checked) {
+                    bloqueoNormal.disabled = true;
+                    bloqueoCortacorriente.disabled = true;
+                    if (bloqueoNormal.checked) {
+                        bloqueoNormal.checked = false;
+                        configs.bloqueo_normal = false;
+                    }
+                    if (bloqueoCortacorriente.checked) {
+                        bloqueoCortacorriente.checked = false;
+                        configs.bloqueo_cortacorriente = false;
+                    }
+                } else if (elementoModificado === 'bloqueo_cortacorriente' && bloqueoCortacorriente.checked) {
+                    bloqueoNormal.disabled = true;
+                    bloqueoGradual.disabled = true;
+                    if (bloqueoNormal.checked) {
+                        bloqueoNormal.checked = false;
+                        configs.bloqueo_normal = false;
+                    }
+                    if (bloqueoGradual.checked) {
+                        bloqueoGradual.checked = false;
+                        configs.bloqueo_gradual = false;
+                    }
+                } else if (elementoModificado === 'bloqueo_normal' && !bloqueoNormal.checked) {
+                    bloqueoGradual.disabled = false;
+                    bloqueoCortacorriente.disabled = false;
+                } else if (elementoModificado === 'bloqueo_gradual' && !bloqueoGradual.checked) {
+                    bloqueoNormal.disabled = false;
+                    bloqueoCortacorriente.disabled = false;
+                } else if (elementoModificado === 'bloqueo_cortacorriente' && !bloqueoCortacorriente.checked) {
+                    bloqueoNormal.disabled = false;
+                    bloqueoGradual.disabled = false;
+                }
+            }
+            
+            // Reglas de exclusión para audio en cabina
+            if (elementoModificado.includes('audio_')) {
+                const audioBidireccional = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_audio_bidireccional`);
+                const audioEspia = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_audio_espia`);
+                
+                if (elementoModificado === 'audio_bidireccional' && audioBidireccional.checked) {
+                    audioEspia.disabled = true;
+                    if (audioEspia.checked) {
+                        audioEspia.checked = false;
+                        configs.audio_espia = false;
+                    }
+                } else if (elementoModificado === 'audio_espia' && audioEspia.checked) {
+                    audioBidireccional.disabled = true;
+                    if (audioBidireccional.checked) {
+                        audioBidireccional.checked = false;
+                        configs.audio_bidireccional = false;
+                    }
+                } else if (elementoModificado === 'audio_bidireccional' && !audioBidireccional.checked) {
+                    audioEspia.disabled = false;
+                } else if (elementoModificado === 'audio_espia' && !audioEspia.checked) {
+                    audioBidireccional.disabled = false;
+                }
+            }
+            
+            // Reglas de exclusión para habilitado en cabina
+            if (elementoModificado.includes('teclado_')) {
+                const tecladoSencillo = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_teclado_sencillo`);
+                const tecladoDinamico = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_teclado_dinamico`);
+                
+                if (elementoModificado === 'teclado_sencillo' && tecladoSencillo.checked) {
+                    tecladoDinamico.disabled = true;
+                    if (tecladoDinamico.checked) {
+                        tecladoDinamico.checked = false;
+                        configs.teclado_dinamico = false;
+                    }
+                } else if (elementoModificado === 'teclado_dinamico' && tecladoDinamico.checked) {
+                    tecladoSencillo.disabled = true;
+                    if (tecladoSencillo.checked) {
+                        tecladoSencillo.checked = false;
+                        configs.teclado_sencillo = false;
+                    }
+                } else if (elementoModificado === 'teclado_sencillo' && !tecladoSencillo.checked) {
+                    tecladoDinamico.disabled = false;
+                } else if (elementoModificado === 'teclado_dinamico' && !tecladoDinamico.checked) {
+                    tecladoSencillo.disabled = false;
+                }
+            }
+            
+            // Regla para bloqueo con apertura de puertas
+            if (elementoModificado === 'bloqueo_apertura') {
+                const bloqueoApertura = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_bloqueo_apertura`);
+                const sensoresJuntos = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sensores_juntos`);
+                const sensoresIndependientes = document.getElementById(`solucion_${unidadIndex}_${solucionIndex}_sensores_independientes`);
+                
+                if (bloqueoApertura.checked && !sensoresJuntos.checked && !sensoresIndependientes.checked) {
+                    // No se puede seleccionar bloqueo con apertura sin sensores de puertas
+                    bloqueoApertura.checked = false;
+                    configs.bloqueo_apertura = false;
+                    mostrarAlerta('Debe seleccionar sensores de puertas antes de activar el bloqueo con apertura', 'warning');
+                }
+            }
+        }
+
+        // Función para manejar cambios en configuraciones
+        function manejarCambioConfiguracion(solucionId, configKey, unidadIndex, solucionIndex) {
+            console.log(`🔄 DEBUG: Cambio en configuración: ${configKey} para ${solucionId}`);
+            
+            const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            const solucion = vehiculo.soluciones[solucionIndex];
+            
+            if (!solucion || !solucion.configuraciones) {
+                solucion.configuraciones = {};
+            }
+            
+            // Actualizar la configuración en el objeto de datos
+            const elemento = document.getElementById(`${solucionId}_${configKey}`);
+            if (elemento) {
+                if (elemento.type === 'checkbox') {
+                    solucion.configuraciones[configKey] = elemento.checked;
+                } else if (elemento.type === 'radio') {
+                    if (elemento.checked) {
+                        if (configKey === 'sensores_puertas') {
+                            solucion.configuraciones[configKey] = elemento.value;
+                        } else if (configKey === 'deteccion_jammer') {
+                            solucion.configuraciones[configKey] = elemento.value;
+                        } else if (configKey === 'audio_bidireccional') {
+                            solucion.configuraciones[configKey] = true;
+                            solucion.configuraciones['audio_espia'] = false;
+                        } else if (configKey === 'audio_espia') {
+                            solucion.configuraciones[configKey] = true;
+                            solucion.configuraciones['audio_bidireccional'] = false;
+                        } else if (configKey === 'teclado_sencillo') {
+                            solucion.configuraciones[configKey] = true;
+                            solucion.configuraciones['teclado_dinamico'] = false;
+                        } else if (configKey === 'teclado_dinamico') {
+                            solucion.configuraciones[configKey] = true;
+                            solucion.configuraciones['teclado_sencillo'] = false;
+                        }
+                    }
+                }
+            }
+            
+            // Aplicar reglas de exclusión
+            aplicarReglasExclusion(unidadIndex, solucionIndex, configKey);
+            
+            // Validar entradas y salidas del GPS
+            const validacion = validarEntradasSalidasGPS(unidadIndex, solucionIndex);
+            
+            if (!validacion.valido) {
+                console.log(`⚠️ DEBUG: Configuración no válida: ${validacion.mensaje}`);
+                mostrarModalAdvertenciaGPS(unidadIndex, solucionIndex, validacion);
+            } else {
+                console.log(`✅ DEBUG: Configuración válida`);
+            }
+            
+            // Actualizar la interfaz si es necesario
+            actualizarInterfazSoluciones(unidadIndex);
+        }
+
+        // Función para actualizar la interfaz de soluciones
+        function actualizarInterfazSoluciones(unidadIndex) {
+            console.log(`🔄 DEBUG: Actualizando interfaz de soluciones para unidad ${unidadIndex + 1}`);
+            
+            // Esta función se puede expandir para actualizar elementos específicos de la UI
+            // Por ahora, solo logueamos la actualización
+            const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            console.log(`📋 DEBUG: Soluciones actuales para unidad ${unidadIndex + 1}:`, vehiculo.soluciones.map(s => s.tipo_solucion));
+        }
+
         // Función para mapear configuraciones de rastreo a funciones de telemetría
         function mapearConfiguracionAFuncion(configKey) {
             const mapeoConfiguraciones = {
@@ -5723,30 +6109,30 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">SOS</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_sos_simple" id="${solucionId}_sos_simple">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_sos_simple" id="${solucionId}_sos_simple" onchange="manejarCambioConfiguracion('${solucionId}', 'sos_simple', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_sos_simple">SOS simple</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_sos_llamada" id="${solucionId}_sos_llamada">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_sos_llamada" id="${solucionId}_sos_llamada" onchange="manejarCambioConfiguracion('${solucionId}', 'sos_llamada', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_sos_llamada">SOS llamada</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_sos_bloqueo" id="${solucionId}_sos_bloqueo">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_sos_bloqueo" id="${solucionId}_sos_bloqueo" onchange="manejarCambioConfiguracion('${solucionId}', 'sos_bloqueo', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_sos_bloqueo">SOS Bloqueo</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Bloqueo</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_normal" id="${solucionId}_bloqueo_normal">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_normal" id="${solucionId}_bloqueo_normal" onchange="manejarCambioConfiguracion('${solucionId}', 'bloqueo_normal', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_bloqueo_normal">Bloqueo normal</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_gradual" id="${solucionId}_bloqueo_gradual">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_gradual" id="${solucionId}_bloqueo_gradual" onchange="manejarCambioConfiguracion('${solucionId}', 'bloqueo_gradual', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_bloqueo_gradual">Bloqueo gradual</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_cortacorriente" id="${solucionId}_bloqueo_cortacorriente">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_cortacorriente" id="${solucionId}_bloqueo_cortacorriente" onchange="manejarCambioConfiguracion('${solucionId}', 'bloqueo_cortacorriente', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_bloqueo_cortacorriente">Bloqueo cortacorriente</label>
                                 </div>
                             </div>
@@ -5755,26 +6141,26 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Sensores de Puertas</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_sensores_puertas" id="${solucionId}_sensores_juntos" value="juntos">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_sensores_puertas" id="${solucionId}_sensores_juntos" value="juntos" onchange="manejarCambioConfiguracion('${solucionId}', 'sensores_puertas', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_sensores_juntos">Sensores juntos</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_sensores_puertas" id="${solucionId}_sensores_independientes" value="independientes">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_sensores_puertas" id="${solucionId}_sensores_independientes" value="independientes" onchange="manejarCambioConfiguracion('${solucionId}', 'sensores_puertas', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_sensores_independientes">Sensores independientes</label>
                                 </div>
                                 <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_apertura" id="${solucionId}_bloqueo_apertura">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_bloqueo_apertura" id="${solucionId}_bloqueo_apertura" onchange="manejarCambioConfiguracion('${solucionId}', 'bloqueo_apertura', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_bloqueo_apertura">Bloqueo con apertura de puertas</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Audio en Cabina</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_audio_cabina" id="${solucionId}_audio_bidireccional" value="bidireccional">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_audio_cabina" id="${solucionId}_audio_bidireccional" value="bidireccional" onchange="manejarCambioConfiguracion('${solucionId}', 'audio_bidireccional', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_audio_bidireccional">Audio bidireccional</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_audio_cabina" id="${solucionId}_audio_espia" value="espia">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_audio_cabina" id="${solucionId}_audio_espia" value="espia" onchange="manejarCambioConfiguracion('${solucionId}', 'audio_espia', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_audio_espia">Audio espía</label>
                                 </div>
                             </div>
@@ -5783,11 +6169,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Detección de Jammer</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_jammer" id="${solucionId}_jammer_alerta" value="alerta" onchange="toggleJammerTime('${solucionId}')">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_jammer" id="${solucionId}_jammer_alerta" value="alerta" onchange="manejarCambioConfiguracion('${solucionId}', 'deteccion_jammer', ${unidadIndex}, ${solucionIndex}); toggleJammerTime('${solucionId}')">
                                     <label class="form-check-label" for="${solucionId}_jammer_alerta">Alerta</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_jammer" id="${solucionId}_jammer_alerta_bloqueo" value="alerta_bloqueo" onchange="toggleJammerTime('${solucionId}')">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_jammer" id="${solucionId}_jammer_alerta_bloqueo" value="alerta_bloqueo" onchange="manejarCambioConfiguracion('${solucionId}', 'deteccion_jammer', ${unidadIndex}, ${solucionIndex}); toggleJammerTime('${solucionId}')">
                                     <label class="form-check-label" for="${solucionId}_jammer_alerta_bloqueo">Alerta y bloqueo</label>
                                 </div>
                                 <div id="${solucionId}_jammer_time_container" class="mt-2" style="display: none;">
@@ -5804,11 +6190,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Habilitado en Cabina</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_teclado" id="${solucionId}_teclado_sencillo" value="sencillo">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_teclado" id="${solucionId}_teclado_sencillo" value="sencillo" onchange="manejarCambioConfiguracion('${solucionId}', 'teclado_sencillo', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_teclado_sencillo">Teclado sencillo</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="${solucionId}_teclado" id="${solucionId}_teclado_dinamico" value="dinamico">
+                                    <input class="form-check-input" type="radio" name="${solucionId}_teclado" id="${solucionId}_teclado_dinamico" value="dinamico" onchange="manejarCambioConfiguracion('${solucionId}', 'teclado_dinamico', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_teclado_dinamico">Teclado dinámico</label>
                                 </div>
                             </div>
