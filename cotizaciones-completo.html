@@ -1388,7 +1388,9 @@
                     
                 // Cerrar modal primero
                 const modal = bootstrap.Modal.getInstance(document.getElementById('modalCambiarEstado'));
-                modal.hide();
+                if (modal) {
+                    modal.hide();
+                }
                 
                 // Recargar la lista después de cerrar el modal
                 setTimeout(() => {
@@ -1992,7 +1994,9 @@
             if (nuevoEstado === 'rechazada') {
                 // Cerrar modal actual y abrir modal de rechazo
                 const modalActual = bootstrap.Modal.getInstance(document.getElementById('modalCambiarEstado'));
-                if (modalActual) modalActual.hide();
+                if (modalActual) {
+                    modalActual.hide();
+                }
                 
                 // Mostrar modal de rechazo después de un pequeño delay
                 setTimeout(() => {
