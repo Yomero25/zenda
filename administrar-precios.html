@@ -1386,8 +1386,14 @@
             console.log('🔄 DEBUG: seccionPrecios:', seccionPrecios);
             console.log('🔄 DEBUG: seccionServicios:', seccionServicios);
             
-            if (seccionPrecios) seccionPrecios.style.display = 'none';
-            if (seccionServicios) seccionServicios.style.display = 'block';
+            if (seccionPrecios) {
+                seccionPrecios.style.display = 'none';
+                console.log('🔄 DEBUG: Sección precios ocultada');
+            }
+            if (seccionServicios) {
+                seccionServicios.style.display = 'block';
+                console.log('🔄 DEBUG: Sección servicios mostrada');
+            }
             
             // Actualizar botones del sidebar
             document.querySelectorAll('.sidebar .btn').forEach(btn => {
