@@ -4848,19 +4848,65 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 container.appendChild(insumosDiv);
             }
 
-            // Servicios
-            const servicios = cotizacionData.servicios || [];
-            if (servicios.length > 0) {
+            // Servicios de Datos Sugeridos
+            const serviciosSugeridos = cotizacionData.serviciosSugeridos || [];
+            if (serviciosSugeridos.length > 0) {
                 const serviciosDiv = document.createElement('div');
                 serviciosDiv.className = 'resumen-item';
+                
+                // Agrupar servicios por nombre y periodicidad
+                const serviciosAgrupados = {};
+                serviciosSugeridos.forEach(servicio => {
+                    const key = `${servicio.nombre}_${servicio.periodicidad}`;
+                    if (!serviciosAgrupados[key]) {
+                        serviciosAgrupados[key] = {
+                            nombre: servicio.nombre,
+                            periodicidad: servicio.periodicidad,
+                            cantidad: 0,
+                            unidades: []
+                        };
+                    }
+                    serviciosAgrupados[key].cantidad += servicio.cantidad;
+                    serviciosAgrupados[key].unidades.push(servicio.unidad);
+                });
+                
+                const serviciosUnicos = Object.values(serviciosAgrupados);
+                
                 serviciosDiv.innerHTML = `
-                    <h5 style="color: #fb930c;"><i class="bi bi-cloud me-2"></i>Servicios (${servicios.length})</h5>
-                    <div class="row">
-                        ${servicios.map(servicio => `
-                            <div class="col-md-6 mb-1">
-                                <span class="badge bg-success me-1">${servicio}</span>
-                            </div>
-                        `).join('')}
+                    <h5 style="color: #fb930c;"><i class="bi bi-cloud me-2"></i>Servicios de Datos Sugeridos (${serviciosUnicos.length})</h5>
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Servicios detectados automáticamente según las soluciones seleccionadas</strong>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th>Periodicidad</th>
+                                    <th>Cantidad</th>
+                                    <th>Aplicado en</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${serviciosUnicos.map(servicio => `
+                                    <tr>
+                                        <td><span class="badge bg-primary">${servicio.nombre}</span></td>
+                                        <td>
+                                            <span class="badge ${servicio.periodicidad === 'anual' ? 'bg-danger' : 'bg-info'}">
+                                                ${servicio.periodicidad}
+                                            </span>
+                                        </td>
+                                        <td><strong>${servicio.cantidad}</strong></td>
+                                        <td>
+                                            <small class="text-muted">
+                                                Unidades: ${servicio.unidades.join(', ')}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 `;
                 container.appendChild(serviciosDiv);
