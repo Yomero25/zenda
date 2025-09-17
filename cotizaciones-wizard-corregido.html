@@ -1826,28 +1826,22 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         
         // Función para agregar módulo Insider
         function agregarModuloInsider(unidadIndex, solucionIndex) {
-            console.log(`🔧 DEBUG: agregarModuloInsider - unidadIndex: ${unidadIndex}, solucionIndex: ${solucionIndex}`);
-            console.log(`🔧 DEBUG: cotizacionData.vehiculos:`, cotizacionData.vehiculos);
-            
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
-            console.log(`🔧 DEBUG: vehiculo:`, vehiculo);
-            
             const solucion = vehiculo.soluciones[solucionIndex];
-            console.log(`🔧 DEBUG: solucion antes:`, solucion);
             
             // Marcar el módulo Insider como activo en la configuración
             if (!solucion.configuraciones) {
                 solucion.configuraciones = {};
             }
             solucion.configuraciones.modulo_insider = true;
-            console.log(`🔧 DEBUG: solucion después:`, solucion);
-            console.log(`🔧 DEBUG: modulo_insider guardado:`, solucion.configuraciones.modulo_insider);
             
-            // Verificar que se guardó correctamente
-            console.log(`🔧 DEBUG: Verificación inmediata - cotizacionData.vehiculos[${unidadIndex}].soluciones[${solucionIndex}].configuraciones.modulo_insider:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones.modulo_insider);
-            
-            // Actualizar la interfaz
-            actualizarInterfazSoluciones(unidadIndex);
+            // NO llamar actualizarInterfazSoluciones aquí porque está perdiendo el valor
+            // En su lugar, actualizar directamente el checkbox si existe
+            const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
+            const moduloInsiderElement = document.getElementById(`${solucionId}_modulo_insider`);
+            if (moduloInsiderElement) {
+                moduloInsiderElement.checked = true;
+            }
             
             // Mostrar mensaje de éxito
             mostrarAlerta('✅ Módulo Insider agregado exitosamente', 'success');
