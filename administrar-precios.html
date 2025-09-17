@@ -1443,6 +1443,14 @@
                         // Forzar visibilidad de la tabla
                         tabla.setAttribute('style', 'display: table !important; visibility: visible !important; opacity: 1 !important;');
                         console.log('🔄 DEBUG: Estilos forzados en la tabla');
+                        
+                        // Hacer scroll hacia la tabla para que sea visible
+                        tabla.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        console.log('🔄 DEBUG: Scroll hacia la tabla ejecutado');
+                        
+                        // También hacer scroll hacia la sección
+                        seccionServicios.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        console.log('🔄 DEBUG: Scroll hacia la sección ejecutado');
                     } else {
                         console.log('❌ DEBUG: No se encontró la tabla en seccionServicios');
                     }
