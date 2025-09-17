@@ -2205,6 +2205,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             const solucionesEnDatos = vehiculo.soluciones.length;
             
             console.log(`🔍 DEBUG: Soluciones en DOM: ${solucionesEnDOM}, Soluciones en datos: ${solucionesEnDatos}`);
+            console.log(`🔍 DEBUG: Configuraciones antes de actualizar:`, vehiculo.soluciones[0]?.configuraciones);
             
             // Solo crear soluciones faltantes, NO regenerar las existentes
             if (solucionesEnDatos > solucionesEnDOM) {
