@@ -1826,14 +1826,21 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         
         // Función para agregar módulo Insider
         function agregarModuloInsider(unidadIndex, solucionIndex) {
+            console.log(`🔧 DEBUG: agregarModuloInsider - unidadIndex: ${unidadIndex}, solucionIndex: ${solucionIndex}`);
+            console.log(`🔧 DEBUG: cotizacionData.vehiculos:`, cotizacionData.vehiculos);
+            
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            console.log(`🔧 DEBUG: vehiculo:`, vehiculo);
+            
             const solucion = vehiculo.soluciones[solucionIndex];
+            console.log(`🔧 DEBUG: solucion antes:`, solucion);
             
             // Marcar el módulo Insider como activo en la configuración
             if (!solucion.configuraciones) {
                 solucion.configuraciones = {};
             }
             solucion.configuraciones.modulo_insider = true;
+            console.log(`🔧 DEBUG: solucion después:`, solucion);
             
             // Actualizar la interfaz
             actualizarInterfazSoluciones(unidadIndex);
