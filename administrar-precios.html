@@ -76,7 +76,13 @@
                     <i class="bi bi-upload"></i> Importar CSV
                 </button>
                 
-
+                <button class="btn btn-warning" onclick="mostrarServicios()">
+                    <i class="bi bi-cloud"></i> Servicios de Datos
+                </button>
+                
+                <button class="btn btn-secondary" onclick="mostrarPrecios()">
+                    <i class="bi bi-currency-dollar"></i> Precios
+                </button>
                 
             </div>
             
@@ -100,7 +106,7 @@
                     </div>
                 </nav>
 
-                <div class="container-fluid mt-4">
+                <div id="seccionPrecios" class="container-fluid mt-4">
                     <div class="row">
                         <div class="col-md-3">
                             <div class="dashboard-card bg-gradient-purple">
@@ -1363,6 +1369,326 @@
                 }
             });
         }
+
+        // =====================
+        // FUNCIONES PARA SERVICIOS
+        // =====================
+
+        let serviciosDatos = [];
+        let servicioEditando = null;
+
+        async function mostrarServicios() {
+            document.getElementById('seccionPrecios').style.display = 'none';
+            document.getElementById('seccionServicios').style.display = 'block';
+            
+            // Actualizar botones del sidebar
+            document.querySelectorAll('.sidebar .btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-light');
+            });
+            document.querySelector('button[onclick="mostrarServicios()"]').classList.remove('btn-outline-light');
+            document.querySelector('button[onclick="mostrarServicios()"]').classList.add('btn-primary');
+            
+            await cargarServiciosDesdeSupabase();
+            cargarTablaServicios();
+            actualizarEstadisticasServicios();
+        }
+
+        async function mostrarPrecios() {
+            document.getElementById('seccionServicios').style.display = 'none';
+            document.getElementById('seccionPrecios').style.display = 'block';
+            
+            // Actualizar botones del sidebar
+            document.querySelectorAll('.sidebar .btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-light');
+            });
+            document.querySelector('button[onclick="mostrarPrecios()"]').classList.remove('btn-outline-light');
+            document.querySelector('button[onclick="mostrarPrecios()"]').classList.add('btn-primary');
+        }
+
+        async function cargarServiciosDesdeSupabase() {
+            try {
+                console.log('🔄 Cargando servicios desde Supabase...');
+                serviciosDatos = await window.dataService.fetchServiciosDatos();
+                console.log(`✅ Servicios cargados: ${serviciosDatos.length}`);
+            } catch (error) {
+                console.error('❌ Error cargando servicios:', error);
+                serviciosDatos = [];
+            }
+        }
+
+        function cargarTablaServicios() {
+            const tbody = document.getElementById('tablaServicios');
+            tbody.innerHTML = '';
+
+            if (serviciosDatos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No hay servicios configurados</td></tr>';
+                return;
+            }
+
+            serviciosDatos.forEach(servicio => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${servicio.nombre}</strong></td>
+                    <td>${servicio.descripcion || 'Sin descripción'}</td>
+                    <td><span class="badge bg-info">${servicio.tipo_periodicidad}</span></td>
+                    <td>$${servicio.precio_mensual || 0}</td>
+                    <td>$${servicio.precio_semestral || 0}</td>
+                    <td>$${servicio.precio_anual || 0}</td>
+                    <td>
+                        <span class="badge ${servicio.activo ? 'bg-success' : 'bg-secondary'}">
+                            ${servicio.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarServicio('${servicio.id}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarServicio('${servicio.id}', '${servicio.nombre}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function actualizarEstadisticasServicios() {
+            const totalServicios = serviciosDatos.length;
+            const serviciosActivos = serviciosDatos.filter(s => s.activo).length;
+            const serviciosMensuales = serviciosDatos.filter(s => s.tipo_periodicidad === 'mensual').length;
+            const serviciosAnuales = serviciosDatos.filter(s => s.tipo_periodicidad === 'anual').length;
+
+            document.getElementById('totalServicios').textContent = totalServicios;
+            document.getElementById('serviciosActivos').textContent = serviciosActivos;
+            document.getElementById('serviciosMensuales').textContent = serviciosMensuales;
+            document.getElementById('serviciosAnuales').textContent = serviciosAnuales;
+        }
+
+        function agregarNuevoServicio() {
+            servicioEditando = null;
+            document.getElementById('tituloModalServicio').innerHTML = '<i class="bi bi-cloud"></i> Nuevo Servicio de Datos';
+            document.getElementById('formServicio').reset();
+            document.getElementById('servicioActivo').checked = true;
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalServicio'));
+            modal.show();
+        }
+
+        function editarServicio(servicioId) {
+            const servicio = serviciosDatos.find(s => s.id === servicioId);
+            if (!servicio) return;
+
+            servicioEditando = servicio;
+            document.getElementById('tituloModalServicio').innerHTML = '<i class="bi bi-pencil"></i> Editar Servicio de Datos';
+            
+            document.getElementById('servicioNombre').value = servicio.nombre;
+            document.getElementById('servicioDescripcion').value = servicio.descripcion || '';
+            document.getElementById('servicioTipoPeriodicidad').value = servicio.tipo_periodicidad;
+            document.getElementById('servicioPrecioMensual').value = servicio.precio_mensual || '';
+            document.getElementById('servicioPrecioSemestral').value = servicio.precio_semestral || '';
+            document.getElementById('servicioPrecioAnual').value = servicio.precio_anual || '';
+            document.getElementById('servicioActivo').checked = servicio.activo;
+            
+            togglePreciosServicio();
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalServicio'));
+            modal.show();
+        }
+
+        function togglePreciosServicio() {
+            const tipoPeriodicidad = document.getElementById('servicioTipoPeriodicidad').value;
+            const container = document.getElementById('preciosServicioContainer');
+            
+            if (tipoPeriodicidad === 'anual') {
+                container.innerHTML = `
+                    <h6 class="text-primary mb-3">Precio Anual</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="servicioPrecioAnual" class="form-label">Precio Anual</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioAnual" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <h6 class="text-primary mb-3">Precios por Periodicidad</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="servicioPrecioMensual" class="form-label">Precio Mensual</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioMensual" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="servicioPrecioSemestral" class="form-label">Precio Semestral</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioSemestral" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="servicioPrecioAnual" class="form-label">Precio Anual</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioAnual" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function guardarServicio() {
+            const nombre = document.getElementById('servicioNombre').value.trim();
+            const descripcion = document.getElementById('servicioDescripcion').value.trim();
+            const tipoPeriodicidad = document.getElementById('servicioTipoPeriodicidad').value;
+            const activo = document.getElementById('servicioActivo').checked;
+
+            if (!nombre || !tipoPeriodicidad) {
+                alert('Por favor completa todos los campos obligatorios');
+                return;
+            }
+
+            const servicioData = {
+                nombre,
+                descripcion,
+                tipo_periodicidad: tipoPeriodicidad,
+                activo
+            };
+
+            // Agregar precios según el tipo de periodicidad
+            if (tipoPeriodicidad === 'anual') {
+                const precioAnual = parseFloat(document.getElementById('servicioPrecioAnual').value) || 0;
+                if (precioAnual <= 0) {
+                    alert('El precio anual debe ser mayor a 0');
+                    return;
+                }
+                servicioData.precio_anual = precioAnual;
+            } else {
+                const precioMensual = parseFloat(document.getElementById('servicioPrecioMensual').value) || 0;
+                const precioSemestral = parseFloat(document.getElementById('servicioPrecioSemestral').value) || 0;
+                const precioAnual = parseFloat(document.getElementById('servicioPrecioAnual').value) || 0;
+
+                if (precioMensual <= 0) {
+                    alert('El precio mensual debe ser mayor a 0');
+                    return;
+                }
+
+                servicioData.precio_mensual = precioMensual;
+                servicioData.precio_semestral = precioSemestral;
+                servicioData.precio_anual = precioAnual;
+            }
+
+            // Si estamos editando, agregar el ID
+            if (servicioEditando) {
+                servicioData.id = servicioEditando.id;
+            }
+
+            try {
+                console.log('💾 Guardando servicio:', servicioData);
+                const resultado = await window.dataService.upsertServicioDatos(servicioData);
+                
+                if (resultado) {
+                    console.log('✅ Servicio guardado exitosamente');
+                    await cargarServiciosDesdeSupabase();
+                    cargarTablaServicios();
+                    actualizarEstadisticasServicios();
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalServicio'));
+                    modal.hide();
+                    
+                    alert('Servicio guardado exitosamente');
+                } else {
+                    alert('Error al guardar el servicio');
+                }
+            } catch (error) {
+                console.error('❌ Error guardando servicio:', error);
+                alert('Error al guardar el servicio: ' + error.message);
+            }
+        }
+
+        async function eliminarServicio(servicioId, nombreServicio) {
+            if (confirm(`¿Estás seguro de que quieres eliminar el servicio "${nombreServicio}"?`)) {
+                try {
+                    const resultado = await window.dataService.deleteServicioDatos(servicioId);
+                    if (resultado) {
+                        console.log('✅ Servicio eliminado exitosamente');
+                        await cargarServiciosDesdeSupabase();
+                        cargarTablaServicios();
+                        actualizarEstadisticasServicios();
+                        alert('Servicio eliminado exitosamente');
+                    } else {
+                        alert('Error al eliminar el servicio');
+                    }
+                } catch (error) {
+                    console.error('❌ Error eliminando servicio:', error);
+                    alert('Error al eliminar el servicio: ' + error.message);
+                }
+            }
+        }
+
+        function aplicarFiltrosServicios() {
+            const filtroServicio = document.getElementById('filtroServicio').value.toLowerCase();
+            const filtroTipo = document.getElementById('filtroTipoServicio').value;
+            const filtroEstado = document.getElementById('filtroEstadoServicio').value;
+
+            const serviciosFiltrados = serviciosDatos.filter(servicio => {
+                const cumpleNombre = !filtroServicio || servicio.nombre.toLowerCase().includes(filtroServicio);
+                const cumpleTipo = !filtroTipo || servicio.tipo_periodicidad === filtroTipo;
+                const cumpleEstado = !filtroEstado || (filtroEstado === 'activo' ? servicio.activo : !servicio.activo);
+                
+                return cumpleNombre && cumpleTipo && cumpleEstado;
+            });
+
+            // Actualizar tabla con servicios filtrados
+            const tbody = document.getElementById('tablaServicios');
+            tbody.innerHTML = '';
+
+            if (serviciosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se encontraron servicios</td></tr>';
+                return;
+            }
+
+            serviciosFiltrados.forEach(servicio => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${servicio.nombre}</strong></td>
+                    <td>${servicio.descripcion || 'Sin descripción'}</td>
+                    <td><span class="badge bg-info">${servicio.tipo_periodicidad}</span></td>
+                    <td>$${servicio.precio_mensual || 0}</td>
+                    <td>$${servicio.precio_semestral || 0}</td>
+                    <td>$${servicio.precio_anual || 0}</td>
+                    <td>
+                        <span class="badge ${servicio.activo ? 'bg-success' : 'bg-secondary'}">
+                            ${servicio.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarServicio('${servicio.id}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarServicio('${servicio.id}', '${servicio.nombre}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
     </script>
 
     <div class="modal fade" id="modalNuevoPrecio" tabindex="-1" aria-labelledby="modalNuevoPrecioLabel" aria-hidden="true">
@@ -1443,6 +1769,89 @@
         </div>
     </div>
 
+    <!-- Sección de Servicios de Datos -->
+    <div id="seccionServicios" style="display: none;">
+        <div class="container-fluid mt-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="dashboard-card bg-gradient-orange">
+                        <h2 id="totalServicios">0</h2>
+                        <p>Servicios Configurados</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card bg-gradient-green">
+                        <h2 id="serviciosActivos">0</h2>
+                        <p>Servicios Activos</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card bg-gradient-blue">
+                        <h2 id="serviciosMensuales">0</h2>
+                        <p>Servicios Mensuales</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card bg-gradient-purple">
+                        <h2 id="serviciosAnuales">0</h2>
+                        <p>Servicios Anuales</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="filtroServicio" class="form-label">Buscar Servicio:</label>
+                        <input type="text" class="form-control" id="filtroServicio" placeholder="Nombre del servicio..." onkeyup="aplicarFiltrosServicios()">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filtroTipoServicio" class="form-label">Tipo de Periodicidad:</label>
+                        <select class="form-select" id="filtroTipoServicio" onchange="aplicarFiltrosServicios()">
+                            <option value="">Todos</option>
+                            <option value="mensual">Mensual</option>
+                            <option value="semestral">Semestral</option>
+                            <option value="anual">Anual</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filtroEstadoServicio" class="form-label">Estado:</label>
+                        <select class="form-select" id="filtroEstadoServicio" onchange="aplicarFiltrosServicios()">
+                            <option value="">Todos</option>
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-success" onclick="agregarNuevoServicio()">
+                            <i class="bi bi-plus-circle"></i> Nuevo Servicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Descripción</th>
+                            <th>Periodicidad</th>
+                            <th>Precio Mensual</th>
+                            <th>Precio Semestral</th>
+                            <th>Precio Anual</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaServicios">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1457,6 +1866,96 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Servicios -->
+    <div class="modal fade" id="modalServicio" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tituloModalServicio">
+                        <i class="bi bi-cloud"></i> Nuevo Servicio de Datos
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formServicio">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="servicioNombre" class="form-label">Nombre del Servicio *</label>
+                                    <input type="text" class="form-control" id="servicioNombre" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="servicioTipoPeriodicidad" class="form-label">Tipo de Periodicidad *</label>
+                                    <select class="form-select" id="servicioTipoPeriodicidad" required onchange="togglePreciosServicio()">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="servicioDescripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="servicioDescripcion" rows="3" placeholder="Describe el servicio..."></textarea>
+                        </div>
+
+                        <div id="preciosServicioContainer">
+                            <h6 class="text-primary mb-3">Precios por Periodicidad</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="servicioPrecioMensual" class="form-label">Precio Mensual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="servicioPrecioMensual" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="servicioPrecioSemestral" class="form-label">Precio Semestral</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="servicioPrecioSemestral" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="servicioPrecioAnual" class="form-label">Precio Anual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="servicioPrecioAnual" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="servicioActivo" checked>
+                                <label class="form-check-label" for="servicioActivo">
+                                    Servicio Activo
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarServicio()">
+                        <i class="bi bi-save"></i> Guardar Servicio
+                    </button>
                 </div>
             </div>
         </div>
