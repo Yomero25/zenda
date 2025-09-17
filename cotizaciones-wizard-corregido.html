@@ -1826,10 +1826,15 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         
         // Función para agregar módulo Insider
         function agregarModuloInsider(unidadIndex, solucionIndex) {
+            console.log(`🔧 DEBUG: Agregando módulo Insider para unidad ${unidadIndex}, solución ${solucionIndex}`);
+            
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
+            console.log(`🔧 DEBUG: Vehículo actual:`, vehiculo);
+            console.log(`🔧 DEBUG: Soluciones actuales:`, vehiculo.soluciones.map(s => s.tipo_solucion));
             
             // Verificar si ya existe solución Insider
             const yaExisteInsider = vehiculo.soluciones.some(sol => sol.tipo_solucion === 'Insider');
+            console.log(`🔧 DEBUG: ¿Ya existe Insider? ${yaExisteInsider}`);
             
             if (!yaExisteInsider) {
                 // Agregar solución Insider
@@ -1842,13 +1847,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 };
                 
                 vehiculo.soluciones.push(nuevaSolucionInsider);
+                console.log(`🔧 DEBUG: Solución Insider agregada. Nuevas soluciones:`, vehiculo.soluciones.map(s => s.tipo_solucion));
                 
                 // Actualizar la interfaz
+                console.log(`🔧 DEBUG: Actualizando interfaz de soluciones...`);
                 actualizarInterfazSoluciones(unidadIndex);
                 
                 // Mostrar mensaje de confirmación
                 mostrarAlerta('Módulo Insider agregado exitosamente', 'success');
             } else {
+                console.log(`🔧 DEBUG: Insider ya existe, no se agrega`);
                 mostrarAlerta('El módulo Insider ya está agregado para esta unidad', 'info');
             }
             
@@ -2184,10 +2192,76 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         function actualizarInterfazSoluciones(unidadIndex) {
             console.log(`🔄 DEBUG: Actualizando interfaz de soluciones para unidad ${unidadIndex + 1}`);
             
-            // Esta función se puede expandir para actualizar elementos específicos de la UI
-            // Por ahora, solo logueamos la actualización
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
             console.log(`📋 DEBUG: Soluciones actuales para unidad ${unidadIndex + 1}:`, vehiculo.soluciones.map(s => s.tipo_solucion));
+            
+            // Buscar el contenedor de soluciones para esta unidad
+            const contenedorSoluciones = document.querySelector(`#unidad_${unidadIndex + 1}_soluciones`);
+            if (!contenedorSoluciones) {
+                console.log(`⚠️ DEBUG: No se encontró contenedor de soluciones para unidad ${unidadIndex + 1}`);
+                return;
+            }
+            
+            // Regenerar el HTML de las soluciones
+            let htmlSoluciones = '';
+            vehiculo.soluciones.forEach((solucion, solucionIndex) => {
+                const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
+                
+                if (solucion.tipo_solucion === 'Insider') {
+                    // HTML específico para solución Insider
+                    htmlSoluciones += `
+                        <div class="card mb-3" id="solucion_${unidadIndex + 1}_${solucionIndex + 1}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Solución ${solucionIndex + 1}</h6>
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarSolucion(${unidadIndex}, ${solucionIndex})">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tipo de Solución:</label>
+                                        <select class="form-select" id="${solucionId}_tipo" disabled>
+                                            <option value="Insider" selected>Insider</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info mt-3">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Módulo Insider:</strong> Proporciona entradas y salidas adicionales para resolver conflictos de capacidades del GPS.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // HTML para otras soluciones (Rastreo avanzado, etc.)
+                    // Por ahora, solo mostrar el nombre de la solución
+                    htmlSoluciones += `
+                        <div class="card mb-3" id="solucion_${unidadIndex + 1}_${solucionIndex + 1}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Solución ${solucionIndex + 1}</h6>
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarSolucion(${unidadIndex}, ${solucionIndex})">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tipo de Solución:</label>
+                                        <select class="form-select" id="${solucionId}_tipo" disabled>
+                                            <option value="${solucion.tipo_solucion}" selected>${solucion.tipo_solucion}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Actualizar el HTML del contenedor
+            contenedorSoluciones.innerHTML = htmlSoluciones;
+            console.log(`✅ DEBUG: Interfaz de soluciones actualizada para unidad ${unidadIndex + 1}`);
         }
 
         // Función para mapear configuraciones de rastreo a funciones de telemetría
