@@ -1888,8 +1888,15 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             // DEPURAR: Verificar estado DESPUÉS de cerrar modal (con delay)
             setTimeout(() => {
-                console.log(`🚨 DESPUÉS DE CERRAR MODAL:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
+                console.log(`🚨 DESPUÉS DE CERRAR MODAL (500ms):`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
+                console.log(`🚨 KEYS DESPUÉS DEL MODAL (500ms):`, Object.keys(cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones));
             }, 500);
+            
+            // DEPURAR: Verificar inmediatamente después del modal
+            setTimeout(() => {
+                console.log(`🚨 INMEDIATO DESPUÉS DEL MODAL (100ms):`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
+                console.log(`🚨 KEYS INMEDIATO (100ms):`, Object.keys(cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones));
+            }, 100);
         }
         
         // Función para aplicar reglas de exclusión
@@ -4527,10 +4534,25 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             // Cargar insumos cuando se muestra el paso 3
             if (step === 3) {
                 console.log('🔄 DEBUG: Mostrando paso 3, actualizando tabla de insumos...');
+                
+                // LOG CRÍTICO: Ver el estado ANTES del setTimeout
+                console.log(`🚨 PRE-TIMEOUT: cotizacionData.vehiculos[0].soluciones[0].configuraciones:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones);
+                console.log(`🚨 PRE-TIMEOUT: modulo_insider específico:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones?.modulo_insider);
+                console.log(`🚨 PRE-TIMEOUT: Object.keys:`, Object.keys(cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones || {}));
+                
                 setTimeout(() => {
+                    // LOG CRÍTICO: Ver el estado DESPUÉS del setTimeout pero ANTES de las funciones de carga
+                    console.log(`🚨 POST-TIMEOUT ANTES CARGAS: cotizacionData.vehiculos[0].soluciones[0].configuraciones:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones);
+                    console.log(`🚨 POST-TIMEOUT ANTES CARGAS: modulo_insider específico:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones?.modulo_insider);
+                    
                     cargarInsumos();
                     cargarServicios();
                     cargarAccesorios();
+                    
+                    // LOG CRÍTICO: Ver el estado DESPUÉS de las funciones de carga
+                    console.log(`🚨 POST-CARGAS: cotizacionData.vehiculos[0].soluciones[0].configuraciones:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones);
+                    console.log(`🚨 POST-CARGAS: modulo_insider específico:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones?.modulo_insider);
+                    
                     // Actualizar la tabla de insumos sugeridos
                     console.log('🔄 DEBUG: Llamando a generarInsumosSugeridos() desde paso 3...');
                     console.log(`🚨 CRÍTICO ANTES DE GENERAR: cotizacionData.vehiculos[0].soluciones[0].configuraciones:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones);
@@ -4574,6 +4596,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     };
                     break;
                 case 2:
+                    // 🚨 CRÍTICO: Preservar configuraciones existentes antes de sobrescribir
+                    const vehiculosExistentes = cotizacionData.vehiculos || [];
+                    console.log(`🚨 PRESERVANDO CONFIGURACIONES EXISTENTES:`, vehiculosExistentes);
+                    
                     cotizacionData.vehiculos = [];
                     
                     // Obtener cantidad de lote si está especificada
@@ -4601,12 +4627,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         const solucionesContainer = document.querySelector(`.soluciones-unidad-container-${unidadId}`);
                         if (solucionesContainer) {
                             const solucionesItems = solucionesContainer.querySelectorAll('.solucion-item');
-                            solucionesItems.forEach(solucionItem => {
+                            solucionesItems.forEach((solucionItem, solucionIndex) => {
                                 const tipoSelect = solucionItem.querySelector('.solucion-tipo');
                                 if (tipoSelect && tipoSelect.value) {
+                                    // 🚨 CRÍTICO: Preservar configuraciones existentes de esta solución
+                                    const configuracionesExistentes = vehiculosExistentes[index]?.soluciones[solucionIndex]?.configuraciones || {};
+                                    console.log(`🚨 PRESERVANDO configuraciones unidad ${index} solución ${solucionIndex}:`, configuracionesExistentes);
+                                    
                                     const solucion = {
                                         tipo_solucion: tipoSelect.value,
-                                        configuraciones: {}
+                                        configuraciones: { ...configuracionesExistentes } // 🚨 Comenzar con configuraciones existentes
                                     };
                                     
                                     // Obtener todas las configuraciones
@@ -4653,6 +4683,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                             }
                                         });
                                     }
+                                    
+                                    // 🚨 LOG CRÍTICO: Verificar que modulo_insider se preservó
+                                    console.log(`🚨 CONFIGURACIONES FINALES unidad ${index} solución ${solucionIndex}:`, solucion.configuraciones);
+                                    console.log(`🚨 modulo_insider preservado:`, solucion.configuraciones.modulo_insider);
                                     
                                     vehiculo.soluciones.push(solucion);
                                 }
