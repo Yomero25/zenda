@@ -2530,6 +2530,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             guardarPasoActual();
             
             const vehiculos = cotizacionData.vehiculos || [];
+            console.log(`🔍 DEBUG: cotizacionData.vehiculos en generarInsumosSugeridos:`, cotizacionData.vehiculos);
+            console.log(`🔍 DEBUG: vehiculos.length:`, vehiculos.length);
             let todosLosInsumos = {};
             
             // Generar equipos automáticos
