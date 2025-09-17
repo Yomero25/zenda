@@ -3220,6 +3220,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 }
             });
             
+            // CRÍTICO: Verificar el estado EXACTO antes de la búsqueda de Insider
+            console.log(`🚨 CRÍTICO: Verificando cotizacionData DIRECTAMENTE en generarInsumosSugeridos`);
+            console.log(`🚨 CRÍTICO: cotizacionData.vehiculos[0].soluciones[0].configuraciones:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones);
+            console.log(`🚨 CRÍTICO: Valor específico modulo_insider:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones?.modulo_insider);
+            
             // Verificar módulos Insider en todas las unidades - USAR cotizacionData.vehiculos directamente
             console.log(`🚨 ESTADO COMPLETO cotizacionData.vehiculos:`, JSON.stringify(cotizacionData.vehiculos, null, 2));
             
@@ -4531,6 +4536,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     cargarAccesorios();
                     // Actualizar la tabla de insumos sugeridos
                     console.log('🔄 DEBUG: Llamando a generarInsumosSugeridos() desde paso 3...');
+                    console.log(`🚨 CRÍTICO ANTES DE GENERAR: cotizacionData.vehiculos[0].soluciones[0].configuraciones:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones);
+                    console.log(`🚨 CRÍTICO ANTES DE GENERAR: modulo_insider específico:`, cotizacionData.vehiculos[0]?.soluciones[0]?.configuraciones?.modulo_insider);
                     generarInsumosSugeridos();
                 }, 100);
             }
