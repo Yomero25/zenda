@@ -2914,6 +2914,21 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             console.log(`🔑 DEBUG: Claves disponibles en configuraciones:`, Object.keys(configs));
                             const solucionesCompatibles = [];
                             
+                            // Verificar si hay módulo Insider en las soluciones de esta unidad
+                            const tieneInsider = vehiculo.soluciones.some(sol => sol.tipo_solucion === 'Insider');
+                            if (tieneInsider) {
+                                console.log(`🔧 DEBUG: Módulo Insider detectado para Unidad ${unidadIndex + 1}`);
+                                const keyInsider = 'Módulo Insider';
+                                todosLosInsumos[keyInsider] = {
+                                    nombre: keyInsider,
+                                    cantidad: 1,
+                                    unidades: [`Unidad ${unidadIndex + 1} (Módulo Insider - Resolución de conflictos GPS)`],
+                                    sugerido: true,
+                                    categoria: 'equipos'
+                                };
+                                console.log(`✅ DEBUG: Módulo Insider agregado como insumo`);
+                            }
+                            
                             // Obtener cantidad de botones configurada
                             const cantidadBotones = configs.cantidad_botones || 1;
                             console.log(`🔢 DEBUG: Cantidad de botones configurada: ${cantidadBotones}`);
