@@ -2196,9 +2196,13 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             console.log(`📋 DEBUG: Soluciones actuales para unidad ${unidadIndex + 1}:`, vehiculo.soluciones.map(s => s.tipo_solucion));
             
             // Buscar el contenedor de soluciones para esta unidad
-            const contenedorSoluciones = document.querySelector(`#unidad_${unidadIndex + 1}_soluciones`);
+            const contenedorSoluciones = document.querySelector(`.soluciones-unidad-container-${unidadIndex + 1}`);
             if (!contenedorSoluciones) {
                 console.log(`⚠️ DEBUG: No se encontró contenedor de soluciones para unidad ${unidadIndex + 1}`);
+                console.log(`🔍 DEBUG: Buscando contenedor con selector: .soluciones-unidad-container-${unidadIndex + 1}`);
+                // Intentar buscar todos los contenedores de soluciones para debug
+                const todosLosContenedores = document.querySelectorAll('[class*="soluciones-unidad-container"]');
+                console.log(`🔍 DEBUG: Contenedores encontrados:`, Array.from(todosLosContenedores).map(c => c.className));
                 return;
             }
             
