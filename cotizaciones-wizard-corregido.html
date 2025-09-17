@@ -2199,95 +2199,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             const contenedorSoluciones = document.querySelector(`.soluciones-unidad-container-${unidadIndex + 1}`);
             if (!contenedorSoluciones) {
                 console.log(`⚠️ DEBUG: No se encontró contenedor de soluciones para unidad ${unidadIndex + 1}`);
-                console.log(`🔍 DEBUG: Buscando contenedor con selector: .soluciones-unidad-container-${unidadIndex + 1}`);
-                // Intentar buscar todos los contenedores de soluciones para debug
-                const todosLosContenedores = document.querySelectorAll('[class*="soluciones-unidad-container"]');
-                console.log(`🔍 DEBUG: Contenedores encontrados:`, Array.from(todosLosContenedores).map(c => c.className));
                 return;
             }
             
-            // Regenerar el HTML de las soluciones
-            let htmlSoluciones = '';
-            vehiculo.soluciones.forEach((solucion, solucionIndex) => {
-                const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
-                
-                if (solucion.tipo_solucion === 'Insider') {
-                    // HTML específico para solución Insider
-                    htmlSoluciones += `
-                        <div class="card mb-3" id="solucion_${unidadIndex + 1}_${solucionIndex + 1}">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0">Solución ${solucionIndex + 1}</h6>
-                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarSolucion(${unidadIndex}, ${solucionIndex})">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Tipo de Solución:</label>
-                                        <select class="form-select" id="${solucionId}_tipo" disabled>
-                                            <option value="Insider" selected>Insider</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="alert alert-info mt-3">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    <strong>Módulo Insider:</strong> Proporciona entradas y salidas adicionales para resolver conflictos de capacidades del GPS.
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // HTML para otras soluciones (Rastreo avanzado, etc.)
-                    // Crear un elemento temporal para generar las configuraciones
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = `
-                        <div class="solucion-item">
-                            <div class="configuraciones-solucion"></div>
-                        </div>
-                    `;
-                    
-                    // Crear un select temporal para generar las configuraciones
-                    const tempSelect = document.createElement('select');
-                    tempSelect.name = solucionId + '_tipo';
-                    tempSelect.value = solucion.tipo_solucion;
-                    
-                    // Crear un contenedor temporal para las configuraciones
-                    const tempContainer = tempDiv.querySelector('.configuraciones-solucion');
-                    
-                    // Llamar a la función que genera las configuraciones
-                    const configuracionesHtml = mostrarConfiguracionesSolucionWizard(tempSelect, tempContainer);
-                    
-                    htmlSoluciones += `
-                        <div class="card mb-3" id="solucion_${unidadIndex + 1}_${solucionIndex + 1}">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0">Solución ${solucionIndex + 1}</h6>
-                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarSolucion(${unidadIndex}, ${solucionIndex})">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Tipo de Solución:</label>
-                                        <select class="form-select" id="${solucionId}_tipo" disabled>
-                                            <option value="${solucion.tipo_solucion}" selected>${solucion.tipo_solucion}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="configuraciones-solucion mt-3">
-                                    ${configuracionesHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            // Actualizar el HTML del contenedor
-            contenedorSoluciones.innerHTML = htmlSoluciones;
-            
-            // Aplicar los valores seleccionados a las configuraciones
+            // NO regenerar el HTML, solo actualizar los valores existentes
             vehiculo.soluciones.forEach((solucion, solucionIndex) => {
                 if (solucion.configuraciones && Object.keys(solucion.configuraciones).length > 0) {
                     const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
