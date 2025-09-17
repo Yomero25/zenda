@@ -3179,15 +3179,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             });
             
             // Verificar módulos Insider en todas las unidades
-            console.log(`🔍 DEBUG: Verificando módulos Insider en ${vehiculos.length} unidades...`);
-            console.log(`🔍 DEBUG: cotizacionData.vehiculos:`, cotizacionData.vehiculos);
             vehiculos.forEach((vehiculo, unidadIndex) => {
-                console.log(`🔍 DEBUG: Unidad ${unidadIndex + 1} - Soluciones:`, vehiculo.soluciones?.map(s => s.tipo_solucion) || []);
                 const tieneInsider = vehiculo.soluciones?.some(sol => sol.tipo_solucion === 'Insider') || false;
-                console.log(`🔍 DEBUG: Unidad ${unidadIndex + 1} - ¿Tiene Insider?: ${tieneInsider}`);
                 
                 if (tieneInsider) {
-                    console.log(`🔧 DEBUG: Módulo Insider detectado para Unidad ${unidadIndex + 1}`);
                     const keyInsider = 'Módulo Insider';
                     todosLosInsumos[keyInsider] = {
                         nombre: keyInsider,
@@ -3196,7 +3191,6 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         sugerido: true,
                         categoria: 'equipos'
                     };
-                    console.log(`✅ DEBUG: Módulo Insider agregado como insumo`);
                 }
             });
 
