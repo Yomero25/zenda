@@ -1681,7 +1681,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 }
             }
             
+            console.log(`🔍 DEBUG: Verificando deteccion_jammer: "${configs.deteccion_jammer}"`);
+            
             if (configs.deteccion_jammer === 'alerta' || configs.deteccion_jammer === 'alerta_bloqueo') {
+                console.log(`🔍 DEBUG: Procesando detección jammer: ${configs.deteccion_jammer}`);
                 // Detección jammer siempre usa una entrada
                 const entradaLibre = [1, 2, 3].find(entrada => !entradasUsadas.includes(entrada));
                 if (entradaLibre) {
@@ -1696,6 +1699,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     salidasUsadas.push(3);
                     console.log(`🔍 DEBUG: Detección jammer con bloqueo usando salida 3`);
                 }
+            } else {
+                console.log(`🔍 DEBUG: Detección jammer no activa o valor inválido: "${configs.deteccion_jammer}"`);
             }
             
             // Verificar si excede las capacidades del GPS (3 entradas, 3 salidas)
