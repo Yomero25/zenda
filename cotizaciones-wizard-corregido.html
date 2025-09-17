@@ -2568,9 +2568,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 await cargarFuncionesRastreo();
             }
             
-            // Obtener datos actuales
-            guardarPasoActual();
-            
+            // Obtener datos actuales (sin guardar - para evitar sobrescribir estado)
             const vehiculos = cotizacionData.vehiculos || [];
             console.log(`🔍 DEBUG: cotizacionData.vehiculos en generarInsumosSugeridos:`, cotizacionData.vehiculos);
             console.log(`🔍 DEBUG: vehiculos.length:`, vehiculos.length);
@@ -4254,8 +4252,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         function mostrarDebugCalculos() {
             console.log('=== INICIO DEBUG DE CÁLCULOS ===');
             
-            // Obtener datos actuales
-            guardarPasoActual();
+            // Obtener datos actuales (sin guardar - para evitar sobrescribir estado)
             const vehiculos = cotizacionData.vehiculos || [];
             
             console.log('1. DATOS DE ENTRADA:');
