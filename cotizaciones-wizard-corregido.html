@@ -3181,6 +3181,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             });
             
             // Verificar módulos Insider en todas las unidades - USAR cotizacionData.vehiculos directamente
+            console.log(`🚨 ESTADO COMPLETO cotizacionData.vehiculos:`, JSON.stringify(cotizacionData.vehiculos, null, 2));
+            
             cotizacionData.vehiculos.forEach((vehiculo, unidadIndex) => {
                 console.log(`🔍 DEBUG: Verificando Insider en Unidad ${unidadIndex + 1}:`, vehiculo.soluciones);
                 
@@ -3190,6 +3192,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     console.log(`🚨 CRÍTICO: Solución ${sol.tipo_solucion} - modulo_insider: ${sol.configuraciones?.modulo_insider}, tieneModulo: ${tieneModulo}`);
                     console.log(`🚨 CRÍTICO: Configuraciones COMPLETAS:`, sol.configuraciones);
                     console.log(`🚨 CRÍTICO: Object.keys(configuraciones):`, Object.keys(sol.configuraciones || {}));
+                    
+                    // BUSCAR MANUALMENTE modulo_insider
+                    if (sol.configuraciones) {
+                        for (let key in sol.configuraciones) {
+                            if (key.includes('insider') || key.includes('modulo')) {
+                                console.log(`🚨 ENCONTRADO: Clave similar: "${key}" = ${sol.configuraciones[key]}`);
+                            }
+                        }
+                    }
+                    
                     return tieneModulo;
                 }) || false;
                 
