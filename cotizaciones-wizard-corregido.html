@@ -1745,15 +1745,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 };
             }
             
-            // Verificar si está al límite (exactamente 3 entradas o salidas) - esto requiere módulo Insider
+            // Verificar si está al límite (exactamente 3 entradas o salidas) - esto es válido
             if (entradasUnicas.length === 3 || salidasUnicas.length === 3) {
                 console.log(`⚠️ DEBUG: Al límite de capacidades - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
-                return {
-                    valido: false,
-                    mensaje: `Las capacidades físicas del GPS GV310LAU están al límite. Se requieren exactamente ${entradasUnicas.length} entradas y ${salidasUnicas.length} salidas, pero no hay margen para futuras expansiones. Se recomienda agregar un módulo Insider.`,
-                    entradasUsadas: entradasUnicas,
-                    salidasUsadas: salidasUnicas
-                };
             }
             
             console.log(`✅ DEBUG: Configuración válida - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
@@ -1831,46 +1825,28 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         
         // Función para agregar módulo Insider
         function agregarModuloInsider(unidadIndex, solucionIndex) {
-            console.log(`🔧 DEBUG: Agregando módulo Insider para unidad ${unidadIndex}, solución ${solucionIndex}`);
-            console.log(`🔧 DEBUG: cotizacionData.vehiculos.length:`, cotizacionData.vehiculos?.length);
-            console.log(`🔧 DEBUG: cotizacionData.vehiculos:`, cotizacionData.vehiculos);
-            
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
-            console.log(`🔧 DEBUG: Vehículo actual:`, vehiculo);
-            console.log(`🔧 DEBUG: Soluciones actuales:`, vehiculo.soluciones.map(s => s.tipo_solucion));
+            const solucion = vehiculo.soluciones[solucionIndex];
             
-            // Verificar si ya existe solución Insider
-            const yaExisteInsider = vehiculo.soluciones.some(sol => sol.tipo_solucion === 'Insider');
-            console.log(`🔧 DEBUG: ¿Ya existe Insider? ${yaExisteInsider}`);
-            
-            if (!yaExisteInsider) {
-                // Agregar solución Insider
-                const nuevaSolucionInsider = {
-                    tipo_solucion: 'Insider',
-                    configuraciones: {
-                        // Configuraciones básicas del módulo Insider
-                        activo: true
-                    }
-                };
-                
-                vehiculo.soluciones.push(nuevaSolucionInsider);
-                console.log(`🔧 DEBUG: Solución Insider agregada. Nuevas soluciones:`, vehiculo.soluciones.map(s => s.tipo_solucion));
-                
-                // Actualizar la interfaz
-                console.log(`🔧 DEBUG: Actualizando interfaz de soluciones...`);
-                actualizarInterfazSoluciones(unidadIndex);
-                
-                // Mostrar mensaje de confirmación
-                mostrarAlerta('Módulo Insider agregado exitosamente', 'success');
-            } else {
-                console.log(`🔧 DEBUG: Insider ya existe, no se agrega`);
-                mostrarAlerta('El módulo Insider ya está agregado para esta unidad', 'info');
+            // Marcar el módulo Insider como activo en la configuración
+            if (!solucion.configuraciones) {
+                solucion.configuraciones = {};
             }
+            solucion.configuraciones.modulo_insider = true;
             
-            // Cerrar modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAdvertenciaGPS'));
+            // Actualizar la interfaz
+            actualizarInterfazSoluciones(unidadIndex);
+            
+            // Mostrar mensaje de éxito
+            alert('✅ Módulo Insider agregado exitosamente');
+            
+            // Cerrar el modal
+            const modal = document.getElementById('modalAdvertenciaGPS');
             if (modal) {
-                modal.hide();
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                    bsModal.hide();
+                }
             }
         }
         
@@ -2172,6 +2148,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         } else if (configKey === 'teclado_dinamico') {
                             solucion.configuraciones[configKey] = true;
                             solucion.configuraciones['teclado_sencillo'] = false;
+                        } else if (configKey === 'modulo_insider') {
+                            solucion.configuraciones[configKey] = elemento.checked;
                         }
                     }
                 }
@@ -2309,6 +2287,12 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             console.log(`⚠️ DEBUG: No se encontró elemento para ${configKey}`);
                         }
                     });
+                }
+                
+                // Aplicar estado del módulo Insider
+                const moduloInsiderElement = document.getElementById(`${solucionId}_modulo_insider`);
+                if (moduloInsiderElement) {
+                    moduloInsiderElement.checked = solucion.configuraciones.modulo_insider || false;
                 }
             });
             
@@ -3180,7 +3164,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             // Verificar módulos Insider en todas las unidades
             vehiculos.forEach((vehiculo, unidadIndex) => {
-                const tieneInsider = vehiculo.soluciones?.some(sol => sol.tipo_solucion === 'Insider') || false;
+                // Buscar en todas las soluciones si alguna tiene módulo Insider activado
+                const tieneInsider = vehiculo.soluciones?.some(sol => 
+                    sol.configuraciones?.modulo_insider === true
+                ) || false;
                 
                 if (tieneInsider) {
                     const keyInsider = 'Módulo Insider';
@@ -6518,6 +6505,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                         <option value="10">10 minutos</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 style="color: #fb930c;">Módulo Insider</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="${solucionId}_modulo_insider" onchange="manejarCambioConfiguracion('${solucionId}', 'modulo_insider', ${unidadIndex}, ${solucionIndex})">
+                                    <label class="form-check-label" for="${solucionId}_modulo_insider">
+                                        <strong>Módulo Insider</strong> - Resuelve conflictos de capacidades GPS
+                                    </label>
+                                </div>
+                                <small class="text-muted">Proporciona entradas y salidas adicionales cuando se exceden las capacidades del GPS GV310LAU</small>
                             </div>
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Habilitado en Cabina</h6>
