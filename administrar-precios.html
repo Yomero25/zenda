@@ -1443,14 +1443,6 @@
                         // Forzar visibilidad de la tabla
                         tabla.setAttribute('style', 'display: table !important; visibility: visible !important; opacity: 1 !important;');
                         console.log('🔄 DEBUG: Estilos forzados en la tabla');
-                        
-                        // Hacer scroll hacia la tabla para que sea visible
-                        tabla.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        console.log('🔄 DEBUG: Scroll hacia la tabla ejecutado');
-                        
-                        // También hacer scroll hacia la sección
-                        seccionServicios.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        console.log('🔄 DEBUG: Scroll hacia la sección ejecutado');
                     } else {
                         console.log('❌ DEBUG: No se encontró la tabla en seccionServicios');
                     }
@@ -1820,42 +1812,6 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalImportarCSV" tabindex="-1" aria-labelledby="modalImportarCSVLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalImportarCSVLabel">
-                        <i class="bi bi-upload me-2"></i>Importar desde CSV
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Formato requerido:</strong><br>
-                        Encabezados: <code>Elemento, Categoría, Precio</code><br>
-                        Ejemplo: <code>GPS GV310LAU, Equipo, 1500</code>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Seleccionar archivo CSV</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="nombreArchivo" placeholder="Ningún archivo seleccionado" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="seleccionarArchivoCSV()">
-                                <i class="bi bi-folder2-open me-1"></i>Seleccionar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnProcesarCSV" onclick="procesarArchivoCSV()" disabled>
-                        <i class="bi bi-upload me-1"></i>Importar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Sección de Servicios de Datos -->
     <div id="seccionServicios" style="display: none;">
         <div class="container-fluid mt-4">
@@ -1938,6 +1894,43 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalImportarCSV" tabindex="-1" aria-labelledby="modalImportarCSVLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalImportarCSVLabel">
+                        <i class="bi bi-upload me-2"></i>Importar desde CSV
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Formato requerido:</strong><br>
+                        Encabezados: <code>Elemento, Categoría, Precio</code><br>
+                        Ejemplo: <code>GPS GV310LAU, Equipo, 1500</code>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar archivo CSV</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="nombreArchivo" placeholder="Ningún archivo seleccionado" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="seleccionarArchivoCSV()">
+                                <i class="bi bi-folder2-open me-1"></i>Seleccionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnProcesarCSV" onclick="procesarArchivoCSV()" disabled>
+                        <i class="bi bi-upload me-1"></i>Importar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1">
         <div class="modal-dialog">
