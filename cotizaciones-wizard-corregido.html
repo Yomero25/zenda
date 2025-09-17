@@ -2239,7 +2239,26 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     `;
                 } else {
                     // HTML para otras soluciones (Rastreo avanzado, etc.)
-                    // Por ahora, solo mostrar el nombre de la solución
+                    // Crear un elemento temporal para generar las configuraciones
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = `
+                        <div class="solucion-item">
+                            <div class="configuraciones-solucion"></div>
+                        </div>
+                    `;
+                    
+                    // Crear un select temporal para generar las configuraciones
+                    const tempSelect = document.createElement('select');
+                    tempSelect.name = solucionId + '_tipo';
+                    tempSelect.value = solucion.tipo_solucion;
+                    
+                    // Llamar a la función que genera las configuraciones
+                    mostrarConfiguracionesSolucionWizard(tempSelect);
+                    
+                    // Obtener el HTML de las configuraciones generadas
+                    const configuracionesContainer = tempDiv.querySelector('.configuraciones-solucion');
+                    const configuracionesHtml = configuracionesContainer ? configuracionesContainer.innerHTML : '';
+                    
                     htmlSoluciones += `
                         <div class="card mb-3" id="solucion_${unidadIndex + 1}_${solucionIndex + 1}">
                             <div class="card-header d-flex justify-content-between align-items-center">
@@ -2257,6 +2276,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                         </select>
                                     </div>
                                 </div>
+                                <div class="configuraciones-solucion mt-3">
+                                    ${configuracionesHtml}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -2265,6 +2287,38 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             // Actualizar el HTML del contenedor
             contenedorSoluciones.innerHTML = htmlSoluciones;
+            
+            // Aplicar los valores seleccionados a las configuraciones
+            vehiculo.soluciones.forEach((solucion, solucionIndex) => {
+                if (solucion.configuraciones && Object.keys(solucion.configuraciones).length > 0) {
+                    const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
+                    
+                    console.log(`🔧 DEBUG: Aplicando configuraciones para ${solucionId}:`, solucion.configuraciones);
+                    
+                    // Aplicar cada configuración
+                    Object.keys(solucion.configuraciones).forEach(configKey => {
+                        const configValue = solucion.configuraciones[configKey];
+                        
+                        // Buscar el elemento por nombre
+                        const elemento = contenedorSoluciones.querySelector(`[name="${solucionId}_${configKey}"]`);
+                        if (elemento) {
+                            if (elemento.type === 'checkbox') {
+                                elemento.checked = !!configValue;
+                            } else if (elemento.type === 'radio') {
+                                elemento.checked = elemento.value === configValue;
+                            } else if (elemento.tagName === 'SELECT') {
+                                elemento.value = configValue;
+                            } else {
+                                elemento.value = configValue;
+                            }
+                            console.log(`✅ DEBUG: Aplicado ${configKey} = ${configValue}`);
+                        } else {
+                            console.log(`⚠️ DEBUG: No se encontró elemento para ${configKey}`);
+                        }
+                    });
+                }
+            });
+            
             console.log(`✅ DEBUG: Interfaz de soluciones actualizada para unidad ${unidadIndex + 1}`);
         }
 
