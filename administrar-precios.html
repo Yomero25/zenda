@@ -1391,8 +1391,12 @@
                 console.log('🔄 DEBUG: Sección precios ocultada');
             }
             if (seccionServicios) {
-                seccionServicios.style.display = 'block';
+                seccionServicios.style.display = 'block !important';
+                seccionServicios.style.visibility = 'visible';
+                seccionServicios.style.opacity = '1';
                 console.log('🔄 DEBUG: Sección servicios mostrada');
+                console.log('🔄 DEBUG: Display style:', seccionServicios.style.display);
+                console.log('🔄 DEBUG: Visibility style:', seccionServicios.style.visibility);
             }
             
             // Actualizar botones del sidebar
@@ -1412,6 +1416,17 @@
             cargarTablaServicios();
             console.log('🔄 DEBUG: Llamando a actualizarEstadisticasServicios...');
             actualizarEstadisticasServicios();
+            
+            // Forzar visibilidad después de un pequeño delay
+            setTimeout(() => {
+                if (seccionServicios) {
+                    seccionServicios.style.display = 'block';
+                    seccionServicios.style.visibility = 'visible';
+                    seccionServicios.style.opacity = '1';
+                    console.log('🔄 DEBUG: Visibilidad forzada después del delay');
+                }
+            }, 100);
+            
             console.log('✅ DEBUG: mostrarServicios completado');
         }
 
