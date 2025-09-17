@@ -1832,6 +1832,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         // Función para agregar módulo Insider
         function agregarModuloInsider(unidadIndex, solucionIndex) {
             console.log(`🔧 DEBUG: Agregando módulo Insider para unidad ${unidadIndex}, solución ${solucionIndex}`);
+            console.log(`🔧 DEBUG: cotizacionData.vehiculos.length:`, cotizacionData.vehiculos?.length);
+            console.log(`🔧 DEBUG: cotizacionData.vehiculos:`, cotizacionData.vehiculos);
             
             const vehiculo = cotizacionData.vehiculos[unidadIndex];
             console.log(`🔧 DEBUG: Vehículo actual:`, vehiculo);
