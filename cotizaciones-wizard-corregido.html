@@ -1841,6 +1841,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             }
             solucion.configuraciones.modulo_insider = true;
             console.log(`🔧 DEBUG: solucion después:`, solucion);
+            console.log(`🔧 DEBUG: modulo_insider guardado:`, solucion.configuraciones.modulo_insider);
+            
+            // Verificar que se guardó correctamente
+            console.log(`🔧 DEBUG: Verificación inmediata - cotizacionData.vehiculos[${unidadIndex}].soluciones[${solucionIndex}].configuraciones.modulo_insider:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones.modulo_insider);
             
             // Actualizar la interfaz
             actualizarInterfazSoluciones(unidadIndex);
@@ -2202,7 +2206,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             console.log(`🔍 DEBUG: Soluciones en DOM: ${solucionesEnDOM}, Soluciones en datos: ${solucionesEnDatos}`);
             
-            // Si hay más soluciones en los datos que en el DOM, crear las faltantes
+            // Solo crear soluciones faltantes, NO regenerar las existentes
             if (solucionesEnDatos > solucionesEnDOM) {
                 console.log(`🔧 DEBUG: Creando ${solucionesEnDatos - solucionesEnDOM} soluciones faltantes`);
                 
