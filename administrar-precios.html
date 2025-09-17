@@ -1378,20 +1378,35 @@
         let servicioEditando = null;
 
         async function mostrarServicios() {
-            document.getElementById('seccionPrecios').style.display = 'none';
-            document.getElementById('seccionServicios').style.display = 'block';
+            console.log('🔄 DEBUG: Iniciando mostrarServicios...');
+            
+            const seccionPrecios = document.getElementById('seccionPrecios');
+            const seccionServicios = document.getElementById('seccionServicios');
+            
+            console.log('🔄 DEBUG: seccionPrecios:', seccionPrecios);
+            console.log('🔄 DEBUG: seccionServicios:', seccionServicios);
+            
+            if (seccionPrecios) seccionPrecios.style.display = 'none';
+            if (seccionServicios) seccionServicios.style.display = 'block';
             
             // Actualizar botones del sidebar
             document.querySelectorAll('.sidebar .btn').forEach(btn => {
                 btn.classList.remove('btn-primary');
                 btn.classList.add('btn-outline-light');
             });
-            document.querySelector('button[onclick="mostrarServicios()"]').classList.remove('btn-outline-light');
-            document.querySelector('button[onclick="mostrarServicios()"]').classList.add('btn-primary');
+            const btnServicios = document.querySelector('button[onclick="mostrarServicios()"]');
+            if (btnServicios) {
+                btnServicios.classList.remove('btn-outline-light');
+                btnServicios.classList.add('btn-primary');
+            }
             
+            console.log('🔄 DEBUG: Cargando servicios desde Supabase...');
             await cargarServiciosDesdeSupabase();
+            console.log('🔄 DEBUG: Llamando a cargarTablaServicios...');
             cargarTablaServicios();
+            console.log('🔄 DEBUG: Llamando a actualizarEstadisticasServicios...');
             actualizarEstadisticasServicios();
+            console.log('✅ DEBUG: mostrarServicios completado');
         }
 
         async function mostrarPrecios() {
@@ -1412,6 +1427,7 @@
                 console.log('🔄 Cargando servicios desde Supabase...');
                 serviciosDatos = await window.dataService.fetchServiciosDatos();
                 console.log(`✅ Servicios cargados: ${serviciosDatos.length}`);
+                console.log('🔄 DEBUG: serviciosDatos después de cargar:', serviciosDatos);
             } catch (error) {
                 console.error('❌ Error cargando servicios:', error);
                 serviciosDatos = [];
@@ -1419,10 +1435,22 @@
         }
 
         function cargarTablaServicios() {
+            console.log('🔄 DEBUG: Iniciando cargarTablaServicios...');
+            console.log('🔄 DEBUG: serviciosDatos.length:', serviciosDatos.length);
+            console.log('🔄 DEBUG: serviciosDatos:', serviciosDatos);
+            
             const tbody = document.getElementById('tablaServicios');
+            console.log('🔄 DEBUG: tbody encontrado:', tbody);
+            
+            if (!tbody) {
+                console.error('❌ DEBUG: No se encontró el elemento tablaServicios');
+                return;
+            }
+            
             tbody.innerHTML = '';
 
             if (serviciosDatos.length === 0) {
+                console.log('⚠️ DEBUG: No hay servicios, mostrando mensaje vacío');
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No hay servicios configurados</td></tr>';
                 return;
             }
