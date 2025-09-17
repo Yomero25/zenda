@@ -1861,6 +1861,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             // Mostrar mensaje de éxito
             mostrarAlerta('✅ Módulo Insider agregado exitosamente', 'success');
             
+            // DEPURAR: Verificar estado ANTES de cerrar modal
+            console.log(`🚨 ANTES DE CERRAR MODAL:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
+            
             // Cerrar el modal
             const modal = document.getElementById('modalAdvertenciaGPS');
             if (modal) {
@@ -1869,6 +1872,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     bsModal.hide();
                 }
             }
+            
+            // DEPURAR: Verificar estado DESPUÉS de cerrar modal (con delay)
+            setTimeout(() => {
+                console.log(`🚨 DESPUÉS DE CERRAR MODAL:`, cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones);
+            }, 500);
         }
         
         // Función para aplicar reglas de exclusión
@@ -6067,6 +6075,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         }
         
         function mostrarConfiguracionesSolucionWizard(select, container = null) {
+            // DEPURAR: Detectar llamadas inesperadas
+            console.log(`🚨 LLAMADA A mostrarConfiguracionesSolucionWizard:`, select.value);
+            console.trace('🚨 STACK TRACE mostrarConfiguracionesSolucionWizard');
+            
             // Si no se proporciona un contenedor, buscar en el DOM
             if (!container) {
                 const solucionItem = select.closest('.solucion-item');
