@@ -2142,6 +2142,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 solucion.configuraciones = {};
             }
             
+            // 🚨 CRÍTICO: Verificar si modulo_insider existe ANTES de actualizar
+            const moduloInsiderAntes = solucion.configuraciones.modulo_insider;
+            console.log(`🚨 ANTES manejarCambioConfiguracion - modulo_insider: ${moduloInsiderAntes}, configKey: ${configKey}`);
+            
             // Actualizar el tipo de solución si es necesario
             const tipoSelect = document.getElementById(`${solucionId}_tipo`);
             if (tipoSelect && tipoSelect.value) {
@@ -2209,6 +2213,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             } else {
                 console.log(`✅ DEBUG: Configuración válida, no se muestra modal`);
                 console.log(`✅ DEBUG: Configuración válida`);
+            }
+            
+            // 🚨 CRÍTICO: Verificar si modulo_insider SIGUE existiendo DESPUÉS de actualizar
+            const moduloInsiderDespues = solucion.configuraciones.modulo_insider;
+            console.log(`🚨 DESPUÉS manejarCambioConfiguracion - modulo_insider: ${moduloInsiderDespues}, configKey: ${configKey}`);
+            
+            // Si se perdió modulo_insider, restaurarlo
+            if (moduloInsiderAntes && !moduloInsiderDespues) {
+                console.log(`🚨 RESTAURANDO modulo_insider que se perdió en manejarCambioConfiguracion`);
+                solucion.configuraciones.modulo_insider = moduloInsiderAntes;
             }
             
             // Actualizar la interfaz si es necesario
