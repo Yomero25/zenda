@@ -1758,6 +1758,129 @@
             agregarInsumoRastreo(); // Agregar un insumo vacío por defecto
         }
 
+        // ===== FUNCIONES PARA MODALES DE NUEVOS TIPOS =====
+        
+        function mostrarModalNuevoTipo(tipo) {
+            console.log(`🔧 Abriendo modal para nuevo ${tipo}...`);
+            
+            const modal = document.getElementById('modalNuevoTipo');
+            const titulo = document.getElementById('modalNuevoTipoTitulo');
+            const label = document.getElementById('modalNuevoTipoLabel');
+            const descripcion = document.getElementById('modalNuevoTipoDescripcion');
+            const input = document.getElementById('nuevoTipoNombre');
+            
+            // Configurar según el tipo
+            if (tipo === 'vehiculo') {
+                titulo.textContent = 'Agregar Nuevo Tipo de Vehículo';
+                label.textContent = 'Nombre del nuevo tipo de vehículo:';
+                descripcion.textContent = 'Este nuevo tipo de vehículo estará disponible inmediatamente para usar en las combinaciones.';
+                input.placeholder = 'Ej: Camión 3.5 ton';
+            } else if (tipo === 'solucion') {
+                titulo.textContent = 'Agregar Nuevo Tipo de Solución';
+                label.textContent = 'Nombre del nuevo tipo de solución:';
+                descripcion.textContent = 'Este nuevo tipo de solución estará disponible inmediatamente para usar en las combinaciones.';
+                input.placeholder = 'Ej: Rastreo básico';
+            }
+            
+            // Limpiar input
+            input.value = '';
+            
+            // Mostrar modal
+            new bootstrap.Modal(modal).show();
+        }
+
+        function mostrarModalNuevoInsumo() {
+            console.log('🔧 Abriendo modal para nuevo insumo...');
+            
+            const modal = document.getElementById('modalNuevoInsumo');
+            const input = document.getElementById('nuevoInsumoNombre');
+            const categoria = document.getElementById('nuevoInsumoCategoria');
+            
+            // Limpiar inputs
+            input.value = '';
+            categoria.value = '';
+            
+            // Mostrar modal
+            new bootstrap.Modal(modal).show();
+        }
+
+        async function guardarNuevoTipo() {
+            const nombre = document.getElementById('nuevoTipoNombre').value.trim();
+            if (!nombre) {
+                mostrarAlerta('Por favor ingresa el nombre del tipo', 'warning');
+                return;
+            }
+
+            try {
+                // Determinar el tipo basado en el título del modal
+                const titulo = document.getElementById('modalNuevoTipoTitulo').textContent;
+                let tipo = 'vehiculo'; // default
+                
+                if (titulo.includes('Solución')) {
+                    tipo = 'solucion';
+                }
+
+                let success = false;
+                if (tipo === 'vehiculo') {
+                    success = await window.dataService.upsertTipoUnidad(nombre, `Tipo de vehículo: ${nombre}`, 'vehiculo');
+                } else if (tipo === 'solucion') {
+                    success = await window.dataService.upsertTipoSolucion(nombre, `Tipo de solución: ${nombre}`, 'solucion');
+                }
+
+                if (success) {
+                    mostrarAlerta(`${tipo === 'vehiculo' ? 'Tipo de vehículo' : 'Tipo de solución'} "${nombre}" agregado correctamente`, 'success');
+                    
+                    // Cerrar modal
+                    bootstrap.Modal.getInstance(document.getElementById('modalNuevoTipo')).hide();
+                    
+                    // Actualizar listas en el modal de nueva combinación
+                    await actualizarListasEnModalNuevaCombinacion();
+                } else {
+                    mostrarAlerta('Error al agregar el tipo', 'danger');
+                }
+            } catch (error) {
+                console.error('❌ Error guardando nuevo tipo:', error);
+                mostrarAlerta('Error al guardar el tipo: ' + error.message, 'danger');
+            }
+        }
+
+        async function guardarNuevoInsumo() {
+            const nombre = document.getElementById('nuevoInsumoNombre').value.trim();
+            const categoria = document.getElementById('nuevoInsumoCategoria').value.trim();
+            
+            if (!nombre) {
+                mostrarAlerta('Por favor ingresa el nombre del insumo', 'warning');
+                return;
+            }
+
+            try {
+                const success = await window.dataService.upsertTipoInsumo(
+                    nombre, 
+                    `Insumo: ${nombre}`, 
+                    categoria || 'General', 
+                    'piezas'
+                );
+
+                if (success) {
+                    mostrarAlerta(`Insumo "${nombre}" agregado correctamente`, 'success');
+                    
+                    // Agregar a la lista local de insumos
+                    if (!listaInsumos.includes(nombre)) {
+                        listaInsumos.push(nombre);
+                        listaInsumos.sort();
+                    }
+                    
+                    // Cerrar modal
+                    bootstrap.Modal.getInstance(document.getElementById('modalNuevoInsumo')).hide();
+                } else {
+                    mostrarAlerta('Error al agregar el insumo', 'danger');
+                }
+            } catch (error) {
+                console.error('❌ Error guardando nuevo insumo:', error);
+                mostrarAlerta('Error al guardar el insumo: ' + error.message, 'danger');
+            }
+        }
+
         // ===== INICIALIZACIÓN =====
         
         document.addEventListener('DOMContentLoaded', async function() {
