@@ -2252,12 +2252,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     tempSelect.name = solucionId + '_tipo';
                     tempSelect.value = solucion.tipo_solucion;
                     
-                    // Llamar a la función que genera las configuraciones
-                    mostrarConfiguracionesSolucionWizard(tempSelect);
+                    // Crear un contenedor temporal para las configuraciones
+                    const tempContainer = tempDiv.querySelector('.configuraciones-solucion');
                     
-                    // Obtener el HTML de las configuraciones generadas
-                    const configuracionesContainer = tempDiv.querySelector('.configuraciones-solucion');
-                    const configuracionesHtml = configuracionesContainer ? configuracionesContainer.innerHTML : '';
+                    // Llamar a la función que genera las configuraciones
+                    const configuracionesHtml = mostrarConfiguracionesSolucionWizard(tempSelect, tempContainer);
                     
                     htmlSoluciones += `
                         <div class="card mb-3" id="solucion_${unidadIndex + 1}_${solucionIndex + 1}">
@@ -6023,9 +6022,17 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             }
         }
         
-        function mostrarConfiguracionesSolucionWizard(select) {
-            const solucionItem = select.closest('.solucion-item');
-            const container = solucionItem.querySelector('.configuraciones-solucion');
+        function mostrarConfiguracionesSolucionWizard(select, container = null) {
+            // Si no se proporciona un contenedor, buscar en el DOM
+            if (!container) {
+                const solucionItem = select.closest('.solucion-item');
+                if (!solucionItem) {
+                    console.error('❌ DEBUG: No se encontró .solucion-item para el select');
+                    return '';
+                }
+                container = solucionItem.querySelector('.configuraciones-solucion');
+            }
+            
             const tipoSolucion = select.value;
             const solucionId = select.name.replace('_tipo', '');
             
@@ -6037,8 +6044,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             console.log(`🔧 DEBUG: Configurando solución - Unidad: ${unidadIndex + 1}, Solución: ${solucionIndex + 1}`);
             
             if (!tipoSolucion) {
-                container.innerHTML = '<p class="text-muted">Selecciona un tipo de solución para ver las configuraciones disponibles.</p>';
-                return;
+                if (container) {
+                    container.innerHTML = '<p class="text-muted">Selecciona un tipo de solución para ver las configuraciones disponibles.</p>';
+                }
+                return '<p class="text-muted">Selecciona un tipo de solución para ver las configuraciones disponibles.</p>';
             }
             
             let configuracionesHtml = '';
@@ -6590,7 +6599,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     `;
             }
             
-            container.innerHTML = configuracionesHtml;
+            if (container) {
+                container.innerHTML = configuracionesHtml;
+            }
+            return configuracionesHtml;
         }
         
         function eliminarSolucionWizard(button) {
@@ -6829,7 +6841,10 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                     `;
             }
             
-            container.innerHTML = configuracionesHtml;
+            if (container) {
+                container.innerHTML = configuracionesHtml;
+            }
+            return configuracionesHtml;
         }
         
         function eliminarSolucion(button) {
