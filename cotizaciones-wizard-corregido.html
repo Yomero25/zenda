@@ -1745,10 +1745,15 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 };
             }
             
-            // Verificar si está al límite (exactamente 3 entradas o salidas)
+            // Verificar si está al límite (exactamente 3 entradas o salidas) - esto requiere módulo Insider
             if (entradasUnicas.length === 3 || salidasUnicas.length === 3) {
                 console.log(`⚠️ DEBUG: Al límite de capacidades - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
-                // No es un error, pero es una advertencia
+                return {
+                    valido: false,
+                    mensaje: `Las capacidades físicas del GPS GV310LAU están al límite. Se requieren exactamente ${entradasUnicas.length} entradas y ${salidasUnicas.length} salidas, pero no hay margen para futuras expansiones. Se recomienda agregar un módulo Insider.`,
+                    entradasUsadas: entradasUnicas,
+                    salidasUsadas: salidasUnicas
+                };
             }
             
             console.log(`✅ DEBUG: Configuración válida - Entradas: ${entradasUnicas.length}/3, Salidas: ${salidasUnicas.length}/3`);
