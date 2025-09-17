@@ -4541,25 +4541,8 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 </thead>
                                 <tbody>
                                     ${insumosSugeridos.map(insumo => {
-                                        // Recalcular cantidad exacta desde la matriz
-                                        let cantidadMatriz = 0;
-                                        const vehiculos = tempData.unidades || cotizacionData.vehiculos || [];
-                                        
-                                        vehiculos.forEach(vehiculo => {
-                                            const tipoUnidad = vehiculo.tipo || 'Tracto';
-                                            if (vehiculo.soluciones) {
-                                                vehiculo.soluciones.forEach(solucion => {
-                                                    const insumosDeEsta = obtenerInsumosSugeridos(tipoUnidad, solucion.tipo_solucion);
-                                                    const insumoEncontrado = insumosDeEsta.find(ins => ins.nombre === insumo.nombre);
-                                                    if (insumoEncontrado) {
-                                                        const cantidad = parseFloat(insumoEncontrado.cantidad) || 0;
-                                                        cantidadMatriz += cantidad;
-                                                    }
-                                                });
-                                            }
-                                        });
-                                        
-                                        const cantidadTotal = cantidadMatriz * cantidadLoteInsumos;
+                                        // Usar la cantidad ya calculada y guardada
+                                        const cantidadTotal = insumo.cantidad || 0;
                                         
                                         return `
                                             <tr>
