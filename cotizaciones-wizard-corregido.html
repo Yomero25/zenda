@@ -2202,7 +2202,79 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 return;
             }
             
-            // NO regenerar el HTML, solo actualizar los valores existentes
+            // Verificar si hay soluciones que no tienen HTML en el DOM
+            const solucionesExistentes = contenedorSoluciones.querySelectorAll('.card');
+            const solucionesEnDOM = solucionesExistentes.length;
+            const solucionesEnDatos = vehiculo.soluciones.length;
+            
+            console.log(`🔍 DEBUG: Soluciones en DOM: ${solucionesEnDOM}, Soluciones en datos: ${solucionesEnDatos}`);
+            
+            // Si hay más soluciones en los datos que en el DOM, crear las faltantes
+            if (solucionesEnDatos > solucionesEnDOM) {
+                console.log(`🔧 DEBUG: Creando ${solucionesEnDatos - solucionesEnDOM} soluciones faltantes`);
+                
+                for (let i = solucionesEnDOM; i < solucionesEnDatos; i++) {
+                    const solucion = vehiculo.soluciones[i];
+                    const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${i + 1}`;
+                    
+                    let htmlSolucion = '';
+                    
+                    if (solucion.tipo_solucion === 'Insider') {
+                        // HTML específico para solución Insider
+                        htmlSolucion = `
+                            <div class="card mb-3" id="solucion_${unidadIndex + 1}_${i + 1}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Solución ${i + 1}</h6>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarSolucion(${unidadIndex}, ${i})">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tipo de Solución:</label>
+                                            <select class="form-select" id="${solucionId}_tipo" disabled>
+                                                <option value="Insider" selected>Insider</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>Módulo Insider:</strong> Proporciona entradas y salidas adicionales para resolver conflictos de capacidades del GPS.
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // HTML para otras soluciones
+                        htmlSolucion = `
+                            <div class="card mb-3" id="solucion_${unidadIndex + 1}_${i + 1}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Solución ${i + 1}</h6>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarSolucion(${unidadIndex}, ${i})">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tipo de Solución:</label>
+                                            <select class="form-select" id="${solucionId}_tipo" disabled>
+                                                <option value="${solucion.tipo_solucion}" selected>${solucion.tipo_solucion}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    contenedorSoluciones.insertAdjacentHTML('beforeend', htmlSolucion);
+                    console.log(`✅ DEBUG: Solución ${i + 1} (${solucion.tipo_solucion}) agregada al DOM`);
+                }
+            }
+            
+            // Actualizar los valores de todas las soluciones
             vehiculo.soluciones.forEach((solucion, solucionIndex) => {
                 if (solucion.configuraciones && Object.keys(solucion.configuraciones).length > 0) {
                     const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
