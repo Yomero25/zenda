@@ -2465,7 +2465,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 tipoRastreo = 'basico';
                                 // Agregar servicio de hosting rastreo específico (nombre exacto para precios)
                                 serviciosNecesarios.push({
-                                    nombre: 'Hosting Rastreo',
+                                    nombre: 'Hosting',
                                     periodicidad: periodicidadHosting,
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
@@ -2476,7 +2476,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 tipoRastreo = 'avanzado';
                                 // Agregar servicio de hosting rastreo específico (nombre exacto para precios)
                                 serviciosNecesarios.push({
-                                    nombre: 'Hosting Rastreo',
+                                    nombre: 'Hosting',
                                     periodicidad: periodicidadHosting,
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
@@ -6134,7 +6134,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 container.innerHTML = '';
             }
             
-            const solucionIndex = container.children.length + 1;
+            // Calcular índice correcto basado en datos existentes para evitar duplicados
+            const unidadIndex = unidadId - 1; // Convertir a base 0
+            let solucionIndex;
+            
+            if (cotizacionData.vehiculos && cotizacionData.vehiculos[unidadIndex] && cotizacionData.vehiculos[unidadIndex].soluciones) {
+                solucionIndex = cotizacionData.vehiculos[unidadIndex].soluciones.length + 1;
+            } else {
+                solucionIndex = container.children.length + 1;
+            }
+            
             const solucionId = `wizard_unidad_${unidadId}_solucion_${solucionIndex}`;
             
             const solucionDiv = document.createElement('div');
