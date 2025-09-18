@@ -435,6 +435,55 @@
                             <div id="resumenContainer">
                                 <!-- Resumen dinámico -->
                             </div>
+                            
+                            <!-- Sección de Correo Electrónico -->
+                            <div class="mt-4" id="seccionCorreo" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header" style="background-color: #fb930c; color: white;">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-envelope me-2"></i>
+                                            Envío y Seguimiento
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="d-grid gap-2">
+                                                    <button type="button" class="btn btn-success btn-lg" onclick="mostrarModalEnviarCorreo()">
+                                                        <i class="bi bi-envelope-paper me-2"></i>
+                                                        Enviar Cotización por Correo
+                                                    </button>
+                                                    <small class="text-muted">Envía la cotización directamente al cliente</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-grid gap-2">
+                                                    <button type="button" class="btn btn-info btn-lg" onclick="mostrarConfiguracionCorreo()">
+                                                        <i class="bi bi-gear me-2"></i>
+                                                        Configurar Correo
+                                                    </button>
+                                                    <small class="text-muted">Configurar servidor SMTP y credenciales</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <hr class="my-3">
+                                        
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h6 class="text-muted mb-3">
+                                                    <i class="bi bi-bell me-1"></i>
+                                                    Notificaciones Automáticas
+                                                </h6>
+                                                <div class="alert alert-info">
+                                                    <i class="bi bi-info-circle me-2"></i>
+                                                    <strong>Seguimiento Automático:</strong> El sistema enviará recordatorios automáticos a los clientes después de 7 días sin respuesta.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -4601,9 +4650,21 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             if (step === 4) {
                 nextBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Crear Cotización';
                 nextBtn.onclick = crearCotizacionFinal;
+                
+                // Mostrar sección de correo en paso 4
+                const seccionCorreo = document.getElementById('seccionCorreo');
+                if (seccionCorreo) {
+                    seccionCorreo.style.display = 'block';
+                }
             } else {
                 nextBtn.innerHTML = 'Siguiente<i class="bi bi-arrow-right ms-1"></i>';
                 nextBtn.onclick = nextStep;
+                
+                // Ocultar sección de correo en otros pasos
+                const seccionCorreo = document.getElementById('seccionCorreo');
+                if (seccionCorreo) {
+                    seccionCorreo.style.display = 'none';
+                }
             }
             
             // Establecer fecha cuando se muestra el paso 1
@@ -7237,6 +7298,520 @@ habilitado,0,2,0,0,1,1,0,0,0`;
         }
 
 
+        // ===========================================
+        // SISTEMA DE CORREO Y NOTIFICACIONES
+        // ===========================================
+        
+        // Configuración de correo
+        const emailConfig = {
+            // Configuración del servidor SMTP (se puede cambiar por el tuyo)
+            smtpServer: 'smtp.gmail.com', // Cambiar por tu servidor
+            smtpPort: 587,
+            secure: false, // true para 465, false para otros puertos
+            user: 'tu-email@empresa.com', // Cambiar por tu email
+            password: 'tu-password-app', // Usar App Password para Gmail
+            fromName: 'Sistema de Cotizaciones',
+            fromEmail: 'tu-email@empresa.com'
+        };
+        
+        // Plantillas de correo
+        const emailTemplates = {
+            cotizacion: {
+                subject: 'Cotización #{numero} - {empresa}',
+                html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #fb930c, #e67e22); color: white; padding: 20px; text-align: center;">
+                        <h1 style="margin: 0;">Cotización #{numero}</h1>
+                        <p style="margin: 5px 0;">Sistema de Cotizaciones</p>
+                    </div>
+                    
+                    <div style="padding: 20px; background: #f8f9fa;">
+                        <h2 style="color: #fb930c;">Datos del Cliente</h2>
+                        <p><strong>Empresa:</strong> {empresa}</p>
+                        <p><strong>Contacto:</strong> {contacto}</p>
+                        <p><strong>Email:</strong> {email}</p>
+                        <p><strong>Teléfono:</strong> {telefono}</p>
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <h2 style="color: #fb930c;">Resumen de la Cotización</h2>
+                        <p><strong>Fecha:</strong> {fecha}</p>
+                        <p><strong>Validez:</strong> {validez}</p>
+                        <p><strong>Total de Unidades:</strong> {unidades}</p>
+                        
+                        <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin: 0 0 10px 0; color: #2c3e50;">Total de la Cotización</h3>
+                            <p style="font-size: 24px; font-weight: bold; color: #fb930c; margin: 0;">${total}</p>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <h3 style="color: #fb930c;">Equipos y Servicios</h3>
+                            {equipos_servicios}
+                        </div>
+                    </div>
+                    
+                    <div style="background: #2c3e50; color: white; padding: 15px; text-align: center;">
+                        <p style="margin: 0;">Gracias por confiar en nosotros</p>
+                        <p style="margin: 5px 0; font-size: 12px;">Para cualquier consulta, responda a este correo</p>
+                    </div>
+                </div>
+                `
+            },
+            seguimiento: {
+                subject: 'Seguimiento de Cotización #{numero} - {empresa}',
+                html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: #28a745; color: white; padding: 20px; text-align: center;">
+                        <h1 style="margin: 0;">Seguimiento de Cotización</h1>
+                        <p style="margin: 5px 0;">Cotización #{numero}</p>
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <h2 style="color: #28a745;">Hola {contacto},</h2>
+                        <p>Esperamos que se encuentre bien. Nos ponemos en contacto para dar seguimiento a la cotización #{numero} que enviamos el {fecha_envio}.</p>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="color: #fb930c;">Recordatorio de la Cotización</h3>
+                            <p><strong>Total:</strong> ${total}</p>
+                            <p><strong>Validez hasta:</strong> {validez}</p>
+                        </div>
+                        
+                        <p>¿Tiene alguna pregunta sobre nuestra propuesta? Estamos disponibles para:</p>
+                        <ul>
+                            <li>Resolver cualquier duda técnica</li>
+                            <li>Ajustar la cotización según sus necesidades</li>
+                            <li>Programar una reunión para discutir detalles</li>
+                            <li>Comenzar con el proceso de implementación</li>
+                        </ul>
+                        
+                        <p>No dude en contactarnos respondiendo a este correo.</p>
+                        
+                        <p style="margin-top: 30px;">Saludos cordiales,<br>
+                        Equipo de Ventas</p>
+                    </div>
+                </div>
+                `
+            }
+        };
+        
+        // Función para enviar correo usando EmailJS o servicio similar
+        async function enviarCorreoCotizacion(datosCorreo) {
+            try {
+                mostrarCargando('Enviando cotización por correo...');
+                
+                // Generar el HTML de equipos y servicios
+                const equiposHtml = generarHtmlEquiposServicios(datosCorreo.cotizacionData);
+                
+                // Preparar los datos del template
+                const templateData = {
+                    numero: datosCorreo.numero || `COT-${Date.now()}`,
+                    empresa: datosCorreo.cliente.empresa || 'N/A',
+                    contacto: datosCorreo.cliente.contacto || 'N/A',
+                    email: datosCorreo.cliente.email || '',
+                    telefono: datosCorreo.cliente.telefono || 'N/A',
+                    fecha: new Date().toLocaleDateString('es-ES'),
+                    validez: datosCorreo.validez || '30 días',
+                    unidades: datosCorreo.cotizacionData.vehiculos?.length || 0,
+                    total: formatearPrecio(datosCorreo.total || 0),
+                    equipos_servicios: equiposHtml
+                };
+                
+                // Reemplazar placeholders en el template
+                let htmlContent = emailTemplates.cotizacion.html;
+                let subject = emailTemplates.cotizacion.subject;
+                
+                Object.keys(templateData).forEach(key => {
+                    const regex = new RegExp(`{${key}}`, 'g');
+                    htmlContent = htmlContent.replace(regex, templateData[key]);
+                    subject = subject.replace(regex, templateData[key]);
+                });
+                
+                // Aquí usarías tu servicio de correo preferido
+                // Por ejemplo: EmailJS, SendGrid, o tu propio backend
+                const resultado = await enviarCorreoConServicio({
+                    to: datosCorreo.cliente.email,
+                    subject: subject,
+                    html: htmlContent,
+                    ...datosCorreo
+                });
+                
+                ocultarCargando();
+                
+                if (resultado.success) {
+                    mostrarAlerta('Cotización enviada por correo exitosamente', 'success');
+                    
+                    // Guardar registro del envío
+                    await guardarRegistroEnvio({
+                        ...datosCorreo,
+                        fecha_envio: new Date().toISOString(),
+                        tipo: 'cotizacion'
+                    });
+                    
+                } else {
+                    throw new Error(resultado.error || 'Error al enviar correo');
+                }
+                
+            } catch (error) {
+                ocultarCargando();
+                console.error('Error enviando correo:', error);
+                mostrarAlerta('Error al enviar correo: ' + error.message, 'danger');
+            }
+        }
+        
+        // Función para enviar notificación de seguimiento
+        async function enviarNotificacionSeguimiento(cotizacionId) {
+            try {
+                // Obtener datos de la cotización
+                const cotizacion = await obtenerCotizacionPorId(cotizacionId);
+                if (!cotizacion) {
+                    throw new Error('Cotización no encontrada');
+                }
+                
+                mostrarCargando('Enviando notificación de seguimiento...');
+                
+                // Preparar datos del template
+                const templateData = {
+                    numero: cotizacion.numero,
+                    empresa: cotizacion.cliente.empresa,
+                    contacto: cotizacion.cliente.contacto,
+                    fecha_envio: new Date(cotizacion.fecha_envio).toLocaleDateString('es-ES'),
+                    total: formatearPrecio(cotizacion.total),
+                    validez: cotizacion.validez || '30 días'
+                };
+                
+                // Reemplazar placeholders
+                let htmlContent = emailTemplates.seguimiento.html;
+                let subject = emailTemplates.seguimiento.subject;
+                
+                Object.keys(templateData).forEach(key => {
+                    const regex = new RegExp(`{${key}}`, 'g');
+                    htmlContent = htmlContent.replace(regex, templateData[key]);
+                    subject = subject.replace(regex, templateData[key]);
+                });
+                
+                const resultado = await enviarCorreoConServicio({
+                    to: cotizacion.cliente.email,
+                    subject: subject,
+                    html: htmlContent
+                });
+                
+                ocultarCargando();
+                
+                if (resultado.success) {
+                    mostrarAlerta('Notificación de seguimiento enviada', 'success');
+                    
+                    // Actualizar registro de seguimiento
+                    await actualizarSeguimientoCotizacion(cotizacionId, {
+                        ultimo_seguimiento: new Date().toISOString(),
+                        estado: 'seguimiento_enviado'
+                    });
+                } else {
+                    throw new Error(resultado.error || 'Error al enviar seguimiento');
+                }
+                
+            } catch (error) {
+                ocultarCargando();
+                console.error('Error enviando seguimiento:', error);
+                mostrarAlerta('Error al enviar seguimiento: ' + error.message, 'danger');
+            }
+        }
+        
+        // Función para generar HTML de equipos y servicios
+        function generarHtmlEquiposServicios(cotizacionData) {
+            let html = '<div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">';
+            
+            if (cotizacionData.vehiculos && cotizacionData.vehiculos.length > 0) {
+                cotizacionData.vehiculos.forEach((vehiculo, index) => {
+                    html += `<h4 style="color: #fb930c; margin-bottom: 10px;">Unidad ${index + 1}</h4>`;
+                    
+                    if (vehiculo.soluciones && vehiculo.soluciones.length > 0) {
+                        vehiculo.soluciones.forEach(solucion => {
+                            html += `<p style="margin: 5px 0;"><strong>• ${solucion.tipo_solucion}</strong></p>`;
+                        });
+                    }
+                });
+            }
+            
+            // Agregar servicios si existen
+            if (cotizacionData.serviciosSugeridos && cotizacionData.serviciosSugeridos.length > 0) {
+                html += '<h4 style="color: #fb930c; margin: 20px 0 10px 0;">Servicios</h4>';
+                cotizacionData.serviciosSugeridos.forEach(servicio => {
+                    html += `<p style="margin: 5px 0;">• ${servicio.nombre} (${servicio.periodicidad})</p>`;
+                });
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Función para enviar correo con servicio externo
+        async function enviarCorreoConServicio(emailData) {
+            try {
+                // Aquí puedes usar diferentes servicios:
+                
+                // OPCIÓN 1: EmailJS (Frontend)
+                if (typeof emailjs !== 'undefined') {
+                    const result = await emailjs.send(
+                        'tu_service_id', // Configurar en EmailJS
+                        'tu_template_id', // Configurar en EmailJS
+                        {
+                            to_email: emailData.to,
+                            subject: emailData.subject,
+                            html_content: emailData.html,
+                            from_name: emailConfig.fromName
+                        }
+                    );
+                    return { success: true, result };
+                }
+                
+                // OPCIÓN 2: Tu propio backend
+                const response = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ...emailData,
+                        config: emailConfig
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                return { success: true, result };
+                
+            } catch (error) {
+                console.error('Error en servicio de correo:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // Función para guardar registro de envío
+        async function guardarRegistroEnvio(datosEnvio) {
+            try {
+                if (modoCentralizado && window.dataService) {
+                    await window.dataService.guardarRegistroCorreo(datosEnvio);
+                } else {
+                    // Guardar en localStorage como fallback
+                    const registros = JSON.parse(localStorage.getItem('registros_correos') || '[]');
+                    registros.push({
+                        ...datosEnvio,
+                        id: Date.now()
+                    });
+                    localStorage.setItem('registros_correos', JSON.stringify(registros));
+                }
+            } catch (error) {
+                console.error('Error guardando registro de envío:', error);
+            }
+        }
+        
+        // Función para mostrar modal de configuración de correo
+        function mostrarConfiguracionCorreo() {
+            const modal = new bootstrap.Modal(document.getElementById('modalConfigCorreo'));
+            modal.show();
+        }
+        
+        // Función para configurar recordatorios automáticos
+        function configurarRecordatoriosAutomaticos() {
+            // Verificar cotizaciones pendientes cada día
+            setInterval(async () => {
+                try {
+                    const cotizacionesPendientes = await obtenerCotizacionesPendientes();
+                    
+                    cotizacionesPendientes.forEach(async cotizacion => {
+                        const diasSinSeguimiento = calcularDiasSinSeguimiento(cotizacion.fecha_envio, cotizacion.ultimo_seguimiento);
+                        
+                        // Enviar seguimiento después de 7 días
+                        if (diasSinSeguimiento >= 7 && cotizacion.estado !== 'cerrada') {
+                            await enviarNotificacionSeguimiento(cotizacion.id);
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('Error en recordatorios automáticos:', error);
+                }
+            }, 24 * 60 * 60 * 1000); // Cada 24 horas
+        }
+        
+        // Funciones auxiliares
+        function calcularDiasSinSeguimiento(fechaEnvio, ultimoSeguimiento) {
+            const fecha = ultimoSeguimiento ? new Date(ultimoSeguimiento) : new Date(fechaEnvio);
+            const ahora = new Date();
+            const diferencia = ahora - fecha;
+            return Math.floor(diferencia / (1000 * 60 * 60 * 24));
+        }
+        
+        function formatearPrecio(precio) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(precio);
+        }
+        
+        // Funciones para manejar los modales y configuración
+        function guardarConfigCorreo() {
+            const config = {
+                smtpServer: document.getElementById('smtpServer').value,
+                smtpPort: parseInt(document.getElementById('smtpPort').value),
+                fromEmail: document.getElementById('fromEmail').value,
+                fromName: document.getElementById('fromName').value,
+                password: document.getElementById('emailPassword').value
+            };
+            
+            // Validar campos requeridos
+            if (!config.smtpServer || !config.fromEmail || !config.password) {
+                mostrarAlerta('Por favor completa todos los campos requeridos', 'warning');
+                return;
+            }
+            
+            // Actualizar configuración global
+            Object.assign(emailConfig, config);
+            
+            // Guardar en localStorage
+            localStorage.setItem('emailConfig', JSON.stringify(config));
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfigCorreo'));
+            modal.hide();
+            
+            mostrarAlerta('Configuración de correo guardada exitosamente', 'success');
+        }
+        
+        function mostrarModalEnviarCorreo() {
+            // Pre-llenar datos del cliente si están disponibles
+            if (cotizacionData.cliente) {
+                document.getElementById('emailCliente').value = cotizacionData.cliente.email || '';
+            }
+            
+            // Generar número de cotización automático si no existe
+            if (!document.getElementById('numeroCotizacion').value) {
+                const numero = `COT-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+                document.getElementById('numeroCotizacion').value = numero;
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalEnviarCorreo'));
+            modal.show();
+        }
+        
+        function procesarEnvioCorreo() {
+            const emailCliente = document.getElementById('emailCliente').value;
+            const numeroCotizacion = document.getElementById('numeroCotizacion').value;
+            const validez = document.getElementById('validezCotizacion').value;
+            const emailCopia = document.getElementById('emailCopia').value;
+            const mensajePersonalizado = document.getElementById('mensajePersonalizado').value;
+            
+            // Validar email requerido
+            if (!emailCliente) {
+                mostrarAlerta('El email del cliente es requerido', 'warning');
+                return;
+            }
+            
+            // Calcular total
+            const total = calcularTotalCotizacion(cotizacionData.vehiculos || [], cotizacionData);
+            
+            // Preparar datos para envío
+            const datosCorreo = {
+                cliente: {
+                    ...cotizacionData.cliente,
+                    email: emailCliente
+                },
+                numero: numeroCotizacion,
+                validez: validez,
+                total: total,
+                cotizacionData: cotizacionData,
+                emailCopia: emailCopia,
+                mensajePersonalizado: mensajePersonalizado
+            };
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEnviarCorreo'));
+            modal.hide();
+            
+            // Enviar correo
+            enviarCorreoCotizacion(datosCorreo);
+        }
+        
+        // Funciones auxiliares que faltan
+        async function obtenerCotizacionPorId(id) {
+            try {
+                if (modoCentralizado && window.dataService) {
+                    return await window.dataService.obtenerCotizacion(id);
+                } else {
+                    // Fallback a localStorage
+                    const cotizaciones = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');
+                    return cotizaciones.find(c => c.id === id);
+                }
+            } catch (error) {
+                console.error('Error obteniendo cotización:', error);
+                return null;
+            }
+        }
+        
+        async function obtenerCotizacionesPendientes() {
+            try {
+                if (modoCentralizado && window.dataService) {
+                    return await window.dataService.obtenerCotizacionesPendientes();
+                } else {
+                    // Fallback a localStorage
+                    const cotizaciones = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');
+                    return cotizaciones.filter(c => c.estado !== 'cerrada');
+                }
+            } catch (error) {
+                console.error('Error obteniendo cotizaciones pendientes:', error);
+                return [];
+            }
+        }
+        
+        async function actualizarSeguimientoCotizacion(id, datos) {
+            try {
+                if (modoCentralizado && window.dataService) {
+                    return await window.dataService.actualizarCotizacion(id, datos);
+                } else {
+                    // Fallback a localStorage
+                    const cotizaciones = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');
+                    const index = cotizaciones.findIndex(c => c.id === id);
+                    if (index !== -1) {
+                        cotizaciones[index] = { ...cotizaciones[index], ...datos };
+                        localStorage.setItem('cotizaciones_guardadas', JSON.stringify(cotizaciones));
+                    }
+                }
+            } catch (error) {
+                console.error('Error actualizando seguimiento:', error);
+            }
+        }
+        
+        // Cargar configuración guardada al inicializar
+        function cargarConfiguracionCorreo() {
+            const configGuardada = localStorage.getItem('emailConfig');
+            if (configGuardada) {
+                try {
+                    const config = JSON.parse(configGuardada);
+                    Object.assign(emailConfig, config);
+                    
+                    // Pre-llenar el formulario de configuración
+                    if (document.getElementById('smtpServer')) {
+                        document.getElementById('smtpServer').value = config.smtpServer || '';
+                        document.getElementById('smtpPort').value = config.smtpPort || '';
+                        document.getElementById('fromEmail').value = config.fromEmail || '';
+                        document.getElementById('fromName').value = config.fromName || '';
+                    }
+                } catch (error) {
+                    console.error('Error cargando configuración de correo:', error);
+                }
+            }
+        }
+        
+        // Inicializar sistema de correo al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar configuración guardada
+            cargarConfiguracionCorreo();
+            
+            // Configurar recordatorios automáticos
+            configurarRecordatoriosAutomaticos();
+        });
 
     </script>
 
@@ -7257,6 +7832,137 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configuración de Correo -->
+    <div class="modal fade" id="modalConfigCorreo" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-envelope-gear me-2"></i>
+                        Configuración de Correo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formConfigCorreo">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Servidor SMTP</label>
+                                <input type="text" class="form-control" id="smtpServer" placeholder="smtp.gmail.com">
+                                <div class="form-text">Ejemplo: smtp.gmail.com, smtp.outlook.com</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Puerto SMTP</label>
+                                <input type="number" class="form-control" id="smtpPort" placeholder="587">
+                                <div class="form-text">587 (TLS) o 465 (SSL)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Email de Envío</label>
+                                <input type="email" class="form-control" id="fromEmail" placeholder="ventas@empresa.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre de Envío</label>
+                                <input type="text" class="form-control" id="fromName" placeholder="Sistema de Cotizaciones">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña de Aplicación</label>
+                            <input type="password" class="form-control" id="emailPassword" placeholder="Contraseña de app">
+                            <div class="form-text">
+                                <strong>Para Gmail:</strong> Usar contraseña de aplicación, no la contraseña normal.
+                                <a href="https://support.google.com/mail/answer/185833" target="_blank">¿Cómo obtenerla?</a>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Servicios Recomendados:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>EmailJS:</strong> Servicio gratuito para envío desde frontend</li>
+                                <li><strong>SendGrid:</strong> Servicio profesional con API</li>
+                                <li><strong>Gmail SMTP:</strong> Usando contraseña de aplicación</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarConfigCorreo()">
+                        <i class="bi bi-check-lg me-1"></i>Guardar Configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Envío de Correo -->
+    <div class="modal fade" id="modalEnviarCorreo" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-envelope-paper me-2"></i>
+                        Enviar Cotización por Correo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEnviarCorreo">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Email del Cliente</label>
+                                <input type="email" class="form-control" id="emailCliente" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Número de Cotización</label>
+                                <input type="text" class="form-control" id="numeroCotizacion" placeholder="COT-001">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Validez de la Cotización</label>
+                                <select class="form-select" id="validezCotizacion">
+                                    <option value="15 días">15 días</option>
+                                    <option value="30 días" selected>30 días</option>
+                                    <option value="45 días">45 días</option>
+                                    <option value="60 días">60 días</option>
+                                    <option value="90 días">90 días</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Enviar Copia a</label>
+                                <input type="email" class="form-control" id="emailCopia" placeholder="supervisor@empresa.com">
+                                <div class="form-text">Opcional: CC del correo</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mensaje Personalizado (Opcional)</label>
+                            <textarea class="form-control" id="mensajePersonalizado" rows="3" 
+                                placeholder="Mensaje adicional que aparecerá en el correo..."></textarea>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Asegúrate de que los datos del cliente estén completos antes de enviar.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="procesarEnvioCorreo()">
+                        <i class="bi bi-send me-1"></i>Enviar Cotización
+                    </button>
                 </div>
             </div>
         </div>
