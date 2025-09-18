@@ -678,6 +678,30 @@
             }
         }
 
+        // Funciones para Hosting Periodicity
+        function toggleHostingPeriodicity(solucionId) {
+            const hostingCheckbox = document.getElementById(`${solucionId}_hosting`);
+            const periodicityContainer = document.getElementById(`${solucionId}_hosting_periodicity`);
+            
+            if (periodicityContainer && hostingCheckbox) {
+                periodicityContainer.style.display = hostingCheckbox.checked ? 'block' : 'none';
+            }
+        }
+
+        function guardarHostingPeriodo(solucionId, unidadIndex, solucionIndex) {
+            const periodoSelect = document.getElementById(`${solucionId}_hosting_periodo`);
+            if (periodoSelect && cotizacionData.vehiculos && cotizacionData.vehiculos[unidadIndex] && 
+                cotizacionData.vehiculos[unidadIndex].soluciones && cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex]) {
+                
+                if (!cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones) {
+                    cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones = {};
+                }
+                
+                cotizacionData.vehiculos[unidadIndex].soluciones[solucionIndex].configuraciones['hosting_periodo'] = periodoSelect.value;
+                console.log(`Hosting periodicidad actualizada: ${periodoSelect.value}`);
+            }
+        }
+
         // Sistema de Almacén - Matriz de insumos editable
         let almacenInsumos = {
             // Estructura: [tipoUnidad][tipoSolucion][insumo] = cantidad
@@ -2182,6 +2206,14 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             if (elemento) {
                 if (elemento.type === 'checkbox') {
                     solucion.configuraciones[configKey] = elemento.checked;
+                    
+                    // Si es hosting, también guardar la periodicidad
+                    if (configKey === 'hosting' && elemento.checked) {
+                        const periodoSelect = document.getElementById(`${solucionId}_hosting_periodo`);
+                        if (periodoSelect) {
+                            solucion.configuraciones['hosting_periodo'] = periodoSelect.value;
+                        }
+                    }
                 } else if (elemento.type === 'radio') {
                     if (elemento.checked) {
                         if (configKey === 'sensores_puertas') {
@@ -2510,7 +2542,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         }
                     });
                     
-                    // Agregar SIMs según los servicios detectados
+                    // Agregar SIMs según los servicios detectados con lógica de prioridad
                     if (tieneVideo) {
                         simsNecesarias.push({
                             nombre: 'SIM video',
@@ -2525,16 +2557,15 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             nombre: 'SIM voz',
                             cantidad: 1,
                             unidad: unidadIndex + 1,
-                            razon: 'Servicio de voz'
+                            razon: 'Servicio de voz y datos (cubre ambos)'
                         });
-                    }
-                    
-                    if (tieneRastreo) {
+                    } else if (tieneRastreo) {
+                        // Solo agregar SIM 5 Mb si NO hay SIM voz, ya que SIM voz cubre datos también
                         simsNecesarias.push({
                             nombre: 'SIM 5 Mb',
                             cantidad: 1,
                             unidad: unidadIndex + 1,
-                            razon: 'Servicio de rastreo'
+                            razon: 'Servicio de rastreo (solo datos)'
                         });
                     }
                 }
