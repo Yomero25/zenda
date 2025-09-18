@@ -2445,18 +2445,45 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         const configuraciones = solucion.configuraciones || {};
                         
                         if (configuraciones.hosting) {
+                            // Obtener periodicidad del hosting (por defecto mensual)
+                            const periodicidadHosting = configuraciones.hosting_periodo || 'mensual';
+                            
                             if (tipoSolucion === 'VPC' || tipoSolucion === 'Dashcam' || 
                                 tipoSolucion === 'Encadenamiento de señales' || tipoSolucion === 'Sideview' ||
                                 tipoSolucion === 'MDVR 4 Ch' || tipoSolucion === 'MDVR 8 Ch') {
                                 tieneVideo = true;
+                                // Agregar servicio de hosting video específico
+                                serviciosNecesarios.push({
+                                    nombre: `Hosting Video (${periodicidadHosting})`,
+                                    periodicidad: periodicidadHosting,
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
                             } else if (tipoSolucion === 'Rastreo basico') {
                                 tieneRastreo = true;
                                 tipoRastreo = 'basico';
+                                // Agregar servicio de hosting rastreo específico
+                                serviciosNecesarios.push({
+                                    nombre: `Hosting Rastreo Básico (${periodicidadHosting})`,
+                                    periodicidad: periodicidadHosting,
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
                             } else if (tipoSolucion === 'Rastreo avanzado') {
                                 tieneRastreo = true;
                                 tipoRastreo = 'avanzado';
+                                // Agregar servicio de hosting rastreo específico
+                                serviciosNecesarios.push({
+                                    nombre: `Hosting Rastreo Avanzado (${periodicidadHosting})`,
+                                    periodicidad: periodicidadHosting,
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
                             } else if (tipoSolucion === 'Rastreo satelital') {
-                                // Satelital es independiente
+                                // Satelital es independiente con hosting anual fijo
                                 serviciosNecesarios.push({
                                     nombre: 'Datos - Satelitales',
                                     periodicidad: 'anual',
@@ -2467,6 +2494,22 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 serviciosNecesarios.push({
                                     nombre: 'Activación satelital',
                                     periodicidad: 'anual',
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
+                                serviciosNecesarios.push({
+                                    nombre: 'Hosting Satelital (anual)',
+                                    periodicidad: 'anual',
+                                    cantidad: 1,
+                                    unidad: unidadIndex + 1,
+                                    solucion: tipoSolucion
+                                });
+                            } else {
+                                // Para otros tipos de soluciones con hosting
+                                serviciosNecesarios.push({
+                                    nombre: `Hosting ${tipoSolucion} (${periodicidadHosting})`,
+                                    periodicidad: periodicidadHosting,
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
                                     solucion: tipoSolucion
