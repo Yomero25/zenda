@@ -6240,8 +6240,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     <label class="form-check-label" for="${solucionId}_grabacion">Grabación</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -6427,8 +6435,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     <label class="form-check-label" for="${solucionId}_grabacion">Grabación</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -6478,8 +6494,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-12">
                                 <h6 style="color: #fb930c;">Hosting</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -6510,8 +6534,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-4">
                                 <h6 style="color: #fb930c;">Servicios</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -6531,8 +6563,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-4">
                                 <h6 style="color: #fb930c;">Transmisión</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -6572,8 +6612,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-4">
                                 <h6 style="color: #fb930c;">Hosting</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -6698,11 +6746,29 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Hosting</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="${solucionId}_hosting_periodicity" style="display: none;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo">Periodicidad</label>
+                                    <select class="form-select" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -6722,9 +6788,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             <div class="col-md-6">
                                 <h6 style="color: #fb930c;">Hosting</h6>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
-                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
+                                    <label class="form-check-label" for="${solucionId}_hosting">Hosting (Anual)</label>
                                 </div>
+                                <input type="hidden" name="${solucionId}_hosting_periodo" value="anual">
+                                <small class="text-muted">Rastreo satelital requiere hosting anual</small>
                             </div>
                         </div>
                     `;
@@ -6918,8 +6986,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     <label class="form-check-label" for="${solucionId}_grabacion">Grabación</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting">
+                                    <input class="form-check-input" type="checkbox" name="${solucionId}_hosting" id="${solucionId}_hosting" onchange="toggleHostingPeriodicity('${solucionId}'); manejarCambioConfiguracion('${solucionId}', 'hosting', ${unidadIndex}, ${solucionIndex})">
                                     <label class="form-check-label" for="${solucionId}_hosting">Hosting</label>
+                                </div>
+                                <div id="${solucionId}_hosting_periodicity" style="display: none; margin-top: 8px;">
+                                    <label class="form-label" for="${solucionId}_hosting_periodo" style="font-size: 0.875rem;">Periodicidad</label>
+                                    <select class="form-select form-select-sm" name="${solucionId}_hosting_periodo" id="${solucionId}_hosting_periodo" onchange="guardarHostingPeriodo('${solucionId}', ${unidadIndex}, ${solucionIndex})">
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
