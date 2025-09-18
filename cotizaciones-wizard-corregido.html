@@ -2290,7 +2290,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 
                 for (let i = solucionesEnDOM; i < solucionesEnDatos; i++) {
                     const solucion = vehiculo.soluciones[i];
-                    const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${i + 1}`;
+                    const solucionId = `paso3_unidad_${unidadIndex + 1}_solucion_${i + 1}`;
                     
                     let htmlSolucion = '';
                     
@@ -2352,7 +2352,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             // Actualizar los valores de todas las soluciones
             vehiculo.soluciones.forEach((solucion, solucionIndex) => {
                 if (solucion.configuraciones && Object.keys(solucion.configuraciones).length > 0) {
-                    const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
+                    const solucionId = `paso3_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
                     
                     console.log(`🔧 DEBUG: Aplicando configuraciones para ${solucionId}:`, solucion.configuraciones);
                     
@@ -2380,7 +2380,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 }
                 
                 // Aplicar estado del módulo Insider
-                const solucionId = `wizard_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
+                const solucionId = `paso3_unidad_${unidadIndex + 1}_solucion_${solucionIndex + 1}`;
                 const moduloInsiderElement = document.getElementById(`${solucionId}_modulo_insider`);
                 if (moduloInsiderElement) {
                     moduloInsiderElement.checked = solucion.configuraciones.modulo_insider || false;
