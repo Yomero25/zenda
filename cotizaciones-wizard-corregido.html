@@ -2452,9 +2452,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                 tipoSolucion === 'Encadenamiento de señales' || tipoSolucion === 'Sideview' ||
                                 tipoSolucion === 'MDVR 4 Ch' || tipoSolucion === 'MDVR 8 Ch') {
                                 tieneVideo = true;
-                                // Agregar servicio de hosting video específico
+                                // Agregar servicio de hosting video específico (nombre exacto para precios)
                                 serviciosNecesarios.push({
-                                    nombre: `Hosting Video (${periodicidadHosting})`,
+                                    nombre: 'Hosting Video',
                                     periodicidad: periodicidadHosting,
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
@@ -2463,9 +2463,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             } else if (tipoSolucion === 'Rastreo basico') {
                                 tieneRastreo = true;
                                 tipoRastreo = 'basico';
-                                // Agregar servicio de hosting rastreo específico
+                                // Agregar servicio de hosting rastreo específico (nombre exacto para precios)
                                 serviciosNecesarios.push({
-                                    nombre: `Hosting Rastreo Básico (${periodicidadHosting})`,
+                                    nombre: 'Hosting Rastreo',
                                     periodicidad: periodicidadHosting,
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
@@ -2474,9 +2474,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             } else if (tipoSolucion === 'Rastreo avanzado') {
                                 tieneRastreo = true;
                                 tipoRastreo = 'avanzado';
-                                // Agregar servicio de hosting rastreo específico
+                                // Agregar servicio de hosting rastreo específico (nombre exacto para precios)
                                 serviciosNecesarios.push({
-                                    nombre: `Hosting Rastreo Avanzado (${periodicidadHosting})`,
+                                    nombre: 'Hosting Rastreo',
                                     periodicidad: periodicidadHosting,
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
@@ -2499,16 +2499,16 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                                     solucion: tipoSolucion
                                 });
                                 serviciosNecesarios.push({
-                                    nombre: 'Hosting Satelital (anual)',
+                                    nombre: 'Hosting Satelital',
                                     periodicidad: 'anual',
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
                                     solucion: tipoSolucion
                                 });
                             } else {
-                                // Para otros tipos de soluciones con hosting
+                                // Para otros tipos de soluciones con hosting (usar Hosting Video por defecto)
                                 serviciosNecesarios.push({
-                                    nombre: `Hosting ${tipoSolucion} (${periodicidadHosting})`,
+                                    nombre: 'Hosting Video',
                                     periodicidad: periodicidadHosting,
                                     cantidad: 1,
                                     unidad: unidadIndex + 1,
