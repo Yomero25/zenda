@@ -2132,17 +2132,14 @@ habilitado,0,2,0,0,1,1,0,0,0`;
 
         // Función para manejar cambios en configuraciones
         function manejarCambioConfiguracion(solucionId, configKey, unidadIndex, solucionIndex) {
-            console.log(`🔄 DEBUG: Cambio en configuración: ${configKey} para ${solucionId}`);
             
             // Verificar que cotizacionData.vehiculos esté inicializado
             if (!cotizacionData.vehiculos || !Array.isArray(cotizacionData.vehiculos)) {
-                console.warn('⚠️ cotizacionData.vehiculos no está inicializado, inicializando...');
                 cotizacionData.vehiculos = [];
             }
             
             // Verificar que el índice de unidad sea válido
             if (unidadIndex >= cotizacionData.vehiculos.length) {
-                console.warn(`⚠️ Unidad ${unidadIndex} no existe, creando...`);
                 // Crear vehículo básico si no existe
                 cotizacionData.vehiculos[unidadIndex] = {
                     soluciones: []
@@ -2175,13 +2172,11 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             // 🚨 CRÍTICO: Verificar si modulo_insider existe ANTES de actualizar
             const moduloInsiderAntes = solucion.configuraciones.modulo_insider;
-            console.log(`🚨 ANTES manejarCambioConfiguracion - modulo_insider: ${moduloInsiderAntes}, configKey: ${configKey}`);
             
             // Actualizar el tipo de solución si es necesario
             const tipoSelect = document.getElementById(`${solucionId}_tipo`);
             if (tipoSelect && tipoSelect.value) {
                 solucion.tipo_solucion = tipoSelect.value;
-                console.log(`🔧 DEBUG: Tipo de solución actualizado: ${tipoSelect.value}`);
             }
             
             // Actualizar la configuración en el objeto de datos
@@ -2220,7 +2215,6 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             solucion.configuraciones[configKey] = elemento.value;
                         } else if (configKey === 'deteccion_jammer') {
                             solucion.configuraciones[configKey] = elemento.value;
-                            console.log(`🔧 DEBUG: Detección jammer guardada: ${elemento.value}`);
                         } else if (configKey === 'audio_bidireccional') {
                             solucion.configuraciones[configKey] = true;
                             solucion.configuraciones['audio_espia'] = false;
@@ -2440,32 +2434,29 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             
             vehiculos.forEach((vehiculo, unidadIndex) => {
                 if (vehiculo.soluciones && vehiculo.soluciones.length > 0) {
+                    let tieneVideo = false;
+                    let tieneVoz = false;
+                    let tieneRastreo = false;
+                    let tipoRastreo = 'basico';
+                    
+                    // Primera pasada: detectar qué tipos de servicios se necesitan
                     vehiculo.soluciones.forEach(solucion => {
                         const tipoSolucion = solucion.tipo_solucion;
                         const configuraciones = solucion.configuraciones || {};
                         
-                        // Detectar servicios según las soluciones y configuraciones
                         if (configuraciones.hosting) {
-                            // Servicios que requieren hosting
                             if (tipoSolucion === 'VPC' || tipoSolucion === 'Dashcam' || 
                                 tipoSolucion === 'Encadenamiento de señales' || tipoSolucion === 'Sideview' ||
                                 tipoSolucion === 'MDVR 4 Ch' || tipoSolucion === 'MDVR 8 Ch') {
-                                serviciosNecesarios.push({
-                                    nombre: 'Datos video',
-                                    periodicidad: 'mensual',
-                                    cantidad: 1,
-                                    unidad: unidadIndex + 1,
-                                    solucion: tipoSolucion
-                                });
-                            } else if (tipoSolucion === 'Rastreo basico' || tipoSolucion === 'Rastreo avanzado') {
-                                serviciosNecesarios.push({
-                                    nombre: 'Datos rastreo basico',
-                                    periodicidad: 'mensual',
-                                    cantidad: 1,
-                                    unidad: unidadIndex + 1,
-                                    solucion: tipoSolucion
-                                });
+                                tieneVideo = true;
+                            } else if (tipoSolucion === 'Rastreo basico') {
+                                tieneRastreo = true;
+                                tipoRastreo = 'basico';
+                            } else if (tipoSolucion === 'Rastreo avanzado') {
+                                tieneRastreo = true;
+                                tipoRastreo = 'avanzado';
                             } else if (tipoSolucion === 'Rastreo satelital') {
+                                // Satelital es independiente
                                 serviciosNecesarios.push({
                                     nombre: 'Datos - Satelitales',
                                     periodicidad: 'anual',
@@ -2486,26 +2477,41 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                         // Detectar servicios de voz
                         if (configuraciones.audio_bidireccional || configuraciones.audio_espia || 
                             configuraciones.sos_llamada) {
-                            serviciosNecesarios.push({
-                                nombre: 'Datos - Voz',
-                                periodicidad: 'mensual',
-                                cantidad: 1,
-                                unidad: unidadIndex + 1,
-                                solucion: tipoSolucion
-                            });
-                        }
-                        
-                        // Detectar servicios de rastreo avanzado
-                        if (tipoSolucion === 'Rastreo avanzado' && configuraciones.hosting) {
-                            // Reemplazar el servicio básico con el avanzado
-                            const index = serviciosNecesarios.findIndex(s => 
-                                s.nombre === 'Datos rastreo basico' && s.unidad === unidadIndex + 1
-                            );
-                            if (index !== -1) {
-                                serviciosNecesarios[index].nombre = 'Datos rastreo avanzado';
-                            }
+                            tieneVoz = true;
                         }
                     });
+                    
+                    // Segunda pasada: agregar servicios con lógica de prioridad
+                    if (tieneVideo) {
+                        serviciosNecesarios.push({
+                            nombre: 'Datos video',
+                            periodicidad: 'mensual',
+                            cantidad: 1,
+                            unidad: unidadIndex + 1,
+                            solucion: 'Video'
+                        });
+                    }
+                    
+                    if (tieneVoz) {
+                        // Datos - Voz cubre tanto voz como datos de rastreo
+                        serviciosNecesarios.push({
+                            nombre: 'Datos - Voz',
+                            periodicidad: 'mensual',
+                            cantidad: 1,
+                            unidad: unidadIndex + 1,
+                            solucion: 'Voz y datos'
+                        });
+                    } else if (tieneRastreo) {
+                        // Solo agregar datos de rastreo si NO hay servicios de voz
+                        const nombreServicio = tipoRastreo === 'avanzado' ? 'Datos rastreo avanzado' : 'Datos rastreo basico';
+                        serviciosNecesarios.push({
+                            nombre: nombreServicio,
+                            periodicidad: 'mensual',
+                            cantidad: 1,
+                            unidad: unidadIndex + 1,
+                            solucion: 'Solo datos'
+                        });
+                    }
                 }
             });
             
