@@ -1613,6 +1613,217 @@
     fetchServiciosDatos,
     upsertServicioDatos,
     deleteServicioDatos,
+    // funciones de correo
+    guardarConfiguracionCorreo: async (config) => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        const { data, error } = await client
+          .from('configuraciones_correo')
+          .upsert({
+            id: 'smtp_config',
+            smtp_server: config.smtpServer,
+            smtp_port: config.smtpPort,
+            from_email: config.fromEmail,
+            from_name: config.fromName,
+            password: config.password,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'id'
+          });
+          
+        if (error) throw error;
+        return { success: true, data };
+      } catch (error) {
+        console.error('Error guardando configuración de correo:', error);
+        throw error;
+      }
+    },
+
+    obtenerConfiguracionCorreo: async () => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        const { data, error } = await client
+          .from('configuraciones_correo')
+          .select('*')
+          .eq('id', 'smtp_config')
+          .single();
+          
+        if (error && error.code !== 'PGRST116') throw error;
+        
+        if (data) {
+          return {
+            smtpServer: data.smtp_server,
+            smtpPort: data.smtp_port,
+            fromEmail: data.from_email,
+            fromName: data.from_name,
+            password: data.password
+          };
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('Error obteniendo configuración de correo:', error);
+        throw error;
+      }
+    },
+
+    guardarPlantillaCorreo: async (tipo, plantilla) => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        const { data, error } = await client
+          .from('plantillas_correo')
+          .upsert({
+            id: tipo,
+            tipo: tipo,
+            subject: plantilla.subject,
+            html: plantilla.html,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'id'
+          });
+          
+        if (error) throw error;
+        return { success: true, data };
+      } catch (error) {
+        console.error('Error guardando plantilla de correo:', error);
+        throw error;
+      }
+    },
+
+    obtenerPlantillasCorreo: async () => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        const { data, error } = await client
+          .from('plantillas_correo')
+          .select('*');
+          
+        if (error) throw error;
+        
+        const plantillas = {};
+        data.forEach(item => {
+          plantillas[item.tipo] = {
+            subject: item.subject,
+            html: item.html
+          };
+        });
+        
+        return plantillas;
+      } catch (error) {
+        console.error('Error obteniendo plantillas de correo:', error);
+        throw error;
+      }
+    },
+
+    guardarConfiguracionSeguimiento: async (config) => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        const { data, error } = await client
+          .from('configuraciones_seguimiento')
+          .upsert({
+            id: 'seguimiento_config',
+            dias_seguimiento: config.diasSeguimiento,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'id'
+          });
+          
+        if (error) throw error;
+        return { success: true, data };
+      } catch (error) {
+        console.error('Error guardando configuración de seguimiento:', error);
+        throw error;
+      }
+    },
+
+    obtenerConfiguracionSeguimiento: async () => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        const { data, error } = await client
+          .from('configuraciones_seguimiento')
+          .select('*')
+          .eq('id', 'seguimiento_config')
+          .single();
+          
+        if (error && error.code !== 'PGRST116') throw error;
+        
+        if (data) {
+          return {
+            diasSeguimiento: data.dias_seguimiento
+          };
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('Error obteniendo configuración de seguimiento:', error);
+        throw error;
+      }
+    },
+
+    guardarRegistroCorreo: async (registro) => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        const { data, error } = await client
+          .from('registros_correos')
+          .insert({
+            cotizacion_id: registro.cotizacionId,
+            numero_cotizacion: registro.numero,
+            destinatarios_principales: JSON.stringify(registro.emails?.principales || []),
+            destinatarios_copia: JSON.stringify(registro.emails?.copia || []),
+            destinatarios_bcc: JSON.stringify(registro.emails?.bcc || []),
+            tipo_envio: registro.tipoEnvio || 'cotizacion',
+            cliente_email: registro.cliente?.email,
+            cliente_empresa: registro.cliente?.empresa,
+            total_cotizacion: registro.total,
+            fecha_envio: registro.fecha_envio,
+            mensaje_personalizado: registro.mensajePersonalizado,
+            created_at: new Date().toISOString()
+          });
+          
+        if (error) throw error;
+        return { success: true, data };
+      } catch (error) {
+        console.error('Error guardando registro de correo:', error);
+        throw error;
+      }
+    },
+
+    obtenerRegistrosCorreos: async (filtros = {}) => {
+      if (!client) throw new Error('Supabase no disponible');
+      
+      try {
+        let query = client.from('registros_correos').select('*');
+        
+        if (filtros.cotizacionId) {
+          query = query.eq('cotizacion_id', filtros.cotizacionId);
+        }
+        
+        if (filtros.fechaDesde) {
+          query = query.gte('fecha_envio', filtros.fechaDesde);
+        }
+        
+        if (filtros.fechaHasta) {
+          query = query.lte('fecha_envio', filtros.fechaHasta);
+        }
+        
+        query = query.order('created_at', { ascending: false });
+        
+        const { data, error } = await query;
+        if (error) throw error;
+        
+        return data;
+      } catch (error) {
+        console.error('Error obteniendo registros de correos:', error);
+        throw error;
+      }
+    },
+
     // helpers
     getCotizacionByIdOrFolio: async (idOrFolio) => {
       const found = await getCotizacionRowByIdOrFolio(idOrFolio);
