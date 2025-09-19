@@ -2528,12 +2528,14 @@
         
         async function cargarConfiguracionCorreo() {
             try {
+                console.log('📧 Cargando configuración de correo...');
                 let config = null;
                 
                 // Intentar cargar desde Supabase
                 if (modoCentralizado && window.dataService) {
                     try {
                         config = await window.dataService.obtenerConfiguracionCorreo();
+                        console.log('📧 Configuración cargada desde Supabase:', config);
                     } catch (error) {
                         console.warn('Error cargando configuración de Supabase, usando localStorage:', error);
                     }
@@ -2544,6 +2546,7 @@
                     const configGuardada = localStorage.getItem('emailConfig');
                     if (configGuardada) {
                         config = JSON.parse(configGuardada);
+                        console.log('📧 Configuración cargada desde localStorage:', config);
                     }
                 }
                 
@@ -2551,15 +2554,22 @@
                     Object.assign(emailConfig, config);
                     
                     // Pre-llenar el formulario de configuración
-                    if (document.getElementById('smtpServer')) {
+                    const smtpServerEl = document.getElementById('smtpServer');
+                    if (smtpServerEl) {
+                        console.log('📧 Pre-llenando formulario...');
                         document.getElementById('smtpServer').value = config.smtpServer || '';
                         document.getElementById('smtpPort').value = config.smtpPort || '';
                         document.getElementById('fromEmail').value = config.fromEmail || '';
                         document.getElementById('fromName').value = config.fromName || '';
+                        console.log('📧 Formulario pre-llenado exitosamente');
+                    } else {
+                        console.warn('📧 Elementos del formulario no encontrados, reintentando...');
                     }
                     
                     // Actualizar estado
                     actualizarEstadoConfig();
+                } else {
+                    console.log('📧 No se encontró configuración guardada');
                 }
             } catch (error) {
                 console.error('Error cargando configuración de correo:', error);
@@ -2931,18 +2941,7 @@
             }).format(precio);
         }
         
-        // Cargar configuración de correo al inicializar
-        function cargarConfiguracionCorreo() {
-            const configGuardada = localStorage.getItem('emailConfig');
-            if (configGuardada) {
-                try {
-                    const config = JSON.parse(configGuardada);
-                    Object.assign(emailConfig, config);
-                } catch (error) {
-                    console.error('Error cargando configuración de correo:', error);
-                }
-            }
-        }
+        // NOTA: cargarConfiguracionCorreo ya está definida arriba con soporte Supabase
         
         // ===========================================
         // FUNCIONES PARA MODAL DE ENVÍO MEJORADO
@@ -3129,6 +3128,17 @@
             await cargarConfiguracionCorreo();
             await cargarPlantillasPersonalizadas();
             await cargarDiasSeguimiento();
+            
+            // Listener para cuando se abra la pestaña de configuración de correo
+            const configCorreoTab = document.getElementById('config-correo-tab');
+            if (configCorreoTab) {
+                configCorreoTab.addEventListener('click', async function() {
+                    // Pequeño delay para asegurar que el tab esté completamente cargado
+                    setTimeout(async () => {
+                        await cargarConfiguracionCorreo();
+                    }, 100);
+                });
+            }
         });
     </script>
 
