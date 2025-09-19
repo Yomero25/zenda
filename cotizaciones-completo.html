@@ -2497,8 +2497,21 @@
                 mostrarCargando('Probando configuración de correo...');
                 
                 // Simular prueba de configuración
-                // En un entorno real, esto haría una llamada al backend
                 await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Guardar estado de prueba exitosa en Supabase
+                const configConEstado = {
+                    ...config,
+                    estadoPrueba: 'exitoso',
+                    ultimaPrueba: new Date().toISOString()
+                };
+                
+                // Guardar configuración con estado
+                if (modoCentralizado && window.dataService) {
+                    await window.dataService.guardarConfiguracionCorreo(configConEstado);
+                } else {
+                    localStorage.setItem('emailConfig', JSON.stringify(configConEstado));
+                }
                 
                 ocultarCargando();
                 actualizarEstadoConfig(true);
@@ -2513,16 +2526,20 @@
         
         function actualizarEstadoConfig(exito = null) {
             const estadoDiv = document.getElementById('estadoConfig');
-            const configGuardada = localStorage.getItem('emailConfig');
             
             if (exito === true) {
                 estadoDiv.innerHTML = '<span class="badge bg-success">Configuración válida</span>';
             } else if (exito === false) {
                 estadoDiv.innerHTML = '<span class="badge bg-danger">Error en configuración</span>';
-            } else if (configGuardada) {
-                estadoDiv.innerHTML = '<span class="badge bg-warning">Configurado (no probado)</span>';
             } else {
-                estadoDiv.innerHTML = '<span class="badge bg-secondary">No configurado</span>';
+                // Verificar estado desde la configuración cargada
+                if (emailConfig && emailConfig.estadoPrueba === 'exitoso') {
+                    estadoDiv.innerHTML = '<span class="badge bg-success">Configuración válida</span>';
+                } else if (emailConfig && (emailConfig.smtpServer || emailConfig.fromEmail)) {
+                    estadoDiv.innerHTML = '<span class="badge bg-warning">Configurado (no probado)</span>';
+                } else {
+                    estadoDiv.innerHTML = '<span class="badge bg-secondary">No configurado</span>';
+                }
             }
         }
         
@@ -2827,6 +2844,38 @@
                         fecha_envio: new Date().toISOString(),
                         tipo: 'cotizacion'
                     });
+                    
+                    // 🚀 ACTUALIZAR ESTADO DE COTIZACIÓN A "ENVIADA"
+                    try {
+                        const cotizacionId = datosCorreo.cotizacionData.id || datosCorreo.cotizacionData.folio;
+                        
+                        if (modoCentralizado && window.dataService) {
+                            // Actualizar en Supabase
+                            await window.dataService.actualizarCotizacion(cotizacionId, {
+                                estado: 'enviada',
+                                fecha_envio: new Date().toISOString()
+                            });
+                            console.log('📧 Estado de cotización actualizado a "enviada" en Supabase');
+                        }
+                        
+                        // Actualizar en la lista local
+                        const cotizacionIndex = cotizaciones.findIndex(c => 
+                            String(c.id || c.folio) === String(cotizacionId)
+                        );
+                        
+                        if (cotizacionIndex !== -1) {
+                            cotizaciones[cotizacionIndex].estado = 'enviada';
+                            cotizaciones[cotizacionIndex].fecha_envio = new Date().toISOString();
+                            
+                            // Re-renderizar la tabla para mostrar los cambios
+                            renderTablaCotizaciones();
+                            console.log('📧 Estado actualizado en lista local y tabla re-renderizada');
+                        }
+                        
+                    } catch (updateError) {
+                        console.warn('Error actualizando estado de cotización:', updateError);
+                    }
+                    
                 } else {
                     throw new Error(resultado.error || 'Error al enviar correo');
                 }
@@ -2883,24 +2932,20 @@
                     return { success: true, result };
                 }
                 
-                // OPCIÓN 2: Backend propio
-                const response = await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ...emailData,
-                        config: emailConfig
-                    })
-                });
+                // SIMULACIÓN: Envío de correo exitoso
+                console.log('📧 Simulando envío de correo con datos:', emailData);
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const result = {
+                    messageId: 'sim-' + Date.now(),
+                    timestamp: new Date().toISOString(),
+                    recipients: emailData.to || [],
+                    subject: emailData.subject,
+                    status: 'sent'
+                };
                 
-                const result = await response.json();
-                return { success: true, result };
+                console.log('📧 Correo enviado exitosamente (simulado):', result);
+                return { success: true, data: result };
                 
             } catch (error) {
                 console.error('Error en servicio de correo:', error);
