@@ -1958,12 +1958,13 @@
         // =====================
 
         function generarBarraProgreso(cotizacion) {
-            console.log('🎨 DEBUG BARRA PROGRESO:', {
-                folio: cotizacion.folio,
-                estado: cotizacion.estado,
-                fecha_envio: cotizacion.fecha_envio,
-                fecha_aceptacion: cotizacion.fecha_aceptacion
-            });
+            // Comentado para reducir ruido en consola
+            // console.log('🎨 DEBUG BARRA PROGRESO:', {
+            //     folio: cotizacion.folio, 
+            //     estado: cotizacion.estado, 
+            //     fecha_envio: cotizacion.fecha_envio, 
+            //     fecha_aceptacion: cotizacion.fecha_aceptacion
+            // });
             
             const estados = [
                 { key: 'enviada', label: 'Enviada', icon: 'bi-send' },
@@ -2003,7 +2004,7 @@
                     colorIcono = 'color: #6c757d !important;'; // Gris para inactivos
                 }
                 
-                console.log(`🎨 ${estado.key}: activo=${activo}, color=${colorIcono}`);
+                // console.log(`🎨 ${estado.key}: activo=${activo}, color=${colorIcono}`);
                 
                 html += `<div class="me-1" title="${estado.label}">
                     <i class="bi ${estado.icon}" 
@@ -2062,13 +2063,14 @@
         }
 
         function esEstadoActivo(cotizacion, estadoKey) {
-            console.log(`🔍 DEBUG esEstadoActivo: ${estadoKey}`, {
-                estado: cotizacion.estado,
-                fecha_envio: cotizacion.fecha_envio,
-                fecha_aceptacion: cotizacion.fecha_aceptacion,
-                fecha_rechazo: cotizacion.fecha_rechazo,
-                fecha_instalacion: cotizacion.fecha_instalacion
-            });
+            // Comentado para reducir ruido en consola
+            // console.log(`🔍 DEBUG esEstadoActivo: ${estadoKey}`, {
+            //     estado: cotizacion.estado,
+            //     fecha_envio: cotizacion.fecha_envio,
+            //     fecha_aceptacion: cotizacion.fecha_aceptacion,
+            //     fecha_rechazo: cotizacion.fecha_rechazo,
+            //     fecha_instalacion: cotizacion.fecha_instalacion
+            // });
             
             switch(estadoKey) {
                 case 'enviada': 
@@ -2083,7 +2085,7 @@
                            cotizacion.fecha_aceptacion ||
                            cotizacion.fecha_rechazo ||
                            cotizacion.fecha_instalacion;
-                    console.log(`🔍 DEBUG enviada resultado:`, resultadoEnviada);
+                    // console.log(`🔍 DEBUG enviada resultado:`, resultadoEnviada);
                     return resultadoEnviada;
                 case 'seguimiento': 
                     return requiereSeguimiento(cotizacion);
@@ -2096,12 +2098,12 @@
                     return cotizacion.fecha_instalacion && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
                 case 'facturada': 
                     const resultadoFacturada = cotizacion.facturada && (cotizacion.estado === 'aceptada' || cotizacion.fecha_aceptacion);
-                    console.log(`🔍 DEBUG facturada:`, {
-                        facturada: cotizacion.facturada,
-                        estado: cotizacion.estado,
-                        fecha_aceptacion: cotizacion.fecha_aceptacion,
-                        resultado: resultadoFacturada
-                    });
+                    // console.log(`🔍 DEBUG facturada:`, {
+                    //     facturada: cotizacion.facturada,
+                    //     estado: cotizacion.estado,
+                    //     fecha_aceptacion: cotizacion.fecha_aceptacion,
+                    //     resultado: resultadoFacturada
+                    // });
                     return resultadoFacturada;
                 case 'finalizada': 
                     return esFinalizada(cotizacion);
