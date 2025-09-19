@@ -728,6 +728,9 @@
                 const total = Number(cotizacion.total || 0);
                 const idAttr = String(cotizacion.id || cotizacion.folio || '');
                 
+                // Agregar data-cotizacion-id para el sistema de correo
+                row.dataset.cotizacionId = idAttr;
+                
                 // Aplicar sombreado naranja si requiere seguimiento
                 if (requiereSeguimiento(cotizacion)) {
                     row.style.backgroundColor = '#fff3cd';
@@ -759,6 +762,9 @@
                     <td><strong class="text-success">$${total.toLocaleString()}</strong></td>
                     <td>
                         <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-primary btn-email" data-action="correo" data-id="${idAttr}" title="Enviar por correo">
+                                <i class="bi bi-envelope"></i>
+                            </button>
                             <button type="button" class="btn btn-outline-info" data-action="ver" data-id="${idAttr}">
                                 <i class="bi bi-eye"></i>
                             </button>
@@ -786,6 +792,9 @@
                 if (!id) return;
                 // Buscar por id o por folio
                 switch (action) {
+                    case 'correo':
+                        enviarCorreoCotizacionDesdeTabla(id);
+                        break;
                     case 'ver':
                         verCotizacion(id);
                         break;
@@ -3112,72 +3121,12 @@
             mostrarModalEnviarCorreo(cotizacion);
         }
         
-        // Función para agregar botones de correo a la tabla dinámicamente
-        function agregarBotonesCorreoATabla() {
-            // Esta función será llamada después de que se renderice la tabla
-            const filas = document.querySelectorAll('#tablaCotizaciones tr');
-            
-            filas.forEach((fila, index) => {
-                if (index === 0) return; // Skip header row
-                
-                const celdaAcciones = fila.querySelector('td:last-child');
-                if (!celdaAcciones) return;
-                
-                // Verificar si ya tiene el botón de correo
-                if (celdaAcciones.querySelector('.btn-email')) return;
-                
-                // Obtener el ID de la cotización desde los datos de la fila
-                const cotizacionId = fila.dataset.cotizacionId || fila.querySelector('[data-cotizacion-id]')?.dataset.cotizacionId;
-                
-                if (cotizacionId) {
-                    // Crear botón de correo
-                    const btnCorreo = document.createElement('button');
-                    btnCorreo.className = 'btn btn-sm btn-outline-primary btn-email me-1';
-                    btnCorreo.innerHTML = '<i class="bi bi-envelope"></i>';
-                    btnCorreo.title = 'Enviar por correo';
-                    btnCorreo.onclick = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        enviarCorreoCotizacionDesdeTabla(cotizacionId);
-                    };
-                    
-                    // Agregar el botón al inicio de la celda de acciones
-                    celdaAcciones.insertBefore(btnCorreo, celdaAcciones.firstChild);
-                }
-            });
-        }
-        
-        // Observador para detectar cambios en la tabla y agregar botones automáticamente
-        function inicializarObservadorTabla() {
-            const tabla = document.getElementById('tablaCotizaciones');
-            if (!tabla) return;
-            
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList') {
-                        // Delay para asegurar que el DOM esté completamente renderizado
-                        setTimeout(agregarBotonesCorreoATabla, 100);
-                    }
-                });
-            });
-            
-            observer.observe(tabla, {
-                childList: true,
-                subtree: true
-            });
-            
-            // Ejecutar inmediatamente para filas existentes
-            setTimeout(agregarBotonesCorreoATabla, 500);
-        }
 
         // Inicializar configuración de correo
         document.addEventListener('DOMContentLoaded', async function() {
             await cargarConfiguracionCorreo();
             await cargarPlantillasPersonalizadas();
             await cargarDiasSeguimiento();
-            
-            // Inicializar observador de tabla para botones de correo
-            inicializarObservadorTabla();
         });
     </script>
 
