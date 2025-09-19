@@ -391,6 +391,31 @@
                                                 </div>
                                             </div>
                                             
+                                            <!-- SERVICIOS DE ENVÍO REAL -->
+                                            <hr class="my-4">
+                                            <h6 class="text-primary mb-3">
+                                                <i class="bi bi-cloud-arrow-up me-2"></i>Servicios de Envío Real
+                                            </h6>
+                                            
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">EmailJS Service ID</label>
+                                                    <input type="text" class="form-control" id="emailjsServiceId" placeholder="service_xxxxxxx">
+                                                    <div class="form-text">ID del servicio EmailJS configurado</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">EmailJS Template ID</label>
+                                                    <input type="text" class="form-control" id="emailjsTemplateId" placeholder="template_xxxxxxx">
+                                                    <div class="form-text">ID de la plantilla EmailJS</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">URL del Backend (Opcional)</label>
+                                                <input type="url" class="form-control" id="backendUrl" placeholder="https://tu-servidor.com">
+                                                <div class="form-text">URL de tu servidor para envío via backend propio</div>
+                                            </div>
+                                            
                                             <div class="d-grid gap-2">
                                                 <button type="button" class="btn btn-success" onclick="guardarConfigCorreo()">
                                                     <i class="bi bi-check-lg me-1"></i>Guardar Configuración
@@ -631,6 +656,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="./dataService.js"></script>
     <script src="./accessGuard.js"></script>
     <script>
@@ -2437,7 +2463,10 @@
                 smtpPort: parseInt(document.getElementById('smtpPort').value),
                 fromEmail: document.getElementById('fromEmail').value,
                 fromName: document.getElementById('fromName').value,
-                password: document.getElementById('emailPassword').value
+                password: document.getElementById('emailPassword').value,
+                emailjsServiceId: document.getElementById('emailjsServiceId').value,
+                emailjsTemplateId: document.getElementById('emailjsTemplateId').value,
+                backendUrl: document.getElementById('backendUrl').value
             };
             
             // Validar campos requeridos
@@ -2578,6 +2607,9 @@
                         document.getElementById('smtpPort').value = config.smtpPort || '';
                         document.getElementById('fromEmail').value = config.fromEmail || '';
                         document.getElementById('fromName').value = config.fromName || '';
+                        document.getElementById('emailjsServiceId').value = config.emailjsServiceId || '';
+                        document.getElementById('emailjsTemplateId').value = config.emailjsTemplateId || '';
+                        document.getElementById('backendUrl').value = config.backendUrl || '';
                         console.log('📧 Formulario pre-llenado exitosamente');
                     } else {
                         console.warn('📧 Elementos del formulario no encontrados, reintentando...');
@@ -2922,24 +2954,62 @@
         
         async function enviarCorreoConServicio(emailData) {
             try {
-                // OPCIÓN 1: EmailJS (Frontend)
+                console.log('📧 Iniciando envío de correo real...');
+                
+                // OPCIÓN 1: EmailJS (Servicio real de correo)
                 if (typeof emailjs !== 'undefined') {
+                    console.log('📧 Usando EmailJS para envío real...');
                     const result = await emailjs.send(
-                        'tu_service_id',
-                        'tu_template_id',
+                        emailConfig.emailjsServiceId || 'YOUR_SERVICE_ID',
+                        emailConfig.emailjsTemplateId || 'YOUR_TEMPLATE_ID',
                         {
                             to_email: Array.isArray(emailData.to) ? emailData.to.join(',') : emailData.to,
                             cc_email: Array.isArray(emailData.cc) ? emailData.cc.join(',') : emailData.cc,
                             subject: emailData.subject,
                             html_content: emailData.html,
-                            from_name: emailConfig.fromName
+                            from_name: emailConfig.fromName,
+                            from_email: emailConfig.fromEmail
                         }
                     );
-                    return { success: true, result };
+                    console.log('📧 Correo enviado exitosamente via EmailJS:', result);
+                    return { success: true, data: result };
                 }
                 
-                // SIMULACIÓN: Envío de correo exitoso
-                console.log('📧 Simulando envío de correo con datos:', emailData);
+                // OPCIÓN 2: Fetch a tu backend personalizado
+                if (emailConfig.backendUrl) {
+                    console.log('📧 Usando backend personalizado...');
+                    const response = await fetch(emailConfig.backendUrl + '/send-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + (emailConfig.apiKey || '')
+                        },
+                        body: JSON.stringify({
+                            from: `${emailConfig.fromName} <${emailConfig.fromEmail}>`,
+                            to: emailData.to,
+                            cc: emailData.cc,
+                            subject: emailData.subject,
+                            html: emailData.html,
+                            smtp: {
+                                server: emailConfig.smtpServer,
+                                port: emailConfig.smtpPort,
+                                user: emailConfig.fromEmail,
+                                password: emailConfig.password
+                            }
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    console.log('📧 Correo enviado exitosamente via backend:', result);
+                    return { success: true, data: result };
+                }
+                
+                // FALLBACK: Simulación si no hay servicio configurado
+                console.log('⚠️ No hay servicio de correo configurado, usando simulación...');
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
                 const result = {
@@ -2947,10 +3017,10 @@
                     timestamp: new Date().toISOString(),
                     recipients: emailData.to || [],
                     subject: emailData.subject,
-                    status: 'sent'
+                    status: 'simulated'
                 };
                 
-                console.log('📧 Correo enviado exitosamente (simulado):', result);
+                console.log('📧 Correo simulado:', result);
                 return { success: true, data: result };
                 
             } catch (error) {
