@@ -3058,8 +3058,8 @@
                 return;
             }
             
-            // Calcular total (simulado para el ejemplo)
-            const total = 150000; // Aquí deberías calcular el total real
+            // Obtener total real de la cotización
+            const total = cotizacionActualCorreo.total || 0;
             
             // Preparar datos para envío
             const datosCorreo = {
@@ -3073,8 +3073,12 @@
                 validez: validez,
                 total: total,
                 cotizacionData: {
-                    vehiculos: [], // Aquí deberías obtener los datos reales
-                    serviciosSugeridos: []
+                    id: cotizacionActualCorreo.id,
+                    folio: cotizacionActualCorreo.folio,
+                    vehiculos: cotizacionActualCorreo.vehiculos || [],
+                    serviciosSugeridos: cotizacionActualCorreo.servicios || [],
+                    cliente_nombre: cotizacionActualCorreo.cliente_nombre,
+                    estado: cotizacionActualCorreo.estado
                 },
                 emails: {
                     principales: emailsPrincipales,
