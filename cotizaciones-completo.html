@@ -460,13 +460,15 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Días para seguimiento automático</label>
-                                                <select class="form-select" id="diasSeguimiento">
+                                                <select class="form-select" id="diasSeguimiento" onchange="guardarDiasSeguimiento()">
                                                     <option value="3">3 días</option>
                                                     <option value="5">5 días</option>
                                                     <option value="7" selected>7 días</option>
                                                     <option value="10">10 días</option>
                                                     <option value="15">15 días</option>
+                                                    <option value="30">30 días</option>
                                                 </select>
+                                                <div class="form-text">Este valor se sincroniza con la configuración del wizard</div>
                                             </div>
                                         </div>
                                     </div>
@@ -2229,6 +2231,60 @@
         }
 
         // ===========================================
+        // FUNCIONES DE UTILIDADES
+        // ===========================================
+        
+        function mostrarCargando(mensaje = 'Cargando...') {
+            // Crear overlay de carga si no existe
+            let overlay = document.getElementById('loadingOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'loadingOverlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 9999;
+                `;
+                
+                const loadingContent = document.createElement('div');
+                loadingContent.style.cssText = `
+                    background: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    text-align: center;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                `;
+                
+                loadingContent.innerHTML = `
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div id="loadingMessage">${mensaje}</div>
+                `;
+                
+                overlay.appendChild(loadingContent);
+                document.body.appendChild(overlay);
+            } else {
+                document.getElementById('loadingMessage').textContent = mensaje;
+                overlay.style.display = 'flex';
+            }
+        }
+        
+        function ocultarCargando() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+        
+        // ===========================================
         // FUNCIONES PARA PLANTILLAS DE CORREO
         // ===========================================
         
@@ -2254,7 +2310,7 @@
             }
         }
         
-        function guardarPlantilla() {
+        async function guardarPlantilla() {
             const selector = document.getElementById('selectorPlantilla');
             const tipoPlantilla = selector.value;
             
@@ -2271,14 +2327,35 @@
                 return;
             }
             
-            // Actualizar plantilla en memoria
-            emailTemplates[tipoPlantilla].subject = asunto;
-            emailTemplates[tipoPlantilla].html = contenido;
-            
-            // Guardar en localStorage
-            localStorage.setItem('emailTemplates', JSON.stringify(emailTemplates));
-            
-            mostrarAlerta('Plantilla guardada exitosamente', 'success');
+            try {
+                mostrarCargando('Guardando plantilla...');
+                
+                // Actualizar plantilla en memoria
+                emailTemplates[tipoPlantilla].subject = asunto;
+                emailTemplates[tipoPlantilla].html = contenido;
+                
+                // Guardar en Supabase si está disponible
+                if (modoCentralizado && window.dataService) {
+                    await window.dataService.guardarPlantillaCorreo(tipoPlantilla, {
+                        subject: asunto,
+                        html: contenido
+                    });
+                } else {
+                    // Fallback a localStorage
+                    localStorage.setItem('emailTemplates', JSON.stringify(emailTemplates));
+                }
+                
+                ocultarCargando();
+                mostrarAlerta('Plantilla guardada exitosamente', 'success');
+                
+            } catch (error) {
+                ocultarCargando();
+                console.error('Error guardando plantilla:', error);
+                
+                // Fallback a localStorage en caso de error
+                localStorage.setItem('emailTemplates', JSON.stringify(emailTemplates));
+                mostrarAlerta('Plantilla guardada localmente (sin sincronización)', 'warning');
+            }
         }
         
         function previsualizarPlantilla() {
@@ -2343,7 +2420,7 @@
         // FUNCIONES PARA CONFIGURACIÓN DE CORREO
         // ===========================================
         
-        function guardarConfigCorreo() {
+        async function guardarConfigCorreo() {
             const config = {
                 smtpServer: document.getElementById('smtpServer').value,
                 smtpPort: parseInt(document.getElementById('smtpPort').value),
@@ -2358,16 +2435,37 @@
                 return;
             }
             
-            // Actualizar configuración global
-            Object.assign(emailConfig, config);
-            
-            // Guardar en localStorage
-            localStorage.setItem('emailConfig', JSON.stringify(config));
-            
-            // Actualizar estado visual
-            actualizarEstadoConfig();
-            
-            mostrarAlerta('Configuración de correo guardada exitosamente', 'success');
+            try {
+                mostrarCargando('Guardando configuración...');
+                
+                // Actualizar configuración global
+                Object.assign(emailConfig, config);
+                
+                // Guardar en Supabase si está disponible
+                if (modoCentralizado && window.dataService) {
+                    await window.dataService.guardarConfiguracionCorreo(config);
+                } else {
+                    // Fallback a localStorage
+                    localStorage.setItem('emailConfig', JSON.stringify(config));
+                }
+                
+                ocultarCargando();
+                
+                // Actualizar estado visual
+                actualizarEstadoConfig();
+                
+                mostrarAlerta('Configuración de correo guardada exitosamente', 'success');
+                
+            } catch (error) {
+                ocultarCargando();
+                console.error('Error guardando configuración:', error);
+                
+                // Fallback a localStorage en caso de error
+                localStorage.setItem('emailConfig', JSON.stringify(config));
+                actualizarEstadoConfig();
+                
+                mostrarAlerta('Configuración guardada localmente (sin sincronización)', 'warning');
+            }
         }
         
         async function probarConfigCorreo() {
@@ -2417,11 +2515,28 @@
             }
         }
         
-        function cargarConfiguracionCorreo() {
-            const configGuardada = localStorage.getItem('emailConfig');
-            if (configGuardada) {
-                try {
-                    const config = JSON.parse(configGuardada);
+        async function cargarConfiguracionCorreo() {
+            try {
+                let config = null;
+                
+                // Intentar cargar desde Supabase
+                if (modoCentralizado && window.dataService) {
+                    try {
+                        config = await window.dataService.obtenerConfiguracionCorreo();
+                    } catch (error) {
+                        console.warn('Error cargando configuración de Supabase, usando localStorage:', error);
+                    }
+                }
+                
+                // Fallback a localStorage si no hay configuración en Supabase
+                if (!config) {
+                    const configGuardada = localStorage.getItem('emailConfig');
+                    if (configGuardada) {
+                        config = JSON.parse(configGuardada);
+                    }
+                }
+                
+                if (config) {
                     Object.assign(emailConfig, config);
                     
                     // Pre-llenar el formulario de configuración
@@ -2434,25 +2549,102 @@
                     
                     // Actualizar estado
                     actualizarEstadoConfig();
-                } catch (error) {
-                    console.error('Error cargando configuración de correo:', error);
                 }
+            } catch (error) {
+                console.error('Error cargando configuración de correo:', error);
             }
         }
         
         // Cargar plantillas personalizadas
-        function cargarPlantillasPersonalizadas() {
-            const plantillasGuardadas = localStorage.getItem('emailTemplates');
-            if (plantillasGuardadas) {
-                try {
-                    const plantillas = JSON.parse(plantillasGuardadas);
-                    Object.assign(emailTemplates, plantillas);
-                } catch (error) {
-                    console.error('Error cargando plantillas personalizadas:', error);
+        async function cargarPlantillasPersonalizadas() {
+            try {
+                let plantillas = null;
+                
+                // Intentar cargar desde Supabase
+                if (modoCentralizado && window.dataService) {
+                    try {
+                        plantillas = await window.dataService.obtenerPlantillasCorreo();
+                    } catch (error) {
+                        console.warn('Error cargando plantillas de Supabase, usando localStorage:', error);
+                    }
                 }
+                
+                // Fallback a localStorage si no hay plantillas en Supabase
+                if (!plantillas) {
+                    const plantillasGuardadas = localStorage.getItem('emailTemplates');
+                    if (plantillasGuardadas) {
+                        plantillas = JSON.parse(plantillasGuardadas);
+                    }
+                }
+                
+                if (plantillas) {
+                    Object.assign(emailTemplates, plantillas);
+                }
+            } catch (error) {
+                console.error('Error cargando plantillas personalizadas:', error);
             }
         }
 
+        // ===========================================
+        // FUNCIONES PARA DÍAS DE SEGUIMIENTO
+        // ===========================================
+        
+        async function guardarDiasSeguimiento() {
+            const dias = document.getElementById('diasSeguimiento').value;
+            
+            try {
+                // Guardar en Supabase si está disponible
+                if (modoCentralizado && window.dataService) {
+                    await window.dataService.guardarConfiguracionSeguimiento({ diasSeguimiento: parseInt(dias) });
+                } else {
+                    // Fallback a localStorage
+                    localStorage.setItem('diasSeguimiento', dias);
+                }
+                
+                mostrarAlerta(`Días de seguimiento actualizados: ${dias} días`, 'success');
+            } catch (error) {
+                console.error('Error guardando días de seguimiento:', error);
+                // Fallback a localStorage en caso de error
+                localStorage.setItem('diasSeguimiento', dias);
+                mostrarAlerta('Configuración guardada localmente', 'warning');
+            }
+        }
+        
+        async function cargarDiasSeguimiento() {
+            try {
+                let dias = 7; // valor por defecto
+                
+                // Intentar cargar desde Supabase
+                if (modoCentralizado && window.dataService) {
+                    try {
+                        const config = await window.dataService.obtenerConfiguracionSeguimiento();
+                        if (config && config.diasSeguimiento) {
+                            dias = config.diasSeguimiento;
+                        }
+                    } catch (error) {
+                        console.warn('Error cargando días de seguimiento de Supabase, usando localStorage:', error);
+                    }
+                }
+                
+                // Fallback a localStorage si no hay configuración en Supabase
+                const diasGuardados = localStorage.getItem('diasSeguimiento');
+                if (diasGuardados && !dias) {
+                    dias = parseInt(diasGuardados);
+                }
+                
+                // Actualizar el selector
+                const selector = document.getElementById('diasSeguimiento');
+                if (selector) {
+                    selector.value = dias.toString();
+                }
+                
+                return dias;
+            } catch (error) {
+                console.error('Error cargando días de seguimiento:', error);
+                return 7; // valor por defecto
+            }
+        }
+        
         // ===========================================
         // SISTEMA DE CORREO Y NOTIFICACIONES
         // ===========================================
@@ -2698,9 +2890,10 @@
         async function guardarRegistroEnvio(datosEnvio) {
             try {
                 if (modoCentralizado && window.dataService) {
+                    // Guardar en Supabase
                     await window.dataService.guardarRegistroCorreo(datosEnvio);
                 } else {
-                    // Guardar en localStorage como fallback
+                    // Fallback a localStorage
                     const registros = JSON.parse(localStorage.getItem('registros_correos') || '[]');
                     registros.push({
                         ...datosEnvio,
@@ -2710,6 +2903,13 @@
                 }
             } catch (error) {
                 console.error('Error guardando registro de envío:', error);
+                // Fallback a localStorage en caso de error
+                const registros = JSON.parse(localStorage.getItem('registros_correos') || '[]');
+                registros.push({
+                    ...datosEnvio,
+                    id: Date.now()
+                });
+                localStorage.setItem('registros_correos', JSON.stringify(registros));
             }
         }
         
@@ -2911,11 +3111,73 @@
             
             mostrarModalEnviarCorreo(cotizacion);
         }
+        
+        // Función para agregar botones de correo a la tabla dinámicamente
+        function agregarBotonesCorreoATabla() {
+            // Esta función será llamada después de que se renderice la tabla
+            const filas = document.querySelectorAll('#tablaCotizaciones tr');
+            
+            filas.forEach((fila, index) => {
+                if (index === 0) return; // Skip header row
+                
+                const celdaAcciones = fila.querySelector('td:last-child');
+                if (!celdaAcciones) return;
+                
+                // Verificar si ya tiene el botón de correo
+                if (celdaAcciones.querySelector('.btn-email')) return;
+                
+                // Obtener el ID de la cotización desde los datos de la fila
+                const cotizacionId = fila.dataset.cotizacionId || fila.querySelector('[data-cotizacion-id]')?.dataset.cotizacionId;
+                
+                if (cotizacionId) {
+                    // Crear botón de correo
+                    const btnCorreo = document.createElement('button');
+                    btnCorreo.className = 'btn btn-sm btn-outline-primary btn-email me-1';
+                    btnCorreo.innerHTML = '<i class="bi bi-envelope"></i>';
+                    btnCorreo.title = 'Enviar por correo';
+                    btnCorreo.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        enviarCorreoCotizacionDesdeTabla(cotizacionId);
+                    };
+                    
+                    // Agregar el botón al inicio de la celda de acciones
+                    celdaAcciones.insertBefore(btnCorreo, celdaAcciones.firstChild);
+                }
+            });
+        }
+        
+        // Observador para detectar cambios en la tabla y agregar botones automáticamente
+        function inicializarObservadorTabla() {
+            const tabla = document.getElementById('tablaCotizaciones');
+            if (!tabla) return;
+            
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        // Delay para asegurar que el DOM esté completamente renderizado
+                        setTimeout(agregarBotonesCorreoATabla, 100);
+                    }
+                });
+            });
+            
+            observer.observe(tabla, {
+                childList: true,
+                subtree: true
+            });
+            
+            // Ejecutar inmediatamente para filas existentes
+            setTimeout(agregarBotonesCorreoATabla, 500);
+        }
 
         // Inicializar configuración de correo
-        document.addEventListener('DOMContentLoaded', function() {
-            cargarConfiguracionCorreo();
-            cargarPlantillasPersonalizadas();
+        document.addEventListener('DOMContentLoaded', async function() {
+            await cargarConfiguracionCorreo();
+            await cargarPlantillasPersonalizadas();
+            await cargarDiasSeguimiento();
+            
+            // Inicializar observador de tabla para botones de correo
+            inicializarObservadorTabla();
         });
     </script>
 
