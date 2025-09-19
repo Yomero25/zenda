@@ -398,15 +398,20 @@
                                             </h6>
                                             
                                             <div class="row mb-3">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">EmailJS Public Key</label>
+                                                    <input type="text" class="form-control" id="emailjsPublicKey" placeholder="user_xxxxxxx">
+                                                    <div class="form-text">Clave pública de EmailJS</div>
+                                                </div>
+                                                <div class="col-md-4">
                                                     <label class="form-label">EmailJS Service ID</label>
                                                     <input type="text" class="form-control" id="emailjsServiceId" placeholder="service_xxxxxxx">
-                                                    <div class="form-text">ID del servicio EmailJS configurado</div>
+                                                    <div class="form-text">ID del servicio configurado</div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <label class="form-label">EmailJS Template ID</label>
                                                     <input type="text" class="form-control" id="emailjsTemplateId" placeholder="template_xxxxxxx">
-                                                    <div class="form-text">ID de la plantilla EmailJS</div>
+                                                    <div class="form-text">ID de la plantilla</div>
                                                 </div>
                                             </div>
                                             
@@ -2464,6 +2469,7 @@
                 fromEmail: document.getElementById('fromEmail').value,
                 fromName: document.getElementById('fromName').value,
                 password: document.getElementById('emailPassword').value,
+                emailjsPublicKey: document.getElementById('emailjsPublicKey').value,
                 emailjsServiceId: document.getElementById('emailjsServiceId').value,
                 emailjsTemplateId: document.getElementById('emailjsTemplateId').value,
                 backendUrl: document.getElementById('backendUrl').value
@@ -2607,6 +2613,7 @@
                         document.getElementById('smtpPort').value = config.smtpPort || '';
                         document.getElementById('fromEmail').value = config.fromEmail || '';
                         document.getElementById('fromName').value = config.fromName || '';
+                        document.getElementById('emailjsPublicKey').value = config.emailjsPublicKey || '';
                         document.getElementById('emailjsServiceId').value = config.emailjsServiceId || '';
                         document.getElementById('emailjsTemplateId').value = config.emailjsTemplateId || '';
                         document.getElementById('backendUrl').value = config.backendUrl || '';
@@ -2957,11 +2964,15 @@
                 console.log('📧 Iniciando envío de correo real...');
                 
                 // OPCIÓN 1: EmailJS (Servicio real de correo)
-                if (typeof emailjs !== 'undefined') {
+                if (typeof emailjs !== 'undefined' && emailConfig.emailjsPublicKey && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId) {
                     console.log('📧 Usando EmailJS para envío real...');
+                    
+                    // Inicializar EmailJS con la Public Key
+                    emailjs.init(emailConfig.emailjsPublicKey);
+                    
                     const result = await emailjs.send(
-                        emailConfig.emailjsServiceId || 'YOUR_SERVICE_ID',
-                        emailConfig.emailjsTemplateId || 'YOUR_TEMPLATE_ID',
+                        emailConfig.emailjsServiceId,
+                        emailConfig.emailjsTemplateId,
                         {
                             to_email: Array.isArray(emailData.to) ? emailData.to.join(',') : emailData.to,
                             cc_email: Array.isArray(emailData.cc) ? emailData.cc.join(',') : emailData.cc,
