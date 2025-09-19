@@ -2848,6 +2848,12 @@
                     // 🚀 ACTUALIZAR ESTADO DE COTIZACIÓN A "ENVIADA"
                     try {
                         const cotizacionId = datosCorreo.cotizacionData.id || datosCorreo.cotizacionData.folio;
+                        console.log('📧 DEBUG: Intentando actualizar cotización:', {
+                            id: datosCorreo.cotizacionData.id,
+                            folio: datosCorreo.cotizacionData.folio,
+                            cotizacionId,
+                            cotizacionData: datosCorreo.cotizacionData
+                        });
                         
                         if (modoCentralizado && window.dataService) {
                             // Actualizar en Supabase
