@@ -422,7 +422,7 @@
                                             </div>
                                             
                                             <div class="d-grid gap-2">
-                                                <button type="button" class="btn btn-success" onclick="guardarConfigCorreo()">
+                                                <button type="button" class="btn btn-success" onclick="console.log('🖱️ BOTÓN CLICKEADO'); guardarConfigCorreo();">
                                                     <i class="bi bi-check-lg me-1"></i>Guardar Configuración
                                                 </button>
                                                 <button type="button" class="btn btn-info" onclick="probarConfigCorreo()">
@@ -2513,21 +2513,22 @@
         // ===========================================
         
         async function guardarConfigCorreo() {
-            console.log('🚀 INICIANDO guardarConfigCorreo()');
-            
-            const config = {
-                smtpServer: document.getElementById('smtpServer').value,
-                smtpPort: parseInt(document.getElementById('smtpPort').value),
-                fromEmail: document.getElementById('fromEmail').value,
-                fromName: document.getElementById('fromName').value,
-                password: document.getElementById('emailPassword').value,
-                emailjsPublicKey: document.getElementById('emailjsPublicKey').value,
-                emailjsServiceId: document.getElementById('emailjsServiceId').value,
-                emailjsTemplateId: document.getElementById('emailjsTemplateId').value,
-                backendUrl: document.getElementById('backendUrl').value
-            };
-            
-            console.log('📧 Configuración capturada:', config);
+            try {
+                console.log('🚀 INICIANDO guardarConfigCorreo()');
+                
+                const config = {
+                    smtpServer: document.getElementById('smtpServer').value,
+                    smtpPort: parseInt(document.getElementById('smtpPort').value),
+                    fromEmail: document.getElementById('fromEmail').value,
+                    fromName: document.getElementById('fromName').value,
+                    password: document.getElementById('emailPassword').value,
+                    emailjsPublicKey: document.getElementById('emailjsPublicKey').value,
+                    emailjsServiceId: document.getElementById('emailjsServiceId').value,
+                    emailjsTemplateId: document.getElementById('emailjsTemplateId').value,
+                    backendUrl: document.getElementById('backendUrl').value
+                };
+                
+                console.log('📧 Configuración capturada:', config);
             
             // Validar campos requeridos
             if (!config.smtpServer || !config.fromEmail || !config.password) {
@@ -2628,6 +2629,11 @@
                 actualizarEstadoConfig();
                 
                 mostrarAlerta('Configuración guardada localmente (sin sincronización)', 'warning');
+            }
+            } catch (outerError) {
+                console.error('❌ ERROR CRÍTICO en guardarConfigCorreo:', outerError);
+                console.error('❌ Stack trace crítico:', outerError.stack);
+                alert('Error crítico: ' + outerError.message);
             }
         }
         
