@@ -2538,6 +2538,23 @@
             
             console.log('🔧 DEBUG: Campos requeridos validados correctamente');
             
+            // DEBUG ESPECÍFICO PARA EMAILJS
+            console.log('🔧 DEBUG ESPECÍFICO - Elementos EmailJS:');
+            const emailjsPublicKeyEl = document.getElementById('emailjsPublicKey');
+            const emailjsServiceIdEl = document.getElementById('emailjsServiceId');
+            const emailjsTemplateIdEl = document.getElementById('emailjsTemplateId');
+
+            console.log('emailjsPublicKey elemento:', emailjsPublicKeyEl);
+            console.log('emailjsPublicKey valor:', emailjsPublicKeyEl ? emailjsPublicKeyEl.value : 'ELEMENTO NO EXISTE');
+            console.log('emailjsServiceId elemento:', emailjsServiceIdEl);
+            console.log('emailjsServiceId valor:', emailjsServiceIdEl ? emailjsServiceIdEl.value : 'ELEMENTO NO EXISTE');
+            console.log('emailjsTemplateId elemento:', emailjsTemplateIdEl);
+            console.log('emailjsTemplateId valor:', emailjsTemplateIdEl ? emailjsTemplateIdEl.value : 'ELEMENTO NO EXISTE');
+
+            // Verificar si la pestaña está activa
+            const configCorreoTab = document.getElementById('config-correo');
+            console.log('Pestaña config-correo está visible:', configCorreoTab && configCorreoTab.classList.contains('active'));
+            
             try {
                 mostrarCargando('Guardando configuración...');
                 
