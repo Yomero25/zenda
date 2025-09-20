@@ -700,17 +700,47 @@
         let unidadIdCounter = 1;
         let solucionIdCounter = 1;
 
+        // Función para manejar errores de conectividad de Supabase
+        function manejarErrorConectividad() {
+            // Los errores de WebSocket y ERR_ADDRESS_UNREACHABLE son temporales
+            // Supabase maneja automáticamente la reconexión, solo necesitamos evitar spam en consola
+            const originalConsoleError = console.error;
+            console.error = function(...args) {
+                const mensaje = args.join(' ');
+                // Filtrar errores conocidos de conectividad temporal
+                if (mensaje.includes('ERR_ADDRESS_UNREACHABLE') || 
+                    mensaje.includes('WebSocket connection') ||
+                    mensaje.includes('Failed to fetch') ||
+                    mensaje.includes('CHANNEL_ERROR')) {
+                    // Solo mostrar estos errores una vez cada 30 segundos
+                    if (!window.lastConnectivityError || Date.now() - window.lastConnectivityError > 30000) {
+                        console.warn('⚠️ Problema temporal de conectividad con Supabase (se reintentará automáticamente)');
+                        window.lastConnectivityError = Date.now();
+                    }
+                    return;
+                }
+                // Para otros errores, mostrar normalmente
+                originalConsoleError.apply(console, args);
+            };
+        }
+
         document.addEventListener("DOMContentLoaded", async function() {
+            manejarErrorConectividad();
             await cargarCotizaciones();
             suscribirRealtimeCotizaciones();
             
             // Suscribirse a cambios en tiempo real de precios
             if (window.dataService && window.dataService.subscribePreciosElementos) {
-                console.log('🔄 Suscribiéndose a cambios de precios en tiempo real...');
-                window.dataService.subscribePreciosElementos((payload) => {
-                    console.log('💲 Cambio en precios detectado:', payload);
-                    console.log('✅ Precios actualizados en tiempo real - las cotizaciones usarán los nuevos precios');
-                });
+                try {
+                    console.log('🔄 Suscribiéndose a cambios de precios en tiempo real...');
+                    window.dataService.subscribePreciosElementos((payload) => {
+                        console.log('💲 Cambio en precios detectado:', payload);
+                        console.log('✅ Precios actualizados en tiempo real - las cotizaciones usarán los nuevos precios');
+                    });
+                } catch (error) {
+                    console.warn('⚠️ Error al suscribirse a cambios de precios:', error);
+                    // No es crítico, solo loggeamos el error
+                }
             }
         });
 
@@ -844,9 +874,19 @@
 
         function suscribirRealtimeCotizaciones() {
             if (!modoCentralizado) return;
-            window.dataService.subscribeCotizaciones(async () => {
-                await cargarCotizaciones();
-            });
+            
+            try {
+                window.dataService.subscribeCotizaciones(async () => {
+                    await cargarCotizaciones();
+                });
+            } catch (error) {
+                console.warn('⚠️ Error al suscribirse a cambios de cotizaciones:', error);
+                // Reintentar suscripción después de 5 segundos
+                setTimeout(() => {
+                    console.log('🔄 Reintentando suscripción a cotizaciones...');
+                    suscribirRealtimeCotizaciones();
+                }, 5000);
+            }
         }
 
         function getEstadoBadge(estado, cotizacion = null) {
@@ -1454,16 +1494,26 @@
                 'rechazada': 'Rechazada'
             };
 
+            // Remover modal anterior si existe
+            const modalExistente = document.getElementById("modalCambiarEstado");
+            if (modalExistente) {
+                const modalInstance = bootstrap.Modal.getInstance(modalExistente);
+                if (modalInstance) {
+                    modalInstance.dispose();
+                }
+                modalExistente.remove();
+            }
+            
             // Mostrar modal de selección de estado
             const estadoActual = cotizacion.estado || 'borrador';
             
             // Crear modal dinámicamente
             const modalHtml = `
-                <div class="modal fade" id="modalCambiarEstado" tabindex="-1">
+                <div class="modal fade" id="modalCambiarEstado" tabindex="-1" aria-labelledby="modalCambiarEstadoLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title">
+                                <h5 class="modal-title" id="modalCambiarEstadoLabel">
                                     <i class="bi bi-arrow-repeat me-2"></i>Cambiar Estado de Cotización
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
