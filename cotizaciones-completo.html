@@ -2724,20 +2724,35 @@
                 }
                 
                 if (config) {
-                    Object.assign(emailConfig, config);
+                    // Mapear datos de Supabase (snake_case) a camelCase para el formulario
+                    const configMapeada = {
+                        smtpServer: config.smtp_server || config.smtpServer || '',
+                        smtpPort: config.smtp_port || config.smtpPort || 587,
+                        fromEmail: config.from_email || config.fromEmail || '',
+                        fromName: config.from_name || config.fromName || '',
+                        password: config.smtp_password || config.password || '',
+                        emailjsPublicKey: config.emailjs_public_key || config.emailjsPublicKey || '',
+                        emailjsServiceId: config.emailjs_service_id || config.emailjsServiceId || '',
+                        emailjsTemplateId: config.emailjs_template_id || config.emailjsTemplateId || '',
+                        backendUrl: config.backend_url || config.backendUrl || ''
+                    };
+                    
+                    // Actualizar configuración global
+                    Object.assign(emailConfig, configMapeada);
                     
                     // Pre-llenar el formulario de configuración
                     const smtpServerEl = document.getElementById('smtpServer');
                     if (smtpServerEl) {
                         console.log('📧 Pre-llenando formulario...');
-                        document.getElementById('smtpServer').value = config.smtpServer || '';
-                        document.getElementById('smtpPort').value = config.smtpPort || '';
-                        document.getElementById('fromEmail').value = config.fromEmail || '';
-                        document.getElementById('fromName').value = config.fromName || '';
-                        document.getElementById('emailjsPublicKey').value = config.emailjsPublicKey || '';
-                        document.getElementById('emailjsServiceId').value = config.emailjsServiceId || '';
-                        document.getElementById('emailjsTemplateId').value = config.emailjsTemplateId || '';
-                        document.getElementById('backendUrl').value = config.backendUrl || '';
+                        document.getElementById('smtpServer').value = configMapeada.smtpServer;
+                        document.getElementById('smtpPort').value = configMapeada.smtpPort;
+                        document.getElementById('fromEmail').value = configMapeada.fromEmail;
+                        document.getElementById('fromName').value = configMapeada.fromName;
+                        document.getElementById('emailPassword').value = configMapeada.password;
+                        document.getElementById('emailjsPublicKey').value = configMapeada.emailjsPublicKey;
+                        document.getElementById('emailjsServiceId').value = configMapeada.emailjsServiceId;
+                        document.getElementById('emailjsTemplateId').value = configMapeada.emailjsTemplateId;
+                        document.getElementById('backendUrl').value = configMapeada.backendUrl;
                         console.log('📧 Formulario pre-llenado exitosamente');
                     } else {
                         console.warn('📧 Elementos del formulario no encontrados, reintentando...');
