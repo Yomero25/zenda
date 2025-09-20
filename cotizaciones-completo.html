@@ -422,7 +422,7 @@
                                             </div>
                                             
                                             <div class="d-grid gap-2">
-                                                <button type="button" class="btn btn-success" onclick="console.log('🖱️ BOTÓN CLICKEADO'); guardarConfigCorreo();">
+                                                <button type="button" class="btn btn-success" onclick="guardarConfigCorreo()">
                                                     <i class="bi bi-check-lg me-1"></i>Guardar Configuración
                                                 </button>
                                                 <button type="button" class="btn btn-info" onclick="probarConfigCorreo()">
@@ -2513,22 +2513,17 @@
         // ===========================================
         
         async function guardarConfigCorreo() {
-            try {
-                console.log('🚀 INICIANDO guardarConfigCorreo()');
-                
-                const config = {
-                    smtpServer: document.getElementById('smtpServer').value,
-                    smtpPort: parseInt(document.getElementById('smtpPort').value),
-                    fromEmail: document.getElementById('fromEmail').value,
-                    fromName: document.getElementById('fromName').value,
-                    password: document.getElementById('emailPassword').value,
-                    emailjsPublicKey: document.getElementById('emailjsPublicKey').value,
-                    emailjsServiceId: document.getElementById('emailjsServiceId').value,
-                    emailjsTemplateId: document.getElementById('emailjsTemplateId').value,
-                    backendUrl: document.getElementById('backendUrl').value
-                };
-                
-                console.log('📧 Configuración capturada:', config);
+            const config = {
+                smtpServer: document.getElementById('smtpServer').value,
+                smtpPort: parseInt(document.getElementById('smtpPort').value),
+                fromEmail: document.getElementById('fromEmail').value,
+                fromName: document.getElementById('fromName').value,
+                password: document.getElementById('emailPassword').value,
+                emailjsPublicKey: document.getElementById('emailjsPublicKey').value,
+                emailjsServiceId: document.getElementById('emailjsServiceId').value,
+                emailjsTemplateId: document.getElementById('emailjsTemplateId').value,
+                backendUrl: document.getElementById('backendUrl').value
+            };
             
             // Validar campos requeridos
             if (!config.smtpServer || !config.fromEmail || !config.password) {
@@ -2566,8 +2561,6 @@
                                 is_active: true
                             };
                             
-                            console.log('📧 DEBUG: Intentando guardar en Supabase:', configData);
-                            
                             // Primero intentar actualizar si existe
                             const { data: existingData, error: selectError } = await window.dataService.supabase
                                 .from('configuraciones_correo')
@@ -2576,32 +2569,26 @@
                                 .single();
                             
                             if (selectError && selectError.code !== 'PGRST116') {
-                                console.error('Error verificando existencia:', selectError);
                                 throw selectError;
                             }
                             
                             let result;
                             if (existingData) {
                                 // Actualizar registro existente
-                                console.log('📧 Actualizando registro existente con ID:', existingData.id);
                                 result = await window.dataService.supabase
                                     .from('configuraciones_correo')
                                     .update(configData)
                                     .eq('id', existingData.id);
                             } else {
                                 // Insertar nuevo registro
-                                console.log('📧 Insertando nuevo registro');
                                 result = await window.dataService.supabase
                                     .from('configuraciones_correo')
                                     .insert(configData);
                             }
                             
                             if (result.error) {
-                                console.error('Error en operación de BD:', result.error);
                                 throw result.error;
                             }
-                            
-                            console.log('✅ Configuración guardada en Supabase exitosamente');
                         }
                     } catch (error) {
                         console.error('Error guardando en Supabase:', error);
@@ -2621,19 +2608,13 @@
                 
             } catch (error) {
                 ocultarCargando();
-                console.error('❌ ERROR guardando configuración:', error);
-                console.error('❌ Stack trace:', error.stack);
+                console.error('Error guardando configuración:', error);
                 
                 // Fallback a localStorage en caso de error
                 localStorage.setItem('emailConfig', JSON.stringify(config));
                 actualizarEstadoConfig();
                 
                 mostrarAlerta('Configuración guardada localmente (sin sincronización)', 'warning');
-            }
-            } catch (outerError) {
-                console.error('❌ ERROR CRÍTICO en guardarConfigCorreo:', outerError);
-                console.error('❌ Stack trace crítico:', outerError.stack);
-                alert('Error crítico: ' + outerError.message);
             }
         }
         
@@ -2714,7 +2695,6 @@
                             config = await window.dataService.obtenerConfiguracionCorreo();
                         } else {
                             // Fallback: usar supabase directo
-                            console.log('📧 DEBUG: Cargando desde Supabase directamente...');
                             const { data, error } = await window.dataService.supabase
                                 .from('configuraciones_correo')
                                 .select('*')
@@ -2724,10 +2704,8 @@
 
                             if (error) {
                                 console.warn('Error cargando configuración de Supabase:', error);
-                                console.log('📧 DEBUG: Código de error:', error.code);
                             } else {
                                 config = data;
-                                console.log('📧 DEBUG: Datos cargados desde Supabase:', data);
                             }
                         }
                         console.log('📧 Configuración cargada desde Supabase:', config);
