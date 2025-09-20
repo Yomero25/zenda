@@ -2729,23 +2729,20 @@
                 // Intentar cargar desde Supabase
                 if (modoCentralizado && window.dataService) {
                     try {
-                        // Intentar usar la función de dataService si existe
-                        if (typeof window.dataService.obtenerConfiguracionCorreo === 'function') {
-                            config = await window.dataService.obtenerConfiguracionCorreo();
-                        } else {
-                            // Fallback: usar supabase directo
-                            const { data, error } = await window.dataService.supabase
-                                .from('configuraciones_correo')
-                                .select('*')
-                                .eq('tipo', 'email')
-                                .eq('is_active', true)
-                                .single();
+                        // Usar supabase directo (forzar fallback)
+                        console.log('🔧 DEBUG: Cargando configuración directamente desde Supabase...');
+                        const { data, error } = await window.dataService.supabase
+                            .from('configuraciones_correo')
+                            .select('*')
+                            .eq('tipo', 'email')
+                            .eq('is_active', true)
+                            .single();
 
-                            if (error) {
-                                console.warn('Error cargando configuración de Supabase:', error);
-                            } else {
-                                config = data;
-                            }
+                        if (error) {
+                            console.warn('Error cargando configuración de Supabase:', error);
+                        } else {
+                            config = data;
+                            console.log('🔧 DEBUG: Configuración cargada desde Supabase:', config);
                         }
                         console.log('📧 Configuración cargada desde Supabase:', config);
                     } catch (error) {
