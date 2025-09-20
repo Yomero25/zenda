@@ -2513,6 +2513,8 @@
         // ===========================================
         
         async function guardarConfigCorreo() {
+            console.log('🚀 INICIANDO guardarConfigCorreo()');
+            
             const config = {
                 smtpServer: document.getElementById('smtpServer').value,
                 smtpPort: parseInt(document.getElementById('smtpPort').value),
@@ -2524,6 +2526,8 @@
                 emailjsTemplateId: document.getElementById('emailjsTemplateId').value,
                 backendUrl: document.getElementById('backendUrl').value
             };
+            
+            console.log('📧 Configuración capturada:', config);
             
             // Validar campos requeridos
             if (!config.smtpServer || !config.fromEmail || !config.password) {
@@ -2616,7 +2620,8 @@
                 
             } catch (error) {
                 ocultarCargando();
-                console.error('Error guardando configuración:', error);
+                console.error('❌ ERROR guardando configuración:', error);
+                console.error('❌ Stack trace:', error.stack);
                 
                 // Fallback a localStorage en caso de error
                 localStorage.setItem('emailConfig', JSON.stringify(config));
