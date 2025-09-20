@@ -2777,7 +2777,7 @@
         // ===========================================
         
         // Configuración de correo (sincronizada con wizard)
-        const emailConfig = {
+        let emailConfig = {
             smtpServer: 'smtp.gmail.com',
             smtpPort: 587,
             secure: false,
@@ -3133,6 +3133,12 @@
         async function enviarCorreoConServicio(emailData) {
             try {
                 console.log('📧 Iniciando envío de correo real...');
+                console.log('📧 Configuración actual:', {
+                    emailjsPublicKey: emailConfig.emailjsPublicKey ? '***' + emailConfig.emailjsPublicKey.slice(-4) : 'NO DEFINIDA',
+                    emailjsServiceId: emailConfig.emailjsServiceId || 'NO DEFINIDO',
+                    emailjsTemplateId: emailConfig.emailjsTemplateId || 'NO DEFINIDO',
+                    fromEmail: emailConfig.fromEmail || 'NO DEFINIDO'
+                });
                 
                 // OPCIÓN 1: EmailJS (Servicio real de correo)
                 if (typeof emailjs !== 'undefined' && emailConfig.emailjsPublicKey && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId) {
@@ -3274,17 +3280,6 @@
             
             const modalElement = document.getElementById('modalEnviarCorreo');
             const modal = new bootstrap.Modal(modalElement);
-            
-            // Arreglar aria-hidden cuando se muestra el modal
-            modalElement.addEventListener('shown.bs.modal', function () {
-                this.removeAttribute('aria-hidden');
-            });
-            
-            // Restaurar aria-hidden cuando se oculta el modal
-            modalElement.addEventListener('hidden.bs.modal', function () {
-                this.setAttribute('aria-hidden', 'true');
-            });
-            
             modal.show();
         }
         
@@ -3447,6 +3442,20 @@
             await cargarConfiguracionCorreo();
             await cargarPlantillasPersonalizadas();
             await cargarDiasSeguimiento();
+            
+            // Configurar event listeners para modal de envío de correo (una sola vez)
+            const modalElement = document.getElementById('modalEnviarCorreo');
+            if (modalElement) {
+                // Arreglar aria-hidden cuando se muestra el modal
+                modalElement.addEventListener('shown.bs.modal', function () {
+                    this.removeAttribute('aria-hidden');
+                });
+                
+                // Restaurar aria-hidden cuando se oculta el modal
+                modalElement.addEventListener('hidden.bs.modal', function () {
+                    this.setAttribute('aria-hidden', 'true');
+                });
+            }
             
             // Listener para cuando se abra la pestaña de configuración de correo
             const configCorreoTab = document.getElementById('config-correo-tab');
