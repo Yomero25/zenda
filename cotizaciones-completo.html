@@ -2561,19 +2561,42 @@
                                 is_active: true
                             };
                             
-                            // Upsert (insertar o actualizar)
-                            const { error } = await window.dataService.supabase
-                                .from('configuraciones_correo')
-                                .upsert(configData, { 
-                                    onConflict: 'tipo',
-                                    ignoreDuplicates: false 
-                                });
+                            console.log('📧 DEBUG: Intentando guardar en Supabase:', configData);
                             
-                            if (error) {
-                                throw error;
+                            // Primero intentar actualizar si existe
+                            const { data: existingData, error: selectError } = await window.dataService.supabase
+                                .from('configuraciones_correo')
+                                .select('id')
+                                .eq('tipo', 'email')
+                                .single();
+                            
+                            if (selectError && selectError.code !== 'PGRST116') {
+                                console.error('Error verificando existencia:', selectError);
+                                throw selectError;
                             }
                             
-                            console.log('✅ Configuración guardada en Supabase');
+                            let result;
+                            if (existingData) {
+                                // Actualizar registro existente
+                                console.log('📧 Actualizando registro existente con ID:', existingData.id);
+                                result = await window.dataService.supabase
+                                    .from('configuraciones_correo')
+                                    .update(configData)
+                                    .eq('id', existingData.id);
+                            } else {
+                                // Insertar nuevo registro
+                                console.log('📧 Insertando nuevo registro');
+                                result = await window.dataService.supabase
+                                    .from('configuraciones_correo')
+                                    .insert(configData);
+                            }
+                            
+                            if (result.error) {
+                                console.error('Error en operación de BD:', result.error);
+                                throw result.error;
+                            }
+                            
+                            console.log('✅ Configuración guardada en Supabase exitosamente');
                         }
                     } catch (error) {
                         console.error('Error guardando en Supabase:', error);
@@ -2680,17 +2703,20 @@
                             config = await window.dataService.obtenerConfiguracionCorreo();
                         } else {
                             // Fallback: usar supabase directo
+                            console.log('📧 DEBUG: Cargando desde Supabase directamente...');
                             const { data, error } = await window.dataService.supabase
                                 .from('configuraciones_correo')
                                 .select('*')
                                 .eq('tipo', 'email')
                                 .eq('is_active', true)
                                 .single();
-                            
+
                             if (error) {
                                 console.warn('Error cargando configuración de Supabase:', error);
+                                console.log('📧 DEBUG: Código de error:', error.code);
                             } else {
                                 config = data;
+                                console.log('📧 DEBUG: Datos cargados desde Supabase:', data);
                             }
                         }
                         console.log('📧 Configuración cargada desde Supabase:', config);
