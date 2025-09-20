@@ -2539,7 +2539,46 @@
                 
                 // Guardar en Supabase si está disponible
                 if (modoCentralizado && window.dataService) {
-                    await window.dataService.guardarConfiguracionCorreo(config);
+                    try {
+                        // Intentar usar la función de dataService si existe
+                        if (typeof window.dataService.guardarConfiguracionCorreo === 'function') {
+                            await window.dataService.guardarConfiguracionCorreo(config);
+                        } else {
+                            // Fallback: usar supabase directo
+                            const configData = {
+                                tipo: 'email',
+                                smtp_server: config.smtpServer,
+                                smtp_port: config.smtpPort,
+                                smtp_secure: false,
+                                smtp_user: config.fromEmail,
+                                smtp_password: config.password,
+                                from_email: config.fromEmail,
+                                from_name: config.fromName,
+                                emailjs_public_key: config.emailjsPublicKey,
+                                emailjs_service_id: config.emailjsServiceId,
+                                emailjs_template_id: config.emailjsTemplateId,
+                                backend_url: config.backendUrl,
+                                is_active: true
+                            };
+                            
+                            // Upsert (insertar o actualizar)
+                            const { error } = await window.dataService.supabase
+                                .from('configuraciones_correo')
+                                .upsert(configData, { 
+                                    onConflict: 'tipo',
+                                    ignoreDuplicates: false 
+                                });
+                            
+                            if (error) {
+                                throw error;
+                            }
+                            
+                            console.log('✅ Configuración guardada en Supabase');
+                        }
+                    } catch (error) {
+                        console.error('Error guardando en Supabase:', error);
+                        throw error; // Re-lanzar para que se maneje en el catch principal
+                    }
                 } else {
                     // Fallback a localStorage
                     localStorage.setItem('emailConfig', JSON.stringify(config));
@@ -2636,7 +2675,24 @@
                 // Intentar cargar desde Supabase
                 if (modoCentralizado && window.dataService) {
                     try {
-                        config = await window.dataService.obtenerConfiguracionCorreo();
+                        // Intentar usar la función de dataService si existe
+                        if (typeof window.dataService.obtenerConfiguracionCorreo === 'function') {
+                            config = await window.dataService.obtenerConfiguracionCorreo();
+                        } else {
+                            // Fallback: usar supabase directo
+                            const { data, error } = await window.dataService.supabase
+                                .from('configuraciones_correo')
+                                .select('*')
+                                .eq('tipo', 'email')
+                                .eq('is_active', true)
+                                .single();
+                            
+                            if (error) {
+                                console.warn('Error cargando configuración de Supabase:', error);
+                            } else {
+                                config = data;
+                            }
+                        }
                         console.log('📧 Configuración cargada desde Supabase:', config);
                     } catch (error) {
                         console.warn('Error cargando configuración de Supabase, usando localStorage:', error);
