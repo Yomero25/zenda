@@ -2513,6 +2513,8 @@
         // ===========================================
         
         async function guardarConfigCorreo() {
+            console.log('🔧 DEBUG: Iniciando guardarConfigCorreo()');
+            
             const config = {
                 smtpServer: document.getElementById('smtpServer').value,
                 smtpPort: parseInt(document.getElementById('smtpPort').value),
@@ -2525,11 +2527,16 @@
                 backendUrl: document.getElementById('backendUrl').value
             };
             
+            console.log('🔧 DEBUG: Configuración capturada:', config);
+            
             // Validar campos requeridos
             if (!config.smtpServer || !config.fromEmail || !config.password) {
+                console.log('🔧 DEBUG: Campos requeridos faltantes');
                 mostrarAlerta('Por favor completa todos los campos requeridos', 'warning');
                 return;
             }
+            
+            console.log('🔧 DEBUG: Campos requeridos validados correctamente');
             
             try {
                 mostrarCargando('Guardando configuración...');
@@ -2545,6 +2552,8 @@
                             await window.dataService.guardarConfiguracionCorreo(config);
                         } else {
                             // Fallback: usar supabase directo
+                            console.log('🔧 DEBUG: Usando Supabase directo para guardar');
+                            
                             const configData = {
                                 tipo: 'email',
                                 smtp_server: config.smtpServer,
@@ -2561,34 +2570,47 @@
                                 is_active: true
                             };
                             
+                            console.log('🔧 DEBUG: configData creado:', configData);
+                            
                             // Primero intentar actualizar si existe
+                            console.log('🔧 DEBUG: Verificando si existe registro en Supabase...');
                             const { data: existingData, error: selectError } = await window.dataService.supabase
                                 .from('configuraciones_correo')
                                 .select('id')
                                 .eq('tipo', 'email')
                                 .single();
                             
+                            console.log('🔧 DEBUG: Resultado de verificación:', { existingData, selectError });
+                            
                             if (selectError && selectError.code !== 'PGRST116') {
+                                console.log('🔧 DEBUG: Error en verificación:', selectError);
                                 throw selectError;
                             }
                             
                             let result;
                             if (existingData) {
                                 // Actualizar registro existente
+                                console.log('🔧 DEBUG: Actualizando registro existente con ID:', existingData.id);
                                 result = await window.dataService.supabase
                                     .from('configuraciones_correo')
                                     .update(configData)
                                     .eq('id', existingData.id);
+                                console.log('🔧 DEBUG: Resultado de actualización:', result);
                             } else {
                                 // Insertar nuevo registro
+                                console.log('🔧 DEBUG: Insertando nuevo registro');
                                 result = await window.dataService.supabase
                                     .from('configuraciones_correo')
                                     .insert(configData);
+                                console.log('🔧 DEBUG: Resultado de inserción:', result);
                             }
                             
                             if (result.error) {
+                                console.log('🔧 DEBUG: Error en operación de BD:', result.error);
                                 throw result.error;
                             }
+                            
+                            console.log('🔧 DEBUG: Operación de BD exitosa');
                         }
                     } catch (error) {
                         console.error('Error guardando en Supabase:', error);
