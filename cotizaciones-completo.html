@@ -2905,30 +2905,29 @@
                 const ahora = new Date();
                 const expiracion = new Date(ahora.getTime() + (15 * 24 * 60 * 60 * 1000)); // 15 días
                 
-                if (modoCentralizado && window.dataService && window.dataService.supabase) {
-                    // Insertar token en Supabase
-                    const { data, error } = await window.dataService.supabase
-                        .from('acceptance_tokens')
-                        .insert({
-                            cotizacion_folio: folio,
-                            token: token,
-                            expires_at: expiracion.toISOString()
-                        })
-                        .select()
-                        .single();
-                    
-                    if (error) {
-                        console.error('Error creando token de aceptación:', error);
-                        return null;
-                    }
-                    
-                    console.log('✅ Token de aceptación creado:', { folio, token, expires_at: expiracion });
-                    return token;
-                } else {
-                    // Fallback: usar directamente el cliente de Supabase si dataService no tiene supabase expuesto
-                    if (typeof supabase !== 'undefined') {
-                        try {
-                            const { data, error } = await supabase
+                if (modoCentralizado && window.dataService) {
+                    try {
+                        // Intentar usar la función de dataService si existe
+                        if (typeof window.dataService.insertarEnTabla === 'function') {
+                            const resultado = await window.dataService.insertarEnTabla('acceptance_tokens', {
+                                cotizacion_folio: folio,
+                                token: token,
+                                expires_at: expiracion.toISOString()
+                            });
+                            
+                            if (resultado.error) {
+                                console.error('Error creando token via dataService:', resultado.error);
+                                console.warn('⚠️ Usando token local - error en BD');
+                                return token; // Devolver token local para que el email funcione
+                            }
+                            
+                            console.log('✅ Token de aceptación creado via dataService:', { folio, token, expires_at: expiracion });
+                            return token;
+                        }
+                        
+                        // Si no existe la función, usar supabase directo si está disponible
+                        if (window.dataService.supabase && typeof window.dataService.supabase.from === 'function') {
+                            const { data, error } = await window.dataService.supabase
                                 .from('acceptance_tokens')
                                 .insert({
                                     cotizacion_folio: folio,
@@ -2939,27 +2938,33 @@
                                 .single();
                             
                             if (error) {
-                                console.error('Error creando token de aceptación (fallback):', error);
-                                console.warn('⚠️ Usando token local por error en Supabase');
+                                console.error('Error creando token via supabase:', error);
+                                console.warn('⚠️ Usando token local - error en BD');
                                 return token; // Devolver token local para que el email funcione
                             }
                             
-                            console.log('✅ Token de aceptación creado (fallback):', { folio, token, expires_at: expiracion });
-                            return token;
-                        } catch (fallbackError) {
-                            console.error('Error en fallback de token:', fallbackError);
-                            console.warn('⚠️ Usando token local por error en fallback');
+                            console.log('✅ Token de aceptación creado via supabase:', { folio, token, expires_at: expiracion });
                             return token;
                         }
-                    } else {
-                        // Último fallback: token local
-                        console.warn('⚠️ Supabase no disponible: token de aceptación local (no persistente)');
+                        
+                        // Si nada funciona, usar token local
+                        console.warn('⚠️ dataService disponible pero sin métodos de BD - usando token local');
+                        return token;
+                        
+                    } catch (dbError) {
+                        console.error('Error en operación de BD:', dbError);
+                        console.warn('⚠️ Usando token local por error de BD');
                         return token;
                     }
+                } else {
+                    // Modo no centralizado o dataService no disponible
+                    console.warn('⚠️ Modo no centralizado o dataService no disponible - usando token local');
+                    return token;
                 }
             } catch (error) {
-                console.error('Error creando token de aceptación:', error);
-                return null;
+                console.error('Error general creando token de aceptación:', error);
+                console.warn('⚠️ Usando token local por error general');
+                return token; // Siempre devolver un token para que el email funcione
             }
         }
         
@@ -3267,7 +3272,19 @@
                 document.getElementById('numeroCotizacion').value = numero;
             }
             
-            const modal = new bootstrap.Modal(document.getElementById('modalEnviarCorreo'));
+            const modalElement = document.getElementById('modalEnviarCorreo');
+            const modal = new bootstrap.Modal(modalElement);
+            
+            // Arreglar aria-hidden cuando se muestra el modal
+            modalElement.addEventListener('shown.bs.modal', function () {
+                this.removeAttribute('aria-hidden');
+            });
+            
+            // Restaurar aria-hidden cuando se oculta el modal
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                this.setAttribute('aria-hidden', 'true');
+            });
+            
             modal.show();
         }
         
