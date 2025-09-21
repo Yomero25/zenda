@@ -3289,10 +3289,9 @@
            const templateParams = {
                to_email: Array.isArray(emailData.to) ? emailData.to.join(',') : emailData.to,
                cc_email: Array.isArray(emailData.cc) ? emailData.cc.join(',') : emailData.cc,
-               subject: emailData.subject,
-               html_content: emailData.html,
                from_name: emailConfig.fromName,
-               from_email: emailConfig.fromEmail
+               from_email: emailConfig.fromEmail,
+               html_content: emailData.html
            };
            
            console.log('📧 DEBUG: Parámetros enviados a EmailJS:', templateParams);
