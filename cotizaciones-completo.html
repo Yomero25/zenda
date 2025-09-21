@@ -2730,7 +2730,6 @@
                 if (modoCentralizado && window.dataService) {
                     try {
                         // Usar supabase directo (forzar fallback)
-                        console.log('🔧 DEBUG: Cargando configuración directamente desde Supabase...');
                         const supabaseClient = window.dataService?.supabase || window.supabase;
                         
                         if (!supabaseClient) {
@@ -2740,7 +2739,6 @@
                         // Si es el módulo de Supabase, crear el cliente
                         let actualClient = supabaseClient;
                         if (typeof supabaseClient.createClient === 'function') {
-                            console.log('🔧 DEBUG: Creando cliente de Supabase con createClient...');
                             actualClient = supabaseClient.createClient(
                                 'https://lsmhcpsvjcbduqovbatj.supabase.co',
                                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzbWhjcHN2amNiZHVxb3ZiYXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMTM4MzgsImV4cCI6MjA3MjU4OTgzOH0.I7dEer-R2ZaiMvU-Hmve6Ms0wk82U1e7C67e8fYWIEw'
@@ -2762,7 +2760,6 @@
                             console.warn('Error cargando configuración de Supabase:', error);
                         } else {
                             config = data;
-                            console.log('🔧 DEBUG: Configuración cargada desde Supabase:', config);
                         }
                         console.log('📧 Configuración cargada desde Supabase:', config);
                     } catch (error) {
