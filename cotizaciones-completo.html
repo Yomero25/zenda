@@ -3167,11 +3167,16 @@
                 let htmlContent = emailTemplates.cotizacion.html;
                 let subject = emailTemplates.cotizacion.subject;
                 
+                console.log('📧 DEBUG: HTML antes del reemplazo:', htmlContent);
+                
                 Object.keys(templateData).forEach(key => {
                     const regex = new RegExp(`{${key}}`, 'g');
                     htmlContent = htmlContent.replace(regex, templateData[key]);
                     subject = subject.replace(regex, templateData[key]);
                 });
+                
+                console.log('📧 DEBUG: HTML después del reemplazo:', htmlContent);
+                console.log('📧 DEBUG: Enlace de aceptación:', enlaceAceptacion);
                 
                 // Enviar correo
                 const resultado = await enviarCorreoConServicio({
