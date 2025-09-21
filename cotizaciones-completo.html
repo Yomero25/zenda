@@ -2731,7 +2731,7 @@
                     try {
                         // Usar supabase directo (forzar fallback)
                         console.log('🔧 DEBUG: Cargando configuración directamente desde Supabase...');
-                        const { data, error } = await window.dataService.supabase
+                        const { data, error } = await supabase
                             .from('configuraciones_correo')
                             .select('*')
                             .eq('tipo', 'email')
