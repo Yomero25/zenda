@@ -2736,11 +2736,33 @@
                         console.log('🔧 DEBUG: window.supabase:', window.supabase);
                         const supabaseClient = window.dataService?.supabase || window.supabase;
                         console.log('🔧 DEBUG: supabaseClient seleccionado:', supabaseClient);
+                        console.log('🔧 DEBUG: Métodos disponibles en supabaseClient:', Object.keys(supabaseClient));
                         if (!supabaseClient) {
                             throw new Error('Cliente de Supabase no disponible');
                         }
                         if (typeof supabaseClient.from !== 'function') {
-                            throw new Error('Cliente de Supabase no tiene método .from()');
+                            console.log('🔧 DEBUG: supabaseClient no tiene .from(), buscando método alternativo...');
+                            // Intentar usar el método correcto
+                            if (typeof supabaseClient.client?.from === 'function') {
+                                console.log('🔧 DEBUG: Usando supabaseClient.client.from');
+                                const { data, error } = await supabaseClient.client
+                                    .from('configuraciones_correo')
+                                    .select('*')
+                                    .eq('tipo', 'email')
+                                    .eq('is_active', true)
+                                    .single();
+                                
+                                if (error) {
+                                    console.warn('Error cargando configuración de Supabase:', error);
+                                } else {
+                                    config = data;
+                                    console.log('🔧 DEBUG: Configuración cargada desde Supabase:', config);
+                                }
+                                console.log('📧 Configuración cargada desde Supabase:', config);
+                                return;
+                            } else {
+                                throw new Error('Cliente de Supabase no tiene método .from() ni .client.from()');
+                            }
                         }
                         const { data, error } = await supabaseClient
                             .from('configuraciones_correo')
