@@ -2731,12 +2731,8 @@
                     try {
                         // Usar supabase directo (forzar fallback)
                         console.log('🔧 DEBUG: Cargando configuración directamente desde Supabase...');
-                        console.log('🔧 DEBUG: window.dataService:', window.dataService);
-                        console.log('🔧 DEBUG: window.dataService?.supabase:', window.dataService?.supabase);
-                        console.log('🔧 DEBUG: window.supabase:', window.supabase);
                         const supabaseClient = window.dataService?.supabase || window.supabase;
-                        console.log('🔧 DEBUG: supabaseClient seleccionado:', supabaseClient);
-                        console.log('🔧 DEBUG: Métodos disponibles en supabaseClient:', Object.keys(supabaseClient));
+                        
                         if (!supabaseClient) {
                             throw new Error('Cliente de Supabase no disponible');
                         }
@@ -2754,6 +2750,7 @@
                         if (typeof actualClient.from !== 'function') {
                             throw new Error('Cliente de Supabase no tiene método .from()');
                         }
+                        
                         const { data, error } = await actualClient
                             .from('configuraciones_correo')
                             .select('*')
