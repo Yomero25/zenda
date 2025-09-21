@@ -2740,31 +2740,21 @@
                         if (!supabaseClient) {
                             throw new Error('Cliente de Supabase no disponible');
                         }
-                        if (typeof supabaseClient.from !== 'function') {
-                            console.log('🔧 DEBUG: supabaseClient no tiene .from(), buscando método alternativo...');
-                            // Intentar usar el método correcto
-                            if (typeof supabaseClient.client?.from === 'function') {
-                                console.log('🔧 DEBUG: Usando supabaseClient.client.from');
-                                const { data, error } = await supabaseClient.client
-                                    .from('configuraciones_correo')
-                                    .select('*')
-                                    .eq('tipo', 'email')
-                                    .eq('is_active', true)
-                                    .single();
-                                
-                                if (error) {
-                                    console.warn('Error cargando configuración de Supabase:', error);
-                                } else {
-                                    config = data;
-                                    console.log('🔧 DEBUG: Configuración cargada desde Supabase:', config);
-                                }
-                                console.log('📧 Configuración cargada desde Supabase:', config);
-                                return;
-                            } else {
-                                throw new Error('Cliente de Supabase no tiene método .from() ni .client.from()');
-                            }
+                        
+                        // Si es el módulo de Supabase, crear el cliente
+                        let actualClient = supabaseClient;
+                        if (typeof supabaseClient.createClient === 'function') {
+                            console.log('🔧 DEBUG: Creando cliente de Supabase con createClient...');
+                            actualClient = supabaseClient.createClient(
+                                'https://lsmhcpsvjcbduqovbatj.supabase.co',
+                                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzbWhjcHN2amNiZHVxb3ZiYXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMTM4MzgsImV4cCI6MjA3MjU4OTgzOH0.I7dEer-R2ZaiMvU-Hmve6Ms0wk82U1e7C67e8fYWIEw'
+                            );
                         }
-                        const { data, error } = await supabaseClient
+                        
+                        if (typeof actualClient.from !== 'function') {
+                            throw new Error('Cliente de Supabase no tiene método .from()');
+                        }
+                        const { data, error } = await actualClient
                             .from('configuraciones_correo')
                             .select('*')
                             .eq('tipo', 'email')
