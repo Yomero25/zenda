@@ -3286,18 +3286,22 @@
                     // Inicializar EmailJS con la Public Key
                     emailjs.init(emailConfig.emailjsPublicKey);
                     
-                    const result = await emailjs.send(
-                        emailConfig.emailjsServiceId,
-                        emailConfig.emailjsTemplateId,
-                        {
-                            to_email: Array.isArray(emailData.to) ? emailData.to.join(',') : emailData.to,
-                            cc_email: Array.isArray(emailData.cc) ? emailData.cc.join(',') : emailData.cc,
-                            subject: emailData.subject,
-                            html_content: emailData.html,
-                            from_name: emailConfig.fromName,
-                            from_email: emailConfig.fromEmail
-                        }
-                    );
+           const templateParams = {
+               to_email: Array.isArray(emailData.to) ? emailData.to.join(',') : emailData.to,
+               cc_email: Array.isArray(emailData.cc) ? emailData.cc.join(',') : emailData.cc,
+               subject: emailData.subject,
+               html_content: emailData.html,
+               from_name: emailConfig.fromName,
+               from_email: emailConfig.fromEmail
+           };
+           
+           console.log('📧 DEBUG: Parámetros enviados a EmailJS:', templateParams);
+           
+           const result = await emailjs.send(
+               emailConfig.emailjsServiceId,
+               emailConfig.emailjsTemplateId,
+               templateParams
+           );
                     console.log('📧 Correo enviado exitosamente via EmailJS:', result);
                     return { success: true, data: result };
                 }
