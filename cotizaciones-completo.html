@@ -2497,14 +2497,102 @@
             }
             
             if (confirm('¿Estás seguro de que quieres restaurar la plantilla original? Se perderán todos los cambios.')) {
-                // Eliminar plantilla personalizada de localStorage
-                const plantillasGuardadas = JSON.parse(localStorage.getItem('emailTemplates') || '{}');
-                delete plantillasGuardadas[tipoPlantilla];
-                localStorage.setItem('emailTemplates', JSON.stringify(plantillasGuardadas));
+                // Plantilla original con botón de aceptación
+                const plantillaOriginal = {
+                    cotizacion: {
+                        subject: 'Cotización #{numero} - {empresa}',
+                        html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #fb930c, #e67e22); color: white; padding: 20px; text-align: center;">
+                        <h1 style="margin: 0;">Cotización #{numero}</h1>
+                        <p style="margin: 5px 0;">Sistema de Cotizaciones</p>
+                    </div>
+                    
+                    <div style="padding: 20px; background: #f8f9fa;">
+                        <h2 style="color: #fb930c;">Datos del Cliente</h2>
+                        <p><strong>Empresa:</strong> {empresa}</p>
+                        <p><strong>Contacto:</strong> {contacto}</p>
+                        <p><strong>Email:</strong> {email}</p>
+                        <p><strong>Teléfono:</strong> {telefono}</p>
+                    </div>
+                    
+                    <div style="padding: 20px;">
+                        <h2 style="color: #fb930c;">Resumen de la Cotización</h2>
+                        <p><strong>Fecha:</strong> {fecha}</p>
+                        <p><strong>Validez:</strong> {validez}</p>
+                        <p><strong>Total de Unidades:</strong> {unidades}</p>
+                        
+                        <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin: 0 0 10px 0; color: #2c3e50;">Total de la Cotización</h3>
+                            <p style="font-size: 24px; font-weight: bold; color: #fb930c; margin: 0;">{total}</p>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <h3 style="color: #fb930c;">Equipos y Servicios</h3>
+                            {equipos_servicios}
+                        </div>
+                        
+                        {mensaje_personalizado}
+                    </div>
+                    
+                    <!-- Botón de Aceptación -->
+                    <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <h3 style="color: #28a745; margin-bottom: 15px;">¿Acepta esta cotización?</h3>
+                        <p style="color: #666; margin-bottom: 20px;">Haga clic en el siguiente botón para aceptar formalmente esta cotización:</p>
+                        <a href="{enlace_aceptacion}" 
+                           style="background: linear-gradient(135deg, #28a745, #20c997); 
+                                  color: white; 
+                                  padding: 15px 40px; 
+                                  text-decoration: none; 
+                                  border-radius: 50px; 
+                                  font-weight: bold; 
+                                  font-size: 16px;
+                                  display: inline-block;
+                                  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                                  transition: all 0.3s ease;">
+                            ✅ ACEPTAR COTIZACIÓN
+                        </a>
+                        <p style="color: #999; font-size: 12px; margin-top: 15px;">
+                            Este enlace expira en 15 días. Al aceptar, recibirá una confirmación inmediata.
+                        </p>
+                    </div>
+                    
+                    <div style="background: #2c3e50; color: white; padding: 15px; text-align: center;">
+                        <p style="margin: 0;">Gracias por confiar en nosotros</p>
+                        <p style="margin: 5px 0; font-size: 12px;">Para cualquier consulta, responda a este correo</p>
+                    </div>
+                </div>
+                `
+                    }
+                };
                 
-                // Recargar plantilla original
-                cargarPlantilla();
-                mostrarAlerta('Plantilla restaurada a su versión original', 'success');
+                // Actualizar plantilla en memoria
+                if (plantillaOriginal[tipoPlantilla]) {
+                    emailTemplates[tipoPlantilla] = plantillaOriginal[tipoPlantilla];
+                    
+                    // Guardar en Supabase si está disponible
+                    if (modoCentralizado && window.dataService) {
+                        window.dataService.guardarPlantillaCorreo(tipoPlantilla, plantillaOriginal[tipoPlantilla].subject, plantillaOriginal[tipoPlantilla].html)
+                        .then(() => {
+                            mostrarAlerta('Plantilla restaurada y guardada en Supabase', 'success');
+                            cargarPlantilla();
+                        })
+                        .catch(error => {
+                            console.error('Error guardando plantilla en Supabase:', error);
+                            // Fallback a localStorage
+                            localStorage.setItem('emailTemplates', JSON.stringify(emailTemplates));
+                            mostrarAlerta('Plantilla restaurada localmente', 'warning');
+                            cargarPlantilla();
+                        });
+                    } else {
+                        // Fallback a localStorage
+                        localStorage.setItem('emailTemplates', JSON.stringify(emailTemplates));
+                        mostrarAlerta('Plantilla restaurada localmente', 'success');
+                        cargarPlantilla();
+                    }
+                } else {
+                    mostrarAlerta('No hay plantilla original disponible para este tipo', 'warning');
+                }
             }
         }
         
@@ -3163,78 +3251,11 @@
                     enlace_aceptacion: enlaceAceptacion
                 };
                 
-                // FORZAR uso de plantilla original con botón de aceptación
-                const plantillaOriginal = {
-                    subject: 'Cotización #{numero} - {empresa}',
-                    html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <div style="background: linear-gradient(135deg, #fb930c, #e67e22); color: white; padding: 20px; text-align: center;">
-                        <h1 style="margin: 0;">Cotización #{numero}</h1>
-                        <p style="margin: 5px 0;">Sistema de Cotizaciones</p>
-                    </div>
-                    
-                    <div style="padding: 20px; background: #f8f9fa;">
-                        <h2 style="color: #fb930c;">Datos del Cliente</h2>
-                        <p><strong>Empresa:</strong> {empresa}</p>
-                        <p><strong>Contacto:</strong> {contacto}</p>
-                        <p><strong>Email:</strong> {email}</p>
-                        <p><strong>Teléfono:</strong> {telefono}</p>
-                    </div>
-                    
-                    <div style="padding: 20px;">
-                        <h2 style="color: #fb930c;">Resumen de la Cotización</h2>
-                        <p><strong>Fecha:</strong> {fecha}</p>
-                        <p><strong>Validez:</strong> {validez}</p>
-                        <p><strong>Total de Unidades:</strong> {unidades}</p>
-                        
-                        <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                            <h3 style="margin: 0 0 10px 0; color: #2c3e50;">Total de la Cotización</h3>
-                            <p style="font-size: 24px; font-weight: bold; color: #fb930c; margin: 0;">{total}</p>
-                        </div>
-                        
-                        <div style="margin: 20px 0;">
-                            <h3 style="color: #fb930c;">Equipos y Servicios</h3>
-                            {equipos_servicios}
-                        </div>
-                        
-                        {mensaje_personalizado}
-                    </div>
-                    
-                    <!-- Botón de Aceptación -->
-                    <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                        <h3 style="color: #28a745; margin-bottom: 15px;">¿Acepta esta cotización?</h3>
-                        <p style="color: #666; margin-bottom: 20px;">Haga clic en el siguiente botón para aceptar formalmente esta cotización:</p>
-                        <a href="{enlace_aceptacion}" 
-                           style="background: linear-gradient(135deg, #28a745, #20c997); 
-                                  color: white; 
-                                  padding: 15px 40px; 
-                                  text-decoration: none; 
-                                  border-radius: 50px; 
-                                  font-weight: bold; 
-                                  font-size: 16px;
-                                  display: inline-block;
-                                  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-                                  transition: all 0.3s ease;">
-                            ✅ ACEPTAR COTIZACIÓN
-                        </a>
-                        <p style="color: #999; font-size: 12px; margin-top: 15px;">
-                            Este enlace expira en 15 días. Al aceptar, recibirá una confirmación inmediata.
-                        </p>
-                    </div>
-                    
-                    <div style="background: #2c3e50; color: white; padding: 15px; text-align: center;">
-                        <p style="margin: 0;">Gracias por confiar en nosotros</p>
-                        <p style="margin: 5px 0; font-size: 12px;">Para cualquier consulta, responda a este correo</p>
-                    </div>
-                </div>
-                `
-                };
+                // Reemplazar placeholders en el template
+                let htmlContent = emailTemplates.cotizacion.html;
+                let subject = emailTemplates.cotizacion.subject;
                 
-                // Usar plantilla original con botón de aceptación
-                let htmlContent = plantillaOriginal.html;
-                let subject = plantillaOriginal.subject;
-                
-                console.log('📧 DEBUG: Usando PLANTILLA ORIGINAL con botón de aceptación');
+                console.log('📧 DEBUG: Plantilla cargada desde:', emailTemplates.cotizacion.html.includes('ACEPTAR COTIZACIÓN') ? 'PLANTILLA ORIGINAL' : 'PLANTILLA PERSONALIZADA');
                 console.log('📧 DEBUG: HTML antes del reemplazo:', htmlContent);
                 
                 Object.keys(templateData).forEach(key => {
