@@ -3167,6 +3167,7 @@
                 let htmlContent = emailTemplates.cotizacion.html;
                 let subject = emailTemplates.cotizacion.subject;
                 
+                console.log('📧 DEBUG: Plantilla cargada desde:', emailTemplates.cotizacion.html.includes('ACEPTAR COTIZACIÓN') ? 'PLANTILLA ORIGINAL' : 'PLANTILLA PERSONALIZADA');
                 console.log('📧 DEBUG: HTML antes del reemplazo:', htmlContent);
                 
                 Object.keys(templateData).forEach(key => {
