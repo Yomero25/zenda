@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZendA - Workflow Manager | Administrar Precios v3.0 - CORREGIDO</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .dashboard-card h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .dashboard-card p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .bg-gradient-purple { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        .bg-gradient-blue { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        .bg-gradient-green { background: linear-gradient(135deg, #fb930c 0%, #f39c12 100%); }
+        .bg-gradient-orange { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .sidebar .btn {
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .precio-input {
+            width: 120px;
+        }
+        .currency-symbol {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 sidebar">
+                <div class="text-center mb-4">
+                    <img src="./ZENDA.svg?v=2" alt="ZendA - Workflow Manager" height="60" class="mb-3">
+                    <h3 class="text-white">
+                        <i class="bi bi-currency-dollar"></i> Panel de Precios
+                    </h3>
+                </div>
+                
+                <button class="btn btn-success" onclick="agregarNuevoPrecio()">
+                    <i class="bi bi-plus-circle"></i> Nuevo Precio
+                </button>
+                
+                <button class="btn btn-info" onclick="importarElementosLote()">
+                    <i class="bi bi-upload"></i> Importar CSV
+                </button>
+                
+                <button class="btn btn-warning" onclick="console.log('🔄 DEBUG: Botón Servicios de Datos clickeado'); mostrarServicios();">
+                    <i class="bi bi-cloud"></i> Servicios de Datos
+                </button>
+                
+                <button class="btn btn-secondary" onclick="mostrarPrecios()">
+                    <i class="bi bi-currency-dollar"></i> Precios
+                </button>
+                
+            </div>
+            
+            <div class="col-md-9">
+                <nav class="navbar navbar-dark bg-dark">
+                    <div class="container-fluid">
+                        <div class="d-flex align-items-center">
+                            <img src="ZENDA.svg?v=2" alt="Logo Empresa" height="40" class="me-3">
+                            <span class="navbar-brand mb-0 h1">
+                                <i class="bi bi-currency-dollar"></i> Administrador de Precios
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="./cotizaciones-completo.html" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-arrow-left"></i> Principal
+                            </a>
+                            <button class="btn btn-outline-light btn-sm" id="btnLogout">
+                                <i class="bi bi-box-arrow-right"></i> Salir
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Sección de Servicios de Datos -->
+                <div id="seccionServicios" class="container-fluid mt-4" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-orange">
+                                <h2 id="totalServicios">0</h2>
+                                <p>Servicios Configurados</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="serviciosActivos">0</h2>
+                                <p>Servicios Activos</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-blue">
+                                <h2 id="serviciosMensuales">0</h2>
+                                <p>Servicios Mensuales</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-purple">
+                                <h2 id="serviciosAnuales">0</h2>
+                                <p>Servicios Anuales</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="filtroServicio" class="form-label">Buscar Servicio:</label>
+                                <input type="text" class="form-control" id="filtroServicio" placeholder="Nombre del servicio..." onkeyup="aplicarFiltrosServicios()">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroTipoServicio" class="form-label">Tipo de Periodicidad:</label>
+                                <select class="form-select" id="filtroTipoServicio" onchange="aplicarFiltrosServicios()">
+                                    <option value="">Todos</option>
+                                    <option value="mensual">Mensual</option>
+                                    <option value="semestral">Semestral</option>
+                                    <option value="anual">Anual</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroEstadoServicio" class="form-label">Estado:</label>
+                                <select class="form-select" id="filtroEstadoServicio" onchange="aplicarFiltrosServicios()">
+                                    <option value="">Todos</option>
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-success" onclick="agregarNuevoServicio()">
+                                    <i class="bi bi-plus-circle"></i> Nuevo Servicio
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th>Descripción</th>
+                                    <th>Periodicidad</th>
+                                    <th>Precio Mensual</th>
+                                    <th>Precio Semestral</th>
+                                    <th>Precio Anual</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaServicios">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="seccionPrecios" class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-purple">
+                                <h2 id="totalElementos">0</h2>
+                                <p>Elementos con Precio</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-blue">
+                                <h2 id="promedioPrecios">$0</h2>
+                                <p>Precio Promedio</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="totalCategorias">0</h2>
+                                <p>Categorías</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-orange">
+                                <h2 id="sinPrecio">0</h2>
+                                <p>Sin Precio</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h5><i class="bi bi-funnel"></i> Filtros</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="filtroCategoria" class="form-label">Categoría:</label>
+                                <select class="form-select" id="filtroCategoria" onchange="aplicarFiltros()">
+                                    <option value="">Todas</option>
+                                    <option value="insumos">Insumos</option>
+                                    <option value="accesorios">Accesorios</option>
+                                    <option value="equipos">Equipos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroEstado" class="form-label">Estado:</label>
+                                <select class="form-select" id="filtroEstado" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="con-precio">Con Precio</option>
+                                    <option value="sin-precio">Sin Precio</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroRango" class="form-label">Rango de Precio:</label>
+                                <select class="form-select" id="filtroRango" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="0-100">$0 - $100</option>
+                                    <option value="100-500">$100 - $500</option>
+                                    <option value="500-1000">$500 - $1,000</option>
+                                    <option value="1000+">$1,000+</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroNombre" class="form-label">Buscar Elemento:</label>
+                                <input type="text" class="form-control" id="filtroNombre" placeholder="Escriba para buscar..." onkeyup="aplicarFiltros()">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()">
+                                    <i class="bi bi-x-circle"></i> Limpiar Filtros
+                                </button>
+                                <span class="badge bg-info ms-2" id="resultadosFiltro">Mostrando todos los elementos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header text-white" style="background: linear-gradient(135deg, #fb930c, #e67e22);">
+                            <h4><i class="bi bi-currency-dollar"></i> Lista de Precios</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th>Elemento</th>
+                                            <th>Categoría</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Última Actualización</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaPrecios">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalEditarPrecio" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Precio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editElemento" class="form-label">Elemento:</label>
+                        <input type="text" class="form-control" id="editElemento" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCategoria" class="form-label">Categoría:</label>
+                        <select class="form-control" id="editCategoria">
+                            <option value="insumos">Insumos</option>
+                            <option value="accesorios">Accesorios</option>
+                            <option value="equipos">Equipos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPrecio" class="form-label">Precio Unitario:</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="editPrecio" step="0.01" min="0">
+                            <span class="input-group-text">MXN</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarEdicionPrecio()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalActualizacionLote" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Actualización de Precios en Lote</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="loteCategoria" class="form-label">Categoría a Actualizar:</label>
+                        <select class="form-control" id="loteCategoria">
+                            <option value="">Todas las categorías</option>
+                            <option value="insumos">Solo Insumos</option>
+                            <option value="accesorios">Solo Accesorios</option>
+                            <option value="equipos">Solo Equipos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loteTipo" class="form-label">Tipo de Actualización:</label>
+                        <select class="form-control" id="loteTipo">
+                            <option value="porcentaje">Incremento/Descuento por Porcentaje</option>
+                            <option value="fijo">Incremento/Descuento Fijo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loteValor" class="form-label">Valor:</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="loteValor" step="0.01">
+                            <span class="input-group-text" id="loteUnidad">%</span>
+                        </div>
+                        <div class="form-text">Usar valores negativos para descuentos</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" onclick="aplicarActualizacionLote()">Aplicar Actualización</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./dataService.js"></script>
+    <script src="./accessGuard.js"></script>
+
+    <script>
+        (async function(){
+            const ok = await window.accessGuard.ensureAuth(['admin','precios']);
+            if (!ok) return;
+        })();
+        document.addEventListener('DOMContentLoaded', function(){
+            const logoutBtn = document.getElementById('btnLogout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try { await window.dataService.authSignOut(); } catch(_){}
+                    window.location.href = './login.html';
+                });
+            }
+        });
+        // ===== VARIABLES GLOBALES =====
+        const modoCentralizado = (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase());
+        let preciosElementos = {};
+        let elementoEditando = null;
+        let datosFiltrados = [];
+
+        // Categorización de elementos (desde el almacén)
+        const categoriasElementos = {
+            'insumos': [
+                'Cable 4 pin 1 m', 'Cable 4 pin 3 m', 'Cable 4 pin 5 m', 'Cable 4 pin 7 m',
+                'Cable 4 pin 15 m', 'Cable 4 pin 30 m', 'Cable 6 pin 5 m', 'Cable 2 vias', 'Cable 4 vias',
+                '"Y" 4 pines', 'Base Pollak', 'Pollak Macho ', 'Pollak Hembra', 'Cable de 1 polo',
+                'Terminal de ojillo', '7 vias liso 2m', 'Silicon', 'Cinchos grande', 'Cinta de tela', 'Cinta de aislar',
+                'Poliflex 3/8', 'Poliflex 1/4', 'Cincho mediado', 'Cincho con grapa',
+                'Pija brocante 5/16', 'Tornillo hexagonal 5/16', 'Tornillo 3/8',
+                'Tuerca 5/16', 'Tuerca 3/8', 'Rondana 5/16', 'Rondana 3/8',
+                'Espiral negro', 'Espiral verde', 'Relevador 2 pasos 2 tiros', 'Relevador 12v', 'Relevador 24v', 'Portarelevador',
+                'placa perforada', 'Gabinete 5*7*3', 'SD 128 Gb', 'SD 256 Gb', 'SD 512 Gb'
+            ],
+            'accesorios': [
+                'Alarma parlante de 3 tonos', 'Alarma parlante programable', 'Bocina', 'Microfono',
+                'Botón balancin', 'Boton de panico', 'Camara + radar', 'Camara con microfono', 'Camara de reversa', 'Camara Digital (IP)',
+                'Camara exterior mini', 'Camara lateral derecha de VPC', 'Camara lateral izquierda de VPC',
+                'Camara sideview derecho', 'Camara sideview izquierdo', 'Camara tipo clavo',
+                'Sensor magnetico chico', 'Sensor magnetico grande', 'Led de giro a la derecha', 'Led de giro a la izquierda',
+                'Sensor derecho VPC', 'Sensor izquierda VPC', 'Sideview derecho', 'Sideview izquierdo',
+                'Camara frontal', 'Camara izquierda', 'Camara derecha'
+            ],
+            'equipos': [
+                'Dashcam ad2', 'Dashcam c6', 'GV310LAU', 'GV58LAU', 'GV75LAU', 'SMOC', 
+                'MDVR 4 Ch', 'MDVR 8 Ch', 'Insider', 'Modulo sensor de cinturon seguridad', 
+                'Limitador de velocidad', 'Monitor de VPC', 'Grabador de video 4 ch'
+            ]
+        };
+
+        // Función para obtener la categoría de un elemento
+        function obtenerCategoria(elemento) {
+            for (const [categoria, elementos] of Object.entries(categoriasElementos)) {
+                if (elementos.includes(elemento)) {
+                    return categoria;
+                }
+            }
+            return 'insumos'; // Por defecto
+        }
+
+        // Función para obtener todos los elementos únicos
+        function obtenerTodosLosElementos() {
+            const todos = [];
+            Object.values(categoriasElementos).forEach(elementos => {
+                todos.push(...elementos);
+            });
+            return [...new Set(todos)];
+        }
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔄 Inicializando administrador de precios...');
+            try {
+                if (modoCentralizado) {
+                    await cargarPreciosDesdeSupabase();
+                    suscribirRealtimePrecios();
+                } else {
+                    cargarPreciosDesdeStorage();
+                    inicializarPreciosDefecto();
+                }
+                cargarTablaPrecios();
+                actualizarEstadisticas();
+                configurarEventos();
+                console.log('✅ Administrador de precios iniciado');
+            } catch (e) {
+                console.error('❌ Error inicializando precios:', e);
+                mostrarAlerta('Error inicializando precios', 'danger');
+            }
+        });
+
+        // Función para actualizar estadísticas
+        function actualizarEstadisticas() {
+            console.log('🔄 Actualizando estadísticas...');
+            const totalElementos = Object.keys(preciosElementos).length;
+            const elementosConPrecio = Object.values(preciosElementos).filter(e => e.precio > 0).length;
+            const elementosSinPrecio = totalElementos - elementosConPrecio;
+            const precioPromedio = elementosConPrecio > 0 ? 
+                Object.values(preciosElementos).reduce((sum, e) => sum + (e.precio || 0), 0) / elementosConPrecio : 0;
+            
+            // Actualizar contadores en la UI
+            const contadores = document.querySelectorAll('.dashboard-card h2');
+            if (contadores[0]) contadores[0].textContent = elementosConPrecio;
+            if (contadores[1]) contadores[1].textContent = `$${precioPromedio.toFixed(0)}`;
+            if (contadores[2]) contadores[2].textContent = Object.keys(preciosElementos).length;
+            if (contadores[3]) contadores[3].textContent = elementosSinPrecio;
+            
+            console.log('✅ Estadísticas actualizadas:', { totalElementos, elementosConPrecio, elementosSinPrecio, precioPromedio });
+        }
+
+        // Función para cargar la tabla de precios - VERSIÓN FUNCIONAL v3.0
+        function cargarTablaPrecios() {
+            console.log('🔄 Cargando tabla de precios...');
+            console.log('preciosElementos:', preciosElementos);
+            console.log('Total elementos en preciosElementos:', Object.keys(preciosElementos).length);
+            console.log('🚀 VERSIÓN 3.0 - CON BOTÓN ELIMINAR Y SIN BOTÓN $');
+            
+            const tbody = document.getElementById('tablaPrecios');
+            if (!tbody) {
+                console.error('❌ No se encontró tbody con id="tablaPrecios"');
+                return;
+            }
+
+            // Limpiar tabla
+            tbody.innerHTML = '';
+            console.log('🧹 Tabla limpiada');
+
+            // Procesar cada elemento (ordenamiento alfabético case-insensitive)
+            const elementos = Object.keys(preciosElementos).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            console.log('📋 Elementos a procesar:', elementos.length);
+            
+            elementos.forEach((elemento, index) => {
+                const datos = preciosElementos[elemento];
+                console.log(`Procesando elemento ${index + 1}/${elementos.length}: ${elemento}`, datos);
+                
+                const precio = datos.precio || 0;
+                const categoria = datos.categoria || 'insumos';
+                const fechaActualizacion = datos.fecha_actualizacion || datos.ultimaActualizacion || 'N/A';
+                
+                // Determinar color del badge según categoría
+                let badgeClass = 'bg-secondary';
+                if (categoria.toLowerCase() === 'equipo' || categoria.toLowerCase() === 'equipos') badgeClass = 'bg-success';
+                else if (categoria.toLowerCase() === 'accesorio' || categoria.toLowerCase() === 'accesorios') badgeClass = 'bg-primary';
+                else if (categoria.toLowerCase() === 'insumo' || categoria.toLowerCase() === 'insumos') badgeClass = 'bg-secondary';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${elemento}</strong></td>
+                    <td><span class="badge ${badgeClass}">${categoria}</span></td>
+                    <td class="currency-symbol">$${precio.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                    <td><small class="text-muted">${fechaActualizacion}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" onclick="editarPrecio('${elemento.replace(/'/g, "\\'")}')" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarPrecio('${elemento.replace(/'/g, "\\'")}')" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log('✅ Tabla cargada exitosamente con', elementos.length, 'elementos');
+        }
+
+        // Variable global para almacenar el elemento a eliminar
+        let elementoAEliminar = null;
+
+        // Función para eliminar un precio
+        function eliminarPrecio(elemento) {
+            elementoAEliminar = elemento;
+            document.getElementById('elementoAEliminar').textContent = elemento;
+            new bootstrap.Modal(document.getElementById('modalConfirmarEliminar')).show();
+        }
+
+        // Función para confirmar eliminación
+        async function confirmarEliminacion() {
+            if (elementoAEliminar) {
+                console.log('🗑️ Eliminando elemento:', elementoAEliminar);
+                
+                try {
+                    // Eliminar de Supabase PRIMERO
+                    if (window.dataService && window.dataService.deletePrecioElementoByNombre) {
+                        console.log('📡 Eliminando de Supabase:', elementoAEliminar);
+                        console.log('🔍 dataService disponible:', !!window.dataService);
+                        console.log('🔍 deletePrecioElementoByNombre disponible:', !!window.dataService.deletePrecioElementoByNombre);
+                        
+                        const resultado = await window.dataService.deletePrecioElementoByNombre(elementoAEliminar);
+                        console.log('📊 Resultado de eliminación:', resultado);
+                        
+                        if (resultado) {
+                            console.log('✅ Eliminado de Supabase correctamente');
+                        } else {
+                            console.error('❌ Error al eliminar de Supabase - resultado false');
+                            throw new Error('No se pudo eliminar de Supabase');
+                        }
+                    } else {
+                        console.error('❌ dataService o deletePrecioElementoByNombre no disponible');
+                        throw new Error('Servicio de datos no disponible');
+                    }
+                    
+                    // Solo después eliminar de memoria local
+                    delete preciosElementos[elementoAEliminar];
+                    
+                    // Guardar en localStorage
+                    localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                    
+                    // Recargar tabla
+                    cargarTablaPrecios();
+                    actualizarEstadisticas();
+                    
+                    console.log('✅ Elemento eliminado completamente:', elementoAEliminar);
+                    
+                    // Cerrar modal
+                    bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
+                    elementoAEliminar = null;
+                    
+                } catch (error) {
+                    console.error('❌ Error al eliminar elemento:', error);
+                    alert('Error al eliminar el elemento. Por favor, inténtelo de nuevo.');
+                }
+            }
+        }
+
+        // Función para restaurar precios si se perdieron
+        async function restaurarPrecios() {
+            console.log('🔄 Restaurando precios...');
+            preciosElementos = {};
+            inicializarPreciosDefecto();
+            try {
+                if (modoCentralizado) {
+                    const tareas = [];
+                    for (const [nombre, datos] of Object.entries(preciosElementos)) {
+                        tareas.push(window.dataService.upsertPrecioElementoByNombre(nombre, {
+                            nombre,
+                            precio: datos.precio || 0,
+                            categoria: datos.categoria || obtenerCategoria(nombre),
+                            ultimaActualizacion: datos.ultimaActualizacion || new Date().toISOString().split('T')[0],
+                        }));
+                    }
+                    for (let i = 0; i < tareas.length; i += 50) {
+                        const slice = tareas.slice(i, i + 50);
+                        // eslint-disable-next-line no-await-in-loop
+                        await Promise.all(slice);
+                    }
+                    console.log('✅ Precios restaurados en Supabase');
+                }
+            } catch (e) {
+                console.warn('⚠️ No se pudieron sincronizar precios a Supabase en restauración', e);
+            }
+            cargarTablaPrecios();
+            actualizarEstadisticas();
+            console.log('✅ Precios restaurados');
+        }
+
+        // Función para limpiar elementos vacíos
+        function limpiarElementosVacios() {
+            console.log('🧹 Limpiando elementos vacíos...');
+            const elementosVacios = Object.keys(preciosElementos).filter(key => !key || key.trim() === '');
+            
+            if (elementosVacios.length > 0) {
+                console.log('🗑️ Eliminando elementos vacíos:', elementosVacios);
+                elementosVacios.forEach(key => {
+                    delete preciosElementos[key];
+                });
+                
+                // Guardar cambios
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                cargarTablaPrecios();
+                actualizarEstadisticas();
+                console.log('✅ Elementos vacíos eliminados');
+                mostrarAlerta(`${elementosVacios.length} elementos vacíos eliminados`, 'success');
+            } else {
+                console.log('✅ No hay elementos vacíos');
+                mostrarAlerta('No hay elementos vacíos para limpiar', 'info');
+            }
+        }
+
+        function configurarEventos() {
+            // Cambiar unidad según tipo de actualización
+            document.getElementById('loteTipo').addEventListener('change', function() {
+                const unidad = this.value === 'porcentaje' ? '%' : '$';
+                document.getElementById('loteUnidad').textContent = unidad;
+            });
+        }
+
+        async function cargarPreciosDesdeSupabase() {
+            try {
+                const filas = await window.dataService.fetchPreciosElementos();
+                const mapa = {};
+                (filas || []).forEach(f => {
+                    const nombre = f.nombre || f.elemento || f.id;
+                    if (!nombre) return;
+                    mapa[nombre] = {
+                        precio: typeof f.precio === 'number' ? f.precio : (f.precio ? Number(f.precio) : 0),
+                        categoria: f.categoria || obtenerCategoria(nombre),
+                        ultimaActualizacion: f.ultimaActualizacion || f.ultima_actualizacion || new Date().toISOString().split('T')[0],
+                    };
+                });
+                preciosElementos = mapa;
+                console.log(`✅ Supabase: ${Object.keys(preciosElementos).length} precios`);
+
+                // Si no hay datos en Supabase, intentar migrar desde localStorage SIEMPRE
+                if (Object.keys(preciosElementos).length === 0) {
+                    console.log('ℹ️ Supabase precios vacío. Intentando migrar desde localStorage/defecto...');
+                    let origen = null;
+                    const preciosGuardados = localStorage.getItem('precios_elementos');
+                    if (preciosGuardados) {
+                        try { origen = JSON.parse(preciosGuardados); } catch {}
+                    }
+                    if (!origen) {
+                        // generar por defecto para migrar
+                        preciosElementos = {};
+                        inicializarPreciosDefecto();
+                        origen = preciosElementos;
+                    }
+                    if (origen) {
+                        await migrarPreciosLocalASupabase(origen);
+                        return cargarPreciosDesdeSupabase();
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Error cargando precios desde Supabase:', e);
+                mostrarAlerta('No se pudo cargar precios desde Supabase', 'danger');
+            }
+        }
+
+        async function migrarPreciosLocalASupabase(mapa) {
+            try {
+                const tareas = [];
+                for (const [nombre, datos] of Object.entries(mapa)) {
+                    const payload = {
+                        nombre,
+                        precio: typeof datos.precio === 'number' ? datos.precio : (datos.precio ? Number(datos.precio) : 0),
+                        categoria: datos.categoria || obtenerCategoria(nombre),
+                        ultimaActualizacion: datos.ultimaActualizacion || new Date().toISOString().split('T')[0],
+                    };
+                    tareas.push(window.dataService.upsertPrecioElementoByNombre(nombre, payload));
+                }
+                for (let i = 0; i < tareas.length; i += 50) {
+                    const slice = tareas.slice(i, i + 50);
+                    // eslint-disable-next-line no-await-in-loop
+                    await Promise.all(slice);
+                }
+                console.log(`✅ Migración de precios completada: ${tareas.length} elementos`);
+                mostrarAlerta('Precios migrados a Supabase', 'success');
+            } catch (e) {
+                console.error('❌ Error migrando precios a Supabase:', e);
+                mostrarAlerta('Error migrando precios a Supabase', 'danger');
+            }
+        }
+
+        function cargarPreciosDesdeStorage() {
+            const preciosGuardados = localStorage.getItem('precios_elementos');
+            if (preciosGuardados) {
+                try {
+                    preciosElementos = JSON.parse(preciosGuardados);
+                    console.log('✅ Precios cargados desde localStorage');
+                } catch (error) {
+                    console.error('❌ Error parseando precios de localStorage:', error);
+                }
+            }
+        }
+
+        function inicializarPreciosDefecto() {
+            // Precios estimados realistas en pesos mexicanos
+            const preciosEstimados = {
+                // INSUMOS - Cables y conectores
+                'Cable 4 pin 1 m': 25,
+                'Cable 4 pin 3 m': 65,
+                'Cable 4 pin 5 m': 95,
+                'Cable 4 pin 7 m': 125,
+                'Cable 4 pin 15 m': 245,
+                'Cable 4 pin 30 m': 485,
+                'Cable 6 pin 5 m': 115,
+                'Cable 2 vias': 18,
+                'Cable 4 vias': 32,
+                '"Y" 4 pines': 45,
+                'Base Pollak': 85,
+                'Pollak Macho ': 65,
+                'Pollak Hembra': 65,
+                'Cable de 1 polo': 12,
+                'Terminal de ojillo': 8,
+                '7 vias liso 2m': 185,
+                
+                // INSUMOS - Materiales básicos
+                'Silicon': 35,
+                'Cinchos grande': 3,
+                'Cinta de tela': 25,
+                'Cinta de aislar': 18,
+                'Poliflex 3/8': 4,
+                'Poliflex 1/4': 3,
+                'Cincho mediado': 2,
+                'Cincho con grapa': 4,
+                'Pija brocante 5/16': 2,
+                'Tornillo hexagonal 5/16': 3,
+                'Tornillo 3/8': 4,
+                'Tuerca 5/16': 2,
+                'Tuerca 3/8': 3,
+                'Rondana 5/16': 1,
+                'Rondana 3/8': 1,
+                'Espiral negro': 25,
+                'Espiral verde': 25,
+                
+                // INSUMOS - Componentes electrónicos
+                'Relevador 2 pasos 2 tiros': 125,
+                'Relevador 12v': 85,
+                'Relevador 24v': 95,
+                'Portarelevador': 35,
+                'placa perforada': 45,
+                'Gabinete 5*7*3': 185,
+                
+                // INSUMOS - Almacenamiento
+                'SD 128 Gb': 485,
+                'SD 256 Gb': 785,
+                'SD 512 Gb': 1285,
+                
+                // ACCESORIOS - Alarmas y audio
+                'Alarma parlante de 3 tonos': 385,
+                'Alarma parlante programable': 685,
+                'Bocina': 185,
+                'Microfono': 285,
+                'Botón balancin': 125,
+                'Boton de panico': 185,
+                
+                // ACCESORIOS - Cámaras
+                'Camara + radar': 1285,
+                'Camara con microfono': 885,
+                'Camara de reversa': 485,
+                'Camara Digital (IP)': 985,
+                'Camara exterior mini': 585,
+                'Camara lateral derecha de VPC': 685,
+                'Camara lateral izquierda de VPC': 685,
+                'Camara sideview derecho': 785,
+                'Camara sideview izquierdo': 785,
+                'Camara tipo clavo': 385,
+                
+                // ACCESORIOS - Sensores
+                'Sensor magnetico chico': 185,
+                'Sensor magnetico grande': 285,
+                'Led de giro a la derecha': 125,
+                'Led de giro a la izquierda': 125,
+                'Sensor derecho VPC': 385,
+                'Sensor izquierda VPC': 385,
+                'Sideview derecho': 485,
+                'Sideview izquierdo': 485,
+                
+                // EQUIPOS
+                'Dashcam ad2': 2485,
+                'Dashcam c6': 1885,
+                'Insider': 1585,
+                'Limitador de velocidad': 1285,
+                'Modulo sensor de cinturon seguridad': 985,
+                'Monitor de VPC': 2885,
+                'Grabador de video 4 ch': 3285
+            };
+            
+            const todosElementos = obtenerTodosLosElementos();
+            
+            todosElementos.forEach(elemento => {
+                if (!preciosElementos[elemento]) {
+                    preciosElementos[elemento] = {
+                        precio: preciosEstimados[elemento] || 0,
+                        categoria: obtenerCategoria(elemento),
+                        ultimaActualizacion: new Date().toISOString().split('T')[0]
+                    };
+                }
+            });
+            
+            // Guardar los precios inicializados en localStorage
+            localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+            console.log('💾 Precios por defecto guardados en localStorage');
+        }
+
+        // Función duplicada eliminada - usando la versión principal
+
+        function actualizarEstadisticas() {
+            const elementos = Object.keys(preciosElementos);
+            const conPrecio = elementos.filter(e => preciosElementos[e].precio > 0);
+            const sinPrecio = elementos.filter(e => preciosElementos[e].precio === 0);
+            
+            const totalPrecios = conPrecio.reduce((sum, e) => sum + preciosElementos[e].precio, 0);
+            const promedio = conPrecio.length > 0 ? totalPrecios / conPrecio.length : 0;
+
+            const categorias = new Set(elementos.map(e => preciosElementos[e].categoria));
+
+            document.getElementById('totalElementos').textContent = conPrecio.length;
+            document.getElementById('promedioPrecios').textContent = `$${promedio.toLocaleString('es-MX', {minimumFractionDigits: 0})}`;
+            document.getElementById('totalCategorias').textContent = categorias.size;
+            document.getElementById('sinPrecio').textContent = sinPrecio.length;
+        }
+
+        function editarPrecio(elemento) {
+            // Validar que el elemento no esté vacío
+            if (!elemento || elemento.trim() === '') {
+                console.error('❌ Error: Elemento vacío, no se puede editar');
+                mostrarAlerta('Error: No se puede editar un elemento sin nombre', 'danger');
+                return;
+            }
+            
+            elementoEditando = elemento;
+            const datos = preciosElementos[elemento];
+            
+            // Si el elemento no existe, inicializarlo
+            if (!datos) {
+                preciosElementos[elemento] = {
+                    precio: 0,
+                    categoria: obtenerCategoria(elemento),
+                    ultimaActualizacion: new Date().toISOString().split('T')[0]
+                };
+            }
+            
+            document.getElementById('editElemento').value = elemento;
+            document.getElementById('editCategoria').value = preciosElementos[elemento].categoria;
+            document.getElementById('editPrecio').value = preciosElementos[elemento].precio || '';
+            
+            new bootstrap.Modal(document.getElementById('modalEditarPrecio')).show();
+        }
+
+
+        async function guardarEdicionPrecio() {
+            if (!elementoEditando) return;
+
+            const precio = parseFloat(document.getElementById('editPrecio').value) || 0;
+            const categoria = document.getElementById('editCategoria').value;
+
+            preciosElementos[elementoEditando].precio = precio;
+            preciosElementos[elementoEditando].categoria = categoria;
+            preciosElementos[elementoEditando].ultimaActualizacion = new Date().toISOString().split('T')[0];
+
+            // Guardar automáticamente
+            if (modoCentralizado) {
+                await window.dataService.upsertPrecioElementoByNombre(elementoEditando, {
+                    nombre: elementoEditando,
+                    categoria,
+                    precio,
+                    ultimaActualizacion: preciosElementos[elementoEditando].ultimaActualizacion,
+                });
+            } else {
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+            }
+
+            cargarTablaPrecios();
+            actualizarEstadisticas();
+            
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarPrecio')).hide();
+            mostrarAlerta(`Precio actualizado y guardado para ${elementoEditando}`, 'success');
+        }
+
+        function actualizarPreciosEnLote() {
+            new bootstrap.Modal(document.getElementById('modalActualizacionLote')).show();
+        }
+
+        async function aplicarActualizacionLote() {
+            const categoria = document.getElementById('loteCategoria').value;
+            const tipo = document.getElementById('loteTipo').value;
+            const valor = parseFloat(document.getElementById('loteValor').value);
+
+            if (isNaN(valor)) {
+                mostrarAlerta('Ingrese un valor válido', 'danger');
+                return;
+            }
+
+            let elementosAfectados = 0;
+            const elementos = Object.keys(preciosElementos);
+
+            elementos.forEach(elemento => {
+                const datos = preciosElementos[elemento];
+                
+                // Filtrar por categoría si se especificó
+                if (categoria && datos.categoria !== categoria) return;
+                
+                // Solo actualizar elementos que ya tienen precio
+                if (datos.precio <= 0) return;
+
+                let nuevoPrecio;
+                if (tipo === 'porcentaje') {
+                    nuevoPrecio = datos.precio * (1 + valor / 100);
+                } else {
+                    nuevoPrecio = datos.precio + valor;
+                }
+
+                // No permitir precios negativos
+                if (nuevoPrecio >= 0) {
+                    preciosElementos[elemento].precio = nuevoPrecio;
+                    preciosElementos[elemento].ultimaActualizacion = new Date().toISOString().split('T')[0];
+                    elementosAfectados++;
+                }
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('modalActualizacionLote')).hide();
+            cargarTablaPrecios();
+            actualizarEstadisticas();
+            
+            // Persistir en lote
+            if (modoCentralizado) {
+                const tareas = [];
+                for (const elemento of Object.keys(preciosElementos)) {
+                    const d = preciosElementos[elemento];
+                    if (categoria && d.categoria !== categoria) continue;
+                    if (d.precio <= 0) continue;
+                    tareas.push(window.dataService.upsertPrecioElementoByNombre(elemento, {
+                        nombre: elemento,
+                        categoria: d.categoria,
+                        precio: d.precio,
+                        ultimaActualizacion: d.ultimaActualizacion,
+                    }));
+                }
+                for (let i = 0; i < tareas.length; i += 50) {
+                    const slice = tareas.slice(i, i + 50);
+                    // eslint-disable-next-line no-await-in-loop
+                    await Promise.all(slice);
+                }
+            } else {
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+            }
+
+            mostrarAlerta(`${elementosAfectados} elementos actualizados`, 'success');
+        }
+
+        function aplicarFiltros() {
+            const filtroCategoria = document.getElementById('filtroCategoria').value;
+            const filtroEstado = document.getElementById('filtroEstado').value;
+            const filtroRango = document.getElementById('filtroRango').value;
+            const filtroNombre = document.getElementById('filtroNombre').value.toLowerCase();
+
+            const tbody = document.getElementById('tablaPrecios');
+            const filas = tbody.querySelectorAll('tr');
+
+            let visibles = 0;
+
+            filas.forEach(fila => {
+                const elemento = fila.cells[0].textContent.toLowerCase();
+                const categoria = fila.cells[1].textContent.toLowerCase();
+                const precioTexto = fila.cells[2].textContent;
+                const precio = parseFloat(precioTexto.replace(/[^0-9.-]+/g, ""));
+
+                let mostrar = true;
+
+                // Filtro por categoría
+                if (filtroCategoria && !categoria.includes(filtroCategoria)) mostrar = false;
+
+                // Filtro por estado
+                if (filtroEstado === 'con-precio' && precio <= 0) mostrar = false;
+                if (filtroEstado === 'sin-precio' && precio > 0) mostrar = false;
+
+                // Filtro por rango de precio
+                if (filtroRango && precio > 0) {
+                    switch (filtroRango) {
+                        case '0-100':
+                            if (precio > 100) mostrar = false;
+                            break;
+                        case '100-500':
+                            if (precio < 100 || precio > 500) mostrar = false;
+                            break;
+                        case '500-1000':
+                            if (precio < 500 || precio > 1000) mostrar = false;
+                            break;
+                        case '1000+':
+                            if (precio < 1000) mostrar = false;
+                            break;
+                    }
+                }
+
+                // Filtro por nombre
+                if (filtroNombre && !elemento.includes(filtroNombre)) mostrar = false;
+
+                fila.style.display = mostrar ? '' : 'none';
+                if (mostrar) visibles++;
+            });
+
+            document.getElementById('resultadosFiltro').textContent = `Mostrando ${visibles} elementos`;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroCategoria').value = '';
+            document.getElementById('filtroEstado').value = '';
+            document.getElementById('filtroRango').value = '';
+            document.getElementById('filtroNombre').value = '';
+            cargarTablaPrecios();
+        }
+
+        function guardarCambios() {
+            if (modoCentralizado) {
+                mostrarAlerta('Los cambios se guardan automáticamente en Supabase', 'info');
+            } else {
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                mostrarAlerta('Precios guardados en el navegador', 'success');
+            }
+        }
+
+        function exportarPrecios() {
+            const dataStr = JSON.stringify(preciosElementos, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'precios_elementos.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            mostrarAlerta('Precios exportados correctamente', 'success');
+        }
+
+        function importarPrecios(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const preciosImportados = JSON.parse(e.target.result);
+                    preciosElementos = { ...preciosElementos, ...preciosImportados };
+                    
+                    cargarTablaPrecios();
+                    actualizarEstadisticas();
+                    
+                    mostrarAlerta('Precios importados correctamente', 'success');
+                } catch (error) {
+                    mostrarAlerta('Error al importar el archivo', 'danger');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function agregarNuevoPrecio() {
+            // Limpiar formulario
+            document.getElementById('nuevoElemento').value = '';
+            document.getElementById('nuevaCategoria').value = '';
+            document.getElementById('nuevoPrecio').value = '';
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalNuevoPrecio'));
+            modal.show();
+        }
+
+        function guardarNuevoPrecio() {
+            const nombre = document.getElementById('nuevoElemento').value.trim();
+            const categoria = document.getElementById('nuevaCategoria').value;
+            const precioTexto = document.getElementById('nuevoPrecio').value.trim();
+
+            console.log('Datos del formulario:', { nombre, categoria, precioTexto });
+
+            // Validaciones
+            if (!nombre) {
+                mostrarAlerta('Debes ingresar un nombre válido', 'warning');
+                return;
+            }
+
+            if (!categoria) {
+                mostrarAlerta('Debes seleccionar una categoría', 'warning');
+                return;
+            }
+
+            if (!precioTexto) {
+                mostrarAlerta('Debes ingresar un precio válido', 'warning');
+                return;
+            }
+
+            const precio = parseFloat(precioTexto.replace(/[^0-9.-]+/g, ""));
+            console.log('Precio parseado:', precio);
+            
+            if (isNaN(precio) || precio < 0) {
+                mostrarAlerta('El precio debe ser un número válido', 'warning');
+                return;
+            }
+
+            console.log('Guardando elemento:', { nombre, categoria, precio });
+
+            // Guardar elemento
+            guardarElemento(nombre, categoria, precio);
+            
+            // Actualizar tabla y estadísticas
+            console.log('🔄 Llamando a cargarTablaPrecios...');
+            try {
+                cargarTablaPrecios();
+                console.log('✅ cargarTablaPrecios ejecutado correctamente');
+            } catch (error) {
+                console.error('❌ Error en cargarTablaPrecios:', error);
+            }
+            
+            console.log('🔄 Llamando a actualizarEstadisticas...');
+            try {
+                actualizarEstadisticas();
+                console.log('✅ actualizarEstadisticas ejecutado correctamente');
+            } catch (error) {
+                console.error('❌ Error en actualizarEstadisticas:', error);
+            }
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoPrecio'));
+            modal.hide();
+        }
+
+        function importarElementosLote() {
+            // Mostrar modal de importación
+            const modal = new bootstrap.Modal(document.getElementById('modalImportarCSV'));
+            modal.show();
+        }
+
+        function seleccionarArchivoCSV() {
+            // Crear input de archivo
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.style.display = 'none';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Mostrar nombre del archivo
+                document.getElementById('nombreArchivo').value = file.name;
+                document.getElementById('btnProcesarCSV').disabled = false;
+
+                // Leer archivo
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    window.archivoCSV = e.target.result;
+                };
+                reader.readAsText(file);
+            };
+            
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
+        }
+
+        function procesarArchivoCSV() {
+            if (!window.archivoCSV) {
+                mostrarAlerta('Debes seleccionar un archivo CSV', 'warning');
+                return;
+            }
+
+            procesarCSV(window.archivoCSV);
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalImportarCSV'));
+            modal.hide();
+        }
+
+        function procesarCSV(csvContent) {
+            try {
+                const lines = csvContent.split('\n').filter(line => line.trim() !== '');
+                if (lines.length < 2) {
+                    mostrarAlerta('El archivo CSV debe tener al menos 2 líneas (encabezado + datos)', 'warning');
+                    return;
+                }
+
+                // Verificar encabezados
+                const encabezados = lines[0].split(',').map(h => h.trim().toLowerCase());
+                const encabezadosEsperados = ['elemento', 'categoría', 'precio'];
+                
+                if (!encabezadosEsperados.every(h => encabezados.includes(h))) {
+                    mostrarAlerta('Los encabezados deben ser: Elemento, Categoría, Precio', 'warning');
+                    return;
+                }
+
+                const indices = {
+                    elemento: encabezados.indexOf('elemento'),
+                    categoria: encabezados.indexOf('categoría'),
+                    precio: encabezados.indexOf('precio')
+                };
+
+                let elementosProcesados = 0;
+                let elementosExitosos = 0;
+                let elementosConError = [];
+                let elementosDuplicados = [];
+
+                // Procesar cada línea de datos
+                for (let i = 1; i < lines.length; i++) {
+                    const columnas = lines[i].split(',').map(c => c.trim());
+                    
+                    if (columnas.length < 3) continue;
+
+                    const elemento = columnas[indices.elemento];
+                    const categoria = columnas[indices.categoria];
+                    const precioTexto = columnas[indices.precio];
+
+                    if (!elemento || !categoria || !precioTexto) {
+                        elementosConError.push(`Línea ${i + 1}: Datos incompletos`);
+                        continue;
+                    }
+
+                    const precio = parseFloat(precioTexto.replace(/[^0-9.-]+/g, ""));
+                    if (isNaN(precio) || precio < 0) {
+                        elementosConError.push(`Línea ${i + 1}: Precio inválido (${precioTexto})`);
+                        continue;
+                    }
+
+                    // Verificar si el elemento ya existe
+                    if (preciosElementos[elemento]) {
+                        elementosDuplicados.push({
+                            elemento: elemento,
+                            linea: i + 1,
+                            categoriaExistente: preciosElementos[elemento].categoria,
+                            precioExistente: preciosElementos[elemento].precio,
+                            categoriaNueva: categoria,
+                            precioNuevo: precio
+                        });
+                        continue;
+                    }
+
+                    elementosProcesados++;
+                    guardarElemento(elemento, categoria, precio, false);
+                    elementosExitosos++;
+                }
+
+                // Mostrar resultados
+                let mensaje = `Procesados: ${elementosProcesados} elementos\nExitosos: ${elementosExitosos}`;
+                if (elementosConError.length > 0) {
+                    mensaje += `\nErrores: ${elementosConError.length}`;
+                    console.warn('Errores en CSV:', elementosConError);
+                }
+                if (elementosDuplicados.length > 0) {
+                    mensaje += `\nDuplicados: ${elementosDuplicados.length}`;
+                    console.warn('Elementos duplicados en CSV:', elementosDuplicados);
+                }
+
+                // Mostrar modal de duplicados si los hay
+                if (elementosDuplicados.length > 0) {
+                    mostrarModalDuplicados(elementosDuplicados);
+                }
+
+                mostrarAlerta(mensaje, (elementosConError.length > 0 || elementosDuplicados.length > 0) ? 'warning' : 'success');
+                
+                // Actualizar la tabla
+                cargarTablaPrecios();
+                actualizarEstadisticas();
+
+            } catch (error) {
+                console.error('Error al procesar CSV:', error);
+                mostrarAlerta('Error al procesar el archivo CSV', 'danger');
+            }
+        }
+
+        function guardarElemento(elemento, categoria, precio, mostrarMensaje = true) {
+            const nuevoElemento = {
+                elemento: elemento,
+                categoria: categoria,
+                precio: precio,
+                fecha_actualizacion: new Date().toISOString()
+            };
+
+            console.log('Guardando en preciosElementos:', { elemento, nuevoElemento });
+            console.log('preciosElementos antes:', preciosElementos);
+
+            // Agregar al objeto local
+            preciosElementos[elemento] = nuevoElemento;
+            
+            console.log('preciosElementos después:', preciosElementos);
+
+            // Guardar en Supabase si está disponible
+            if (modoCentralizado) {
+                const record = {
+                    precio: precio,
+                    categoria: categoria,
+                    ultimaActualizacion: new Date().toISOString().split('T')[0]
+                };
+                window.dataService.upsertPrecioElementoByNombre(elemento, record)
+                    .then(() => {
+                        if (mostrarMensaje) {
+                            mostrarAlerta('Elemento agregado correctamente', 'success');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al guardar en Supabase:', error);
+                        if (mostrarMensaje) {
+                            mostrarAlerta('Error al guardar en Supabase, pero se guardó localmente', 'warning');
+                        }
+                    });
+            } else {
+                // Guardar en localStorage
+                localStorage.setItem('precios_elementos', JSON.stringify(preciosElementos));
+                if (mostrarMensaje) {
+                    mostrarAlerta('Elemento agregado correctamente', 'success');
+                }
+            }
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        function mostrarModalDuplicados(elementosDuplicados) {
+            // Crear el modal dinámicamente
+            const modalHtml = `
+                <div class="modal fade" id="modalDuplicados" tabindex="-1" aria-labelledby="modalDuplicadosLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-title" id="modalDuplicadosLabel">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>Elementos Duplicados Detectados
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Los siguientes elementos ya existen en la lista de precios:</strong>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Elemento</th>
+                                                <th>Línea CSV</th>
+                                                <th>Existente</th>
+                                                <th>Nuevo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${elementosDuplicados.map(dup => `
+                                                <tr>
+                                                    <td><strong>${dup.elemento}</strong></td>
+                                                    <td>${dup.linea}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${dup.categoriaExistente}</span>
+                                                        <br><small>$${dup.precioExistente.toLocaleString('es-MX', {minimumFractionDigits: 2})}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-primary">${dup.categoriaNueva}</span>
+                                                        <br><small>$${dup.precioNuevo.toLocaleString('es-MX', {minimumFractionDigits: 2})}</small>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="alert alert-info mt-3">
+                                    <i class="bi bi-lightbulb me-2"></i>
+                                    <strong>Sugerencia:</strong> Para actualizar estos elementos, cierra este modal y usa el botón "Editar" (lápiz) en la tabla principal de precios, o modifica el CSV eliminando los elementos duplicados antes de importar.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal existente si hay uno
+            const modalExistente = document.getElementById('modalDuplicados');
+            if (modalExistente) {
+                modalExistente.remove();
+            }
+            
+            // Agregar el nuevo modal al DOM
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('modalDuplicados'));
+            modal.show();
+        }
+
+        function suscribirRealtimePrecios() {
+            if (!modoCentralizado) return;
+            window.dataService.subscribePreciosElementos(async (payload) => {
+                try {
+                    await cargarPreciosDesdeSupabase();
+                    cargarTablaPrecios();
+                    actualizarEstadisticas();
+                } catch (e) {
+                    console.warn('Realtime precios refresco fallido', e);
+                }
+            });
+        }
+
+        // =====================
+        // FUNCIONES PARA SERVICIOS
+        // =====================
+
+        let serviciosDatos = [];
+        let servicioEditando = null;
+
+        async function mostrarServicios() {
+            console.log('🔄 DEBUG: Iniciando mostrarServicios...');
+            
+            const seccionPrecios = document.getElementById('seccionPrecios');
+            const seccionServicios = document.getElementById('seccionServicios');
+            
+            console.log('🔄 DEBUG: seccionPrecios:', seccionPrecios);
+            console.log('🔄 DEBUG: seccionServicios:', seccionServicios);
+            
+            if (seccionPrecios) {
+                seccionPrecios.style.display = 'none';
+                console.log('🔄 DEBUG: Sección precios ocultada');
+            }
+            if (seccionServicios) {
+                seccionServicios.setAttribute('style', 'display: block !important; visibility: visible; opacity: 1;');
+                console.log('🔄 DEBUG: Sección servicios mostrada');
+                console.log('🔄 DEBUG: Display style:', seccionServicios.style.display);
+                console.log('🔄 DEBUG: Visibility style:', seccionServicios.style.visibility);
+            }
+            
+            // Actualizar botones del sidebar
+            document.querySelectorAll('.sidebar .btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-light');
+            });
+            const btnServicios = document.querySelector('button[onclick="mostrarServicios()"]');
+            if (btnServicios) {
+                btnServicios.classList.remove('btn-outline-light');
+                btnServicios.classList.add('btn-primary');
+            }
+            
+            console.log('🔄 DEBUG: Cargando servicios desde Supabase...');
+            await cargarServiciosDesdeSupabase();
+            console.log('🔄 DEBUG: Llamando a cargarTablaServicios...');
+            cargarTablaServicios();
+            console.log('🔄 DEBUG: Llamando a actualizarEstadisticasServicios...');
+            actualizarEstadisticasServicios();
+            
+            // Forzar visibilidad después de un pequeño delay
+            setTimeout(() => {
+                if (seccionServicios) {
+                    seccionServicios.setAttribute('style', 'display: block !important; visibility: visible; opacity: 1;');
+                    console.log('🔄 DEBUG: Visibilidad forzada después del delay');
+                    console.log('🔄 DEBUG: Display final:', seccionServicios.style.display);
+                    
+                    // Verificar si la tabla está visible
+                    const tabla = seccionServicios.querySelector('table');
+                    if (tabla) {
+                        console.log('🔄 DEBUG: Tabla encontrada:', tabla);
+                        console.log('🔄 DEBUG: Tabla visible:', tabla.offsetHeight > 0);
+                        console.log('🔄 DEBUG: Tabla display:', window.getComputedStyle(tabla).display);
+                        console.log('🔄 DEBUG: Tabla height:', tabla.offsetHeight);
+                        console.log('🔄 DEBUG: Tabla width:', tabla.offsetWidth);
+                        console.log('🔄 DEBUG: Tabla position:', tabla.offsetTop, tabla.offsetLeft);
+                        console.log('🔄 DEBUG: Sección height:', seccionServicios.offsetHeight);
+                        console.log('🔄 DEBUG: Sección width:', seccionServicios.offsetWidth);
+                        
+                        // Verificar si hay CSS que esté ocultando la tabla
+                        const computedStyle = window.getComputedStyle(tabla);
+                        console.log('🔄 DEBUG: Tabla visibility:', computedStyle.visibility);
+                        console.log('🔄 DEBUG: Tabla opacity:', computedStyle.opacity);
+                        console.log('🔄 DEBUG: Tabla z-index:', computedStyle.zIndex);
+                        
+                        // Forzar visibilidad de la tabla
+                        tabla.setAttribute('style', 'display: table !important; visibility: visible !important; opacity: 1 !important;');
+                        console.log('🔄 DEBUG: Estilos forzados en la tabla');
+                    } else {
+                        console.log('❌ DEBUG: No se encontró la tabla en seccionServicios');
+                    }
+                }
+            }, 100);
+            
+            console.log('✅ DEBUG: mostrarServicios completado');
+        }
+
+        async function mostrarPrecios() {
+            document.getElementById('seccionServicios').style.display = 'none';
+            document.getElementById('seccionPrecios').style.display = 'block';
+            
+            // Actualizar botones del sidebar
+            document.querySelectorAll('.sidebar .btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-light');
+            });
+            document.querySelector('button[onclick="mostrarPrecios()"]').classList.remove('btn-outline-light');
+            document.querySelector('button[onclick="mostrarPrecios()"]').classList.add('btn-primary');
+        }
+
+        async function cargarServiciosDesdeSupabase() {
+            try {
+                console.log('🔄 Cargando servicios desde Supabase...');
+                serviciosDatos = await window.dataService.fetchServiciosDatos();
+                console.log(`✅ Servicios cargados: ${serviciosDatos.length}`);
+                console.log('🔄 DEBUG: serviciosDatos después de cargar:', serviciosDatos);
+            } catch (error) {
+                console.error('❌ Error cargando servicios:', error);
+                serviciosDatos = [];
+            }
+        }
+
+        function cargarTablaServicios() {
+            console.log('🚨🚨🚨 VERSIÓN ACTUALIZADA DEL ARCHIVO 🚨🚨🚨');
+            console.log('🔄 DEBUG: Iniciando cargarTablaServicios...');
+            console.log('🔄 DEBUG: serviciosDatos.length:', serviciosDatos.length);
+            console.log('🔄 DEBUG: serviciosDatos:', serviciosDatos);
+            
+            const tbody = document.getElementById('tablaServicios');
+            console.log('🔄 DEBUG: tbody encontrado:', tbody);
+            
+            if (!tbody) {
+                console.error('❌ DEBUG: No se encontró el elemento tablaServicios');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+
+            if (serviciosDatos.length === 0) {
+                console.log('⚠️ DEBUG: No hay servicios, mostrando mensaje vacío');
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No hay servicios configurados</td></tr>';
+                return;
+            }
+
+            console.log('🔄 DEBUG: Iniciando renderizado de servicios...');
+            serviciosDatos.forEach((servicio, index) => {
+                console.log(`🔄 DEBUG: Procesando servicio ${index + 1}:`, servicio);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${servicio.nombre}</strong></td>
+                    <td>${servicio.descripcion || 'Sin descripción'}</td>
+                    <td><span class="badge bg-info">${servicio.tipo_periodicidad}</span></td>
+                    <td>$${servicio.precio_mensual || 0}</td>
+                    <td>$${servicio.precio_semestral || 0}</td>
+                    <td>$${servicio.precio_anual || 0}</td>
+                    <td>
+                        <span class="badge ${servicio.activo ? 'bg-success' : 'bg-secondary'}">
+                            ${servicio.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarServicio('${servicio.id}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarServicio('${servicio.id}', '${servicio.nombre}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                console.log(`🔄 DEBUG: Agregando fila ${index + 1} al tbody`);
+                tbody.appendChild(row);
+            });
+            console.log('✅ DEBUG: Renderizado de servicios completado');
+            console.log('🔄 DEBUG: Contenido del tbody:', tbody.innerHTML.substring(0, 200) + '...');
+            console.log('🔄 DEBUG: Número de filas en tbody:', tbody.children.length);
+            console.log('🚨 DEBUG: VERSIÓN ACTUALIZADA - Si ves esto, el archivo se actualizó correctamente');
+        }
+
+        function actualizarEstadisticasServicios() {
+            const totalServicios = serviciosDatos.length;
+            const serviciosActivos = serviciosDatos.filter(s => s.activo).length;
+            const serviciosMensuales = serviciosDatos.filter(s => s.tipo_periodicidad === 'mensual').length;
+            const serviciosAnuales = serviciosDatos.filter(s => s.tipo_periodicidad === 'anual').length;
+
+            document.getElementById('totalServicios').textContent = totalServicios;
+            document.getElementById('serviciosActivos').textContent = serviciosActivos;
+            document.getElementById('serviciosMensuales').textContent = serviciosMensuales;
+            document.getElementById('serviciosAnuales').textContent = serviciosAnuales;
+        }
+
+        function agregarNuevoServicio() {
+            servicioEditando = null;
+            document.getElementById('tituloModalServicio').innerHTML = '<i class="bi bi-cloud"></i> Nuevo Servicio de Datos';
+            document.getElementById('formServicio').reset();
+            document.getElementById('servicioActivo').checked = true;
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalServicio'));
+            modal.show();
+        }
+
+        function editarServicio(servicioId) {
+            const servicio = serviciosDatos.find(s => s.id === servicioId);
+            if (!servicio) return;
+
+            servicioEditando = servicio;
+            document.getElementById('tituloModalServicio').innerHTML = '<i class="bi bi-pencil"></i> Editar Servicio de Datos';
+            
+            document.getElementById('servicioNombre').value = servicio.nombre;
+            document.getElementById('servicioDescripcion').value = servicio.descripcion || '';
+            document.getElementById('servicioTipoPeriodicidad').value = servicio.tipo_periodicidad;
+            document.getElementById('servicioPrecioMensual').value = servicio.precio_mensual || '';
+            document.getElementById('servicioPrecioSemestral').value = servicio.precio_semestral || '';
+            document.getElementById('servicioPrecioAnual').value = servicio.precio_anual || '';
+            document.getElementById('servicioActivo').checked = servicio.activo;
+            
+            togglePreciosServicio();
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalServicio'));
+            modal.show();
+        }
+
+        function togglePreciosServicio() {
+            const tipoPeriodicidad = document.getElementById('servicioTipoPeriodicidad').value;
+            const container = document.getElementById('preciosServicioContainer');
+            
+            if (tipoPeriodicidad === 'anual') {
+                container.innerHTML = `
+                    <h6 class="text-primary mb-3">Precio Anual</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="servicioPrecioAnual" class="form-label">Precio Anual</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioAnual" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <h6 class="text-primary mb-3">Precios por Periodicidad</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="servicioPrecioMensual" class="form-label">Precio Mensual</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioMensual" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="servicioPrecioSemestral" class="form-label">Precio Semestral</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioSemestral" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="servicioPrecioAnual" class="form-label">Precio Anual</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="servicioPrecioAnual" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function guardarServicio() {
+            const nombre = document.getElementById('servicioNombre').value.trim();
+            const descripcion = document.getElementById('servicioDescripcion').value.trim();
+            const tipoPeriodicidad = document.getElementById('servicioTipoPeriodicidad').value;
+            const activo = document.getElementById('servicioActivo').checked;
+
+            if (!nombre || !tipoPeriodicidad) {
+                alert('Por favor completa todos los campos obligatorios');
+                return;
+            }
+
+            const servicioData = {
+                nombre,
+                descripcion,
+                tipo_periodicidad: tipoPeriodicidad,
+                activo
+            };
+
+            // Agregar precios según el tipo de periodicidad
+            if (tipoPeriodicidad === 'anual') {
+                const precioAnual = parseFloat(document.getElementById('servicioPrecioAnual').value) || 0;
+                if (precioAnual <= 0) {
+                    alert('El precio anual debe ser mayor a 0');
+                    return;
+                }
+                servicioData.precio_anual = precioAnual;
+            } else {
+                const precioMensual = parseFloat(document.getElementById('servicioPrecioMensual').value) || 0;
+                const precioSemestral = parseFloat(document.getElementById('servicioPrecioSemestral').value) || 0;
+                const precioAnual = parseFloat(document.getElementById('servicioPrecioAnual').value) || 0;
+
+                if (precioMensual <= 0) {
+                    alert('El precio mensual debe ser mayor a 0');
+                    return;
+                }
+
+                servicioData.precio_mensual = precioMensual;
+                servicioData.precio_semestral = precioSemestral;
+                servicioData.precio_anual = precioAnual;
+            }
+
+            // Si estamos editando, agregar el ID
+            if (servicioEditando) {
+                servicioData.id = servicioEditando.id;
+            }
+
+            try {
+                console.log('💾 Guardando servicio:', servicioData);
+                const resultado = await window.dataService.upsertServicioDatos(servicioData);
+                
+                if (resultado) {
+                    console.log('✅ Servicio guardado exitosamente');
+                    await cargarServiciosDesdeSupabase();
+                    cargarTablaServicios();
+                    actualizarEstadisticasServicios();
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalServicio'));
+                    modal.hide();
+                    
+                    alert('Servicio guardado exitosamente');
+                } else {
+                    alert('Error al guardar el servicio');
+                }
+            } catch (error) {
+                console.error('❌ Error guardando servicio:', error);
+                alert('Error al guardar el servicio: ' + error.message);
+            }
+        }
+
+        async function eliminarServicio(servicioId, nombreServicio) {
+            if (confirm(`¿Estás seguro de que quieres eliminar el servicio "${nombreServicio}"?`)) {
+                try {
+                    const resultado = await window.dataService.deleteServicioDatos(servicioId);
+                    if (resultado) {
+                        console.log('✅ Servicio eliminado exitosamente');
+                        await cargarServiciosDesdeSupabase();
+                        cargarTablaServicios();
+                        actualizarEstadisticasServicios();
+                        alert('Servicio eliminado exitosamente');
+                    } else {
+                        alert('Error al eliminar el servicio');
+                    }
+                } catch (error) {
+                    console.error('❌ Error eliminando servicio:', error);
+                    alert('Error al eliminar el servicio: ' + error.message);
+                }
+            }
+        }
+
+        function aplicarFiltrosServicios() {
+            const filtroServicio = document.getElementById('filtroServicio').value.toLowerCase();
+            const filtroTipo = document.getElementById('filtroTipoServicio').value;
+            const filtroEstado = document.getElementById('filtroEstadoServicio').value;
+
+            const serviciosFiltrados = serviciosDatos.filter(servicio => {
+                const cumpleNombre = !filtroServicio || servicio.nombre.toLowerCase().includes(filtroServicio);
+                const cumpleTipo = !filtroTipo || servicio.tipo_periodicidad === filtroTipo;
+                const cumpleEstado = !filtroEstado || (filtroEstado === 'activo' ? servicio.activo : !servicio.activo);
+                
+                return cumpleNombre && cumpleTipo && cumpleEstado;
+            });
+
+            // Actualizar tabla con servicios filtrados
+            const tbody = document.getElementById('tablaServicios');
+            tbody.innerHTML = '';
+
+            if (serviciosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se encontraron servicios</td></tr>';
+                return;
+            }
+
+            serviciosFiltrados.forEach(servicio => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${servicio.nombre}</strong></td>
+                    <td>${servicio.descripcion || 'Sin descripción'}</td>
+                    <td><span class="badge bg-info">${servicio.tipo_periodicidad}</span></td>
+                    <td>$${servicio.precio_mensual || 0}</td>
+                    <td>$${servicio.precio_semestral || 0}</td>
+                    <td>$${servicio.precio_anual || 0}</td>
+                    <td>
+                        <span class="badge ${servicio.activo ? 'bg-success' : 'bg-secondary'}">
+                            ${servicio.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarServicio('${servicio.id}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarServicio('${servicio.id}', '${servicio.nombre}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+
+    <div class="modal fade" id="modalNuevoPrecio" tabindex="-1" aria-labelledby="modalNuevoPrecioLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNuevoPrecioLabel">
+                        <i class="bi bi-plus-circle me-2"></i>Nuevo Elemento
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nuevoElemento" class="form-label">Nombre del Elemento</label>
+                        <input type="text" class="form-control" id="nuevoElemento" placeholder="Ej: GPS GV310LAU">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevaCategoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="nuevaCategoria">
+                            <option value="">Selecciona una categoría</option>
+                            <option value="Equipo">Equipo</option>
+                            <option value="Accesorio">Accesorio</option>
+                            <option value="Insumo">Insumo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevoPrecio" class="form-label">Precio Unitario</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="nuevoPrecio" placeholder="0.00" step="0.01" min="0">
+                            <span class="input-group-text">MXN</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarNuevoPrecio()">
+                        <i class="bi bi-check-circle me-1"></i>Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalImportarCSV" tabindex="-1" aria-labelledby="modalImportarCSVLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalImportarCSVLabel">
+                        <i class="bi bi-upload me-2"></i>Importar desde CSV
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Formato requerido:</strong><br>
+                        Encabezados: <code>Elemento, Categoría, Precio</code><br>
+                        Ejemplo: <code>GPS GV310LAU, Equipo, 1500</code>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar archivo CSV</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="nombreArchivo" placeholder="Ningún archivo seleccionado" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="seleccionarArchivoCSV()">
+                                <i class="bi bi-folder2-open me-1"></i>Seleccionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnProcesarCSV" onclick="procesarArchivoCSV()" disabled>
+                        <i class="bi bi-upload me-1"></i>Importar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que quieres eliminar el elemento <strong id="elementoAEliminar"></strong>?</p>
+                    <p class="text-muted">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Servicios -->
+    <div class="modal fade" id="modalServicio" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tituloModalServicio">
+                        <i class="bi bi-cloud"></i> Nuevo Servicio de Datos
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formServicio">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="servicioNombre" class="form-label">Nombre del Servicio *</label>
+                                    <input type="text" class="form-control" id="servicioNombre" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="servicioTipoPeriodicidad" class="form-label">Tipo de Periodicidad *</label>
+                                    <select class="form-select" id="servicioTipoPeriodicidad" required onchange="togglePreciosServicio()">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="mensual">Mensual</option>
+                                        <option value="semestral">Semestral</option>
+                                        <option value="anual">Anual</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="servicioDescripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="servicioDescripcion" rows="3" placeholder="Describe el servicio..."></textarea>
+                        </div>
+
+                        <div id="preciosServicioContainer">
+                            <h6 class="text-primary mb-3">Precios por Periodicidad</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="servicioPrecioMensual" class="form-label">Precio Mensual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="servicioPrecioMensual" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="servicioPrecioSemestral" class="form-label">Precio Semestral</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="servicioPrecioSemestral" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="servicioPrecioAnual" class="form-label">Precio Anual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="servicioPrecioAnual" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="servicioActivo" checked>
+                                <label class="form-check-label" for="servicioActivo">
+                                    Servicio Activo
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarServicio()">
+                        <i class="bi bi-save"></i> Guardar Servicio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

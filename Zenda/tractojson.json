@@ -1,0 +1,218 @@
+{
+  "combinaciones": [
+    {
+      "tipoUnidad": "Tracto",
+      "tipoSolucion": "VPC",
+      "insumos": {
+      "Cable 4 pin 5 m": 1,
+      "Cable 4 pin 7 m": 2,
+      "Cable 4 pin 15 m": 1,
+      "Silicon": 0.1,
+      "Cinchos grande": 30,
+      "Cinta de tela": 1,
+      "Cinta de aislar": 1,
+      "Poliflex 3/8": 18,
+      "Cincho mediado": 80,
+      "Cincho con grapa": 40,
+      "Pija brocante 5/16": 6,
+      "Terminal de ojillo": 2,
+      "Poliflex 1/4": 2,
+      "Cable 2 vias": 2,
+      "Cable 4 vias": 2,
+      "Tuerca 3/8": 2,
+      "Rondana 3/8": 2,
+      "Espiral negro": 1,
+      "Alarma parlante de 3 tonos": 1,
+      "Camara con radar": 1,
+      "Camara con microfono": 1,
+      "Camara de reversa": 1,
+      "Camara Digital (IP)": 1,
+      "Camara exterior mini": 1,
+      "Camara lateral derecha de VPC": 1,
+      "Camara lateral izquierda de VPC": 1,  
+      "Led de giro a la derecha": 1,
+      "Led de giro a la izquierda": 1,
+      "Monitor de VPC": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Sensor VPC",
+    "insumos": {
+      "Cable 2 vias": 4,
+      "Sensor derecho VPC": 1,
+      "Sensor izquierda VPC": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Led de giro",
+    "insumos": {
+      "Pija brocante 5/16": 10,
+      "Terminal de ojillo": 2,
+      "Poliflex 1/4": 8,
+      "Cable 2 vias": 26,
+      "Led de giro a la derecha": 2,
+      "Led de giro a la izquierda": 2
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Alarma parlante estandar",
+    "insumos": {
+      "Tornillo hexagonal 5/16": 2,
+      "Cinta de tela": 1,
+      "Poliflex 3/8": 8,
+      "Cincho mediado": 30,
+      "Pija brocante 5/16": 2,
+      "Cable 2 vias": 6,
+      "Cable 4 vias": 2,
+      "Tuerca 3/8": 2,
+      "Rondana 3/8": 2,
+      "Relevador 2 pasos 2 tiros": 1,
+      "Alarma parlante de 3 tonos": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Encadenamiento señales",
+    "insumos": {
+      "Cable 4 pin 1 m": 5,
+      "Cable 4 pin 5 m": 1,
+      "Cable 4 pin 7 m": 1,
+      "Cable 4 pin 15 m": 2,
+      "Y 4 pines": 7,
+      "Base Pollak": 4,
+      "Pollak Macho": 4,
+      "Silicon": 0.1,
+      "Cinta de tela": 1,
+      "Poliflex 3/8": 30,
+      "Cincho mediado": 120,
+      "Cincho con grapa": 80,
+      "Pija brocante 5/16": 40,
+      "Cable 2 vias": 40,
+      "Cable 4 vias": 40,
+      "Espiral negro": 1,
+      "Espiral verde": 2,
+      "7 vias liso 2m": 1,
+      "Relevador 2 pasos 2 tiros": 5,
+      "placa perforada": 3,
+      "Gabinete 5*7*3": 4,
+      "Relevador 12v": 2
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "MDVR 4 Ch",
+    "insumos": {
+      "Cable 4 pin 3 m": 1,
+      "Cable 4 pin 7 m": 2,
+      "Cable 4 pin 15 m": 1,
+      "Cable 6 pin 5 m": 1,
+      "Silicon": 0.1,
+      "Cinta de tela": 1,
+      "Poliflex 3/8": 18,
+      "Cincho mediado": 80,
+      "Cincho con grapa": 30,
+      "Pija brocante 5/16": 6,
+      "Terminal de ojillo": 2,
+      "Poliflex 1/4": 5,
+      "Grabador de video 4 ch": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "MDVR 8 Ch",
+    "insumos": {
+      "Cable 4 pin 3 m": 1,
+      "Cable 4 pin 7 m": 2,
+      "Cable 4 pin 15 m": 1,
+      "Cable 6 pin 5 m": 1,
+      "Silicon": 0.1,
+      "Cinta de tela": 1,
+      "Poliflex 3/8": 18,
+      "Cincho mediado": 80,
+      "Cincho con grapa": 30,
+      "Pija brocante 5/16": 6,
+      "Terminal de ojillo": 2,
+      "Poliflex 1/4": 5,
+      "Grabador de video 4 ch": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Sideview",
+    "insumos": {
+      "Cable 4 pin 7 m": 4,
+      "Silicon": 0.1,
+      "Cinta de tela": 1,
+      "Poliflex 3/8": 15,
+      "Cincho mediado": 60,
+      "Pija brocante 5/16": 16,
+      "Terminal de ojillo": 2,
+      "Poliflex 1/4": 10,
+      "Cable 2 vias": 10,
+      "Camara sideview derecho": 1,
+      "Camara sideview izquierdo": 1,
+      "Sideview derecho": 1,
+      "Sideview izquierdo": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Dashcam",
+    "insumos": {
+      "Cinta de tela": 1,
+      "Cincho mediado": 15,
+      "Pija brocante 5/16": 1,
+      "Terminal de ojillo": 2,
+      "Poliflex 1/4": 5,
+      "Cable 2 vias": 5,
+      "Dashcam ad2": 1,
+      "Dashcam c6": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Rastreo basico",
+    "insumos": {
+      "Cinta de tela": 1,
+      "Cincho mediado": 15,
+      "Pija brocante 5/16": 1,
+      "Terminal de ojillo": 3,
+      "Cable 2 vias": 8,
+      "Relevador 12v": 1,
+      "Relevador 24v": 1,
+      "Portarelevador": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Rastreo avanzado",
+    "insumos": {
+      "Cinta de tela": 1,
+      "Cincho mediado": 15,
+      "Pija brocante 5/16": 1,
+      "Terminal de ojillo": 3,
+      "Cable 2 vias": 8,
+      "Relevador 12v": 1,
+      "Relevador 24v": 1,
+      "Portarelevador": 1
+    }
+  },
+  {
+    "tipoUnidad": "Tracto",
+    "tipoSolucion": "Rastreo satelital",
+    "insumos": {
+      "Cinta de tela": 1,
+      "Cincho mediado": 15,
+      "Pija brocante 5/16": 1,
+      "Terminal de ojillo": 2,
+      "Cable 2 vias": 4,
+      "Relevador 12v": 1,
+      "Relevador 24v": 1,
+      "Portarelevador": 1
+    }
+  }
+  ]
+}

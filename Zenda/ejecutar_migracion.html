@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejecutar Migración - Tablas Separadas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); min-height: 100vh; }
+        .container { padding-top: 50px; }
+        .card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .btn { border-radius: 10px; padding: 12px 24px; font-weight: bold; }
+        .log-container { 
+            background: #1e1e1e; 
+            color: #00ff00; 
+            font-family: 'Courier New', monospace; 
+            padding: 20px; 
+            border-radius: 10px; 
+            max-height: 400px; 
+            overflow-y: auto; 
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2>🔄 Migración a Tablas Separadas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h5>ℹ️ ¿Qué hace esta migración?</h5>
+                            <ul class="mb-0">
+                                <li>Migra todos los tipos de vehículos, soluciones e insumos de localStorage a las nuevas tablas de Supabase</li>
+                                <li>Los datos se guardarán permanentemente en la base de datos</li>
+                                <li>Podrás eliminar tipos directamente desde Supabase Dashboard</li>
+                                <li>Los cambios persistirán al refrescar la página</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center mb-4">
+                            <button id="btnVerificar" class="btn btn-warning btn-lg me-2">
+                                🔍 Verificar Conexión
+                            </button>
+                            <button id="btnMigrar" class="btn btn-success btn-lg me-2">
+                                🚀 Ejecutar Migración
+                            </button>
+                            <button id="btnProbar" class="btn btn-info btn-lg">
+                                🧪 Probar Tablas
+                            </button>
+                        </div>
+                        
+                        <div id="logContainer" class="log-container" style="display: none;">
+                            <div id="logContent">Esperando ejecución...</div>
+                        </div>
+                        
+                        <div id="resultado" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts necesarios -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="dataService.js" onload="console.log('✅ dataService.js cargado')" onerror="console.error('❌ Error cargando dataService.js')"></script>
+    
+    <script>
+        let logContent = '';
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logContent += `[${timestamp}] ${message}\n`;
+            document.getElementById('logContent').textContent = logContent;
+            document.getElementById('logContainer').scrollTop = document.getElementById('logContainer').scrollHeight;
+        }
+        
+        function mostrarResultado(mensaje, tipo = 'info') {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = `<div class="alert alert-${tipo}">${mensaje}</div>`;
+        }
+        
+        // Función para verificar conexión
+        async function verificarConexion() {
+            log('🔍 Verificando conexión...');
+            
+            try {
+                // Verificar que dataService esté disponible
+                if (!window.dataService) {
+                    log('❌ dataService no está definido');
+                    mostrarResultado('Error: dataService no está definido. Verifica que dataService.js se cargó correctamente.', 'danger');
+                    return false;
+                }
+                
+                if (!window.dataService.client) {
+                    log('❌ dataService.client no está disponible');
+                    mostrarResultado('Error: dataService.client no está disponible. Verifica la conexión a Supabase.', 'danger');
+                    return false;
+                }
+                
+                // Probar una consulta simple
+                log('📡 Probando conexión a Supabase...');
+                const testResult = await window.dataService.client.from('tipos_unidad').select('count').limit(1);
+                log('✅ Conexión a Supabase exitosa');
+                
+                // Verificar funciones específicas
+                if (typeof window.dataService.fetchTiposUnidad !== 'function') {
+                    log('❌ fetchTiposUnidad no está disponible');
+                    mostrarResultado('Error: fetchTiposUnidad no está disponible', 'danger');
+                    return false;
+                }
+                
+                if (typeof window.dataService.upsertTipoUnidad !== 'function') {
+                    log('❌ upsertTipoUnidad no está disponible');
+                    mostrarResultado('Error: upsertTipoUnidad no está disponible', 'danger');
+                    return false;
+                }
+                
+                log('✅ Todas las funciones están disponibles');
+                mostrarResultado('✅ Conexión verificada correctamente. Puedes proceder con la migración.', 'success');
+                return true;
+                
+            } catch (error) {
+                log(`❌ Error verificando conexión: ${error.message}`);
+                mostrarResultado('❌ Error verificando conexión: ' + error.message, 'danger');
+                return false;
+            }
+        }
+
+        // Función de migración
+        async function migrarATablasSeparadas() {
+            log('🚀 Iniciando migración a tablas separadas...');
+            
+            try {
+                // Verificar que dataService esté disponible
+                if (!window.dataService || !window.dataService.client) {
+                    log('❌ dataService no está disponible');
+                    mostrarResultado('Error: dataService no está disponible. Usa "Verificar Conexión" primero.', 'danger');
+                    return false;
+                }
+                
+                // 1. Obtener tipos existentes de localStorage
+                const tiposGlobales = JSON.parse(localStorage.getItem('tipos_globales') || '{"vehiculos":[],"soluciones":[],"insumos":[]}');
+                
+                log('📋 Tipos encontrados en localStorage:');
+                log(`- Vehículos: ${tiposGlobales.vehiculos?.length || 0}`);
+                log(`- Soluciones: ${tiposGlobales.soluciones?.length || 0}`);
+                log(`- Insumos: ${tiposGlobales.insumos?.length || 0}`);
+                
+                // 2. Migrar tipos de vehículo
+                log('🚗 Migrando tipos de vehículo...');
+                for (const vehiculo of tiposGlobales.vehiculos || []) {
+                    if (vehiculo && vehiculo.trim()) {
+                        await window.dataService.upsertTipoUnidad(vehiculo.trim(), `Tipo de vehículo: ${vehiculo}`);
+                        log(`✅ Vehículo migrado: ${vehiculo}`);
+                    }
+                }
+                
+                // 3. Migrar tipos de solución
+                log('🔧 Migrando tipos de solución...');
+                for (const solucion of tiposGlobales.soluciones || []) {
+                    if (solucion && solucion.trim()) {
+                        await window.dataService.upsertTipoSolucion(solucion.trim(), `Tipo de solución: ${solucion}`, 'General');
+                        log(`✅ Solución migrada: ${solucion}`);
+                    }
+                }
+                
+                // 4. Migrar tipos de insumo
+                log('📦 Migrando tipos de insumo...');
+                for (const insumo of tiposGlobales.insumos || []) {
+                    if (insumo && insumo.trim()) {
+                        await window.dataService.upsertTipoInsumo(insumo.trim(), `Tipo de insumo: ${insumo}`, 'General', 'piezas');
+                        log(`✅ Insumo migrado: ${insumo}`);
+                    }
+                }
+                
+                // 5. Verificar migración
+                log('🔍 Verificando migración...');
+                const vehiculosMigrados = await window.dataService.fetchTiposUnidad();
+                const solucionesMigradas = await window.dataService.fetchTiposSolucion();
+                const insumosMigrados = await window.dataService.fetchTiposInsumo();
+                
+                log(`✅ Vehículos migrados: ${vehiculosMigrados.length}`);
+                log(`✅ Soluciones migradas: ${solucionesMigradas.length}`);
+                log(`✅ Insumos migrados: ${insumosMigrados.length}`);
+                
+                // 6. Limpiar localStorage (opcional)
+                const limpiar = confirm('¿Deseas limpiar los tipos_globales de localStorage? (Recomendado después de la migración)');
+                if (limpiar) {
+                    localStorage.removeItem('tipos_globales');
+                    log('🧹 localStorage limpiado');
+                }
+                
+                log('✅ Migración completada exitosamente');
+                mostrarResultado('✅ Migración completada exitosamente. Ahora puedes usar el módulo de administrar almacén con las nuevas tablas.', 'success');
+                
+                return true;
+                
+            } catch (error) {
+                log(`❌ Error durante la migración: ${error.message}`);
+                mostrarResultado('❌ Error durante la migración: ' + error.message, 'danger');
+                return false;
+            }
+        }
+
+        // Función para probar las nuevas tablas
+        async function probarTablasSeparadas() {
+            log('🧪 Probando tablas separadas...');
+            
+            try {
+                // Probar fetch de cada tabla
+                const vehiculos = await window.dataService.fetchTiposUnidad();
+                const soluciones = await window.dataService.fetchTiposSolucion();
+                const insumos = await window.dataService.fetchTiposInsumo();
+                
+                log('📊 Resultados:');
+                log(`- Vehículos: ${vehiculos.length} registros`);
+                log(`- Soluciones: ${soluciones.length} registros`);
+                log(`- Insumos: ${insumos.length} registros`);
+                
+                // Mostrar algunos ejemplos
+                if (vehiculos.length > 0) {
+                    log(`🚗 Ejemplo de vehículo: ${JSON.stringify(vehiculos[0])}`);
+                }
+                if (soluciones.length > 0) {
+                    log(`🔧 Ejemplo de solución: ${JSON.stringify(soluciones[0])}`);
+                }
+                if (insumos.length > 0) {
+                    log(`📦 Ejemplo de insumo: ${JSON.stringify(insumos[0])}`);
+                }
+                
+                mostrarResultado(`✅ Prueba completada: ${vehiculos.length} vehículos, ${soluciones.length} soluciones, ${insumos.length} insumos`, 'success');
+                return true;
+                
+            } catch (error) {
+                log(`❌ Error probando tablas: ${error.message}`);
+                mostrarResultado('❌ Error probando tablas: ' + error.message, 'danger');
+                return false;
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('btnVerificar').addEventListener('click', async function() {
+            document.getElementById('logContainer').style.display = 'block';
+            logContent = '';
+            this.disabled = true;
+            this.innerHTML = '⏳ Verificando...';
+            
+            const resultado = await verificarConexion();
+            
+            this.disabled = false;
+            this.innerHTML = '🔍 Verificar Conexión';
+        });
+        
+        document.getElementById('btnMigrar').addEventListener('click', async function() {
+            document.getElementById('logContainer').style.display = 'block';
+            logContent = '';
+            this.disabled = true;
+            this.innerHTML = '⏳ Migrando...';
+            
+            const resultado = await migrarATablasSeparadas();
+            
+            this.disabled = false;
+            this.innerHTML = '🚀 Ejecutar Migración';
+        });
+        
+        document.getElementById('btnProbar').addEventListener('click', async function() {
+            document.getElementById('logContainer').style.display = 'block';
+            logContent = '';
+            this.disabled = true;
+            this.innerHTML = '⏳ Probando...';
+            
+            const resultado = await probarTablasSeparadas();
+            
+            this.disabled = false;
+            this.innerHTML = '🧪 Probar Tablas';
+        });
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Página de migración cargada');
+            log('💡 Haz clic en "Ejecutar Migración" para comenzar');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZendA - Workflow Manager | Instalaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .dashboard-card h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .dashboard-card p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .bg-gradient-purple { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        .bg-gradient-blue { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        .bg-gradient-green { background: linear-gradient(135deg, #fb930c 0%, #f39c12 100%); }
+        .bg-gradient-orange { background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%); }
+        .bg-gradient-red { background: linear-gradient(135deg, #fb930c 0%, #d35400 100%); }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #fb930c 0%, #e67e22 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .sidebar .btn {
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+        .solicitud-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        .solicitud-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .detail-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .item-row {
+            border-bottom: 1px solid #e9ecef;
+            padding: 8px 0;
+        }
+        .item-row:last-child {
+            border-bottom: none;
+        }
+        .urgencia-alta { border-left: 5px solid #dc3545; }
+        .urgencia-media { border-left: 5px solid #ffc107; }
+        .urgencia-baja { border-left: 5px solid #28a745; }
+        /* Despachada (atenuado como en despacho) */
+        .solicitud-despachada {
+            background-color: #f8f9fa;
+            border-left: 5px solid #6c757d;
+            opacity: 0.8;
+        }
+        .solicitud-despachada .card-title { color: #6c757d; }
+        
+        /* Instalada (estilo distintivo) */
+        .solicitud-instalada {
+            background-color: #f0f8f0;
+            border-left: 5px solid #28a745;
+            border: 2px solid #28a745;
+        }
+        .solicitud-instalada .card-title { color: #155724; }
+        .solicitud-instalada:hover {
+            background-color: #e8f5e8;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div class="text-center mb-4">
+                    <img src="ZENDA.svg?v=2" alt="Logo Empresa" height="60" class="mb-3">
+                    <h3 class="text-white">
+                        <i class="bi bi-tools"></i> Panel de Instalaciones
+                    </h3>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="actualizarSolicitudes()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+                <button class="btn btn-warning" onclick="corregirEstadoSolicitud()">
+                    <i class="bi bi-tools"></i> Corregir Estado
+                </button>
+                
+                <div class="mt-4" id="adminActionsSidebar" style="display:none;">
+                    <a href="./cotizaciones-completo.html" class="btn btn-outline-light">
+                        <i class="bi bi-arrow-left"></i> Volver al Sistema Principal
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Header -->
+                <nav class="navbar navbar-dark bg-dark">
+                    <div class="container-fluid">
+                        <div class="d-flex align-items-center">
+                            <img src="ZENDA.svg?v=2" alt="Logo Empresa" height="40" class="me-3">
+                            <span class="navbar-brand mb-0 h1">
+                                <i class="bi bi-tools"></i> Módulo de Instalaciones
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="./cotizaciones-completo.html" class="btn btn-outline-light btn-sm" id="btnPrincipalHeader" style="display:none;">
+                                <i class="bi bi-arrow-left"></i> Principal
+                            </a>
+                            <button class="btn btn-outline-light btn-sm" id="btnLogout">
+                                <i class="bi bi-box-arrow-right"></i> Salir
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Dashboard -->
+                <div class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="dashboard-card bg-gradient-purple">
+                                <h2 id="totalSolicitudes">0</h2>
+                                <p>Solicitudes Totales</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-blue">
+                                <h2 id="pendientes">0</h2>
+                                <p>Pendientes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="validadas">0</h2>
+                                <p>Validadas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-orange">
+                                <h2 id="retornadas">0</h2>
+                                <p>Retornadas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-blue">
+                                <h2 id="cambiosSolicitados">0</h2>
+                                <p>Cambios Solicitados</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="cambiosValidados">0</h2>
+                                <p>Cambios Validados</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-red">
+                                <h2 id="urgentes">0</h2>
+                                <p>Urgentes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-blue">
+                                <h2 id="despachadas">0</h2>
+                                <p>Despachadas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dashboard-card bg-gradient-green">
+                                <h2 id="instaladas">0</h2>
+                                <p>Instaladas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filter-section">
+                        <h5><i class="bi bi-funnel"></i> Filtros</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="filtroEstado" class="form-label">Estado:</label>
+                                <select class="form-select" id="filtroEstado" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="pendiente_validacion">Pendientes</option>
+                                    <option value="validada">Validadas</option>
+                                    <option value="retornada">Retornadas</option>
+                                    <option value="despacho_cambios_solicitados">Cambios Solicitados</option>
+                                    <option value="cambios_validados">Cambios Validados</option>
+                                    <option value="despachada">Despachadas</option>
+                                    <option value="instalada">Instaladas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroUrgencia" class="form-label">Urgencia:</label>
+                                <select class="form-select" id="filtroUrgencia" onchange="aplicarFiltros()">
+                                    <option value="">Todas</option>
+                                    <option value="alta">Alta</option>
+                                    <option value="media">Media</option>
+                                    <option value="baja">Baja</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroFecha" class="form-label">Fecha:</label>
+                                <input type="date" class="form-control" id="filtroFecha" onchange="aplicarFiltros()">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filtroCotizacion" class="form-label">Buscar Cotización:</label>
+                                <input type="text" class="form-control" id="filtroCotizacion" placeholder="ID Cotización..." onkeyup="aplicarFiltros()">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()">
+                                    <i class="bi bi-x-circle"></i> Limpiar Filtros
+                                </button>
+                                <span class="badge bg-info ms-2" id="resultadosFiltro">Mostrando todas las solicitudes</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Solicitudes -->
+                    <div id="listaSolicitudes">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalles de Solicitud -->
+    <div class="modal fade" id="modalDetalleSolicitud" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Validación de Solicitud de Instalación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="contenidoDetalle">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" onclick="agregarInsumosModal()">
+                        <i class="bi bi-plus-circle"></i> Agregar Insumos
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="retornarADespachoModal()">
+                        <i class="bi bi-arrow-left"></i> Retornar a Despacho
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="validarSolicitudModal()">
+                        <i class="bi bi-check-circle"></i> Validar Solicitud
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar Insumos -->
+    <div class="modal fade" id="modalAgregarInsumos" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Insumos Adicionales</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nuevoInsumo" class="form-label">Nombre del Insumo:</label>
+                        <input type="text" class="form-control" id="nuevoInsumo" placeholder="Ej: Cable adicional, tornillos extra...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cantidadInsumo" class="form-label">Cantidad:</label>
+                        <input type="number" class="form-control" id="cantidadInsumo" min="1" value="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoriaInsumo" class="form-label">Categoría:</label>
+                        <select class="form-select" id="categoriaInsumo">
+                            <option value="insumos">Insumos</option>
+                            <option value="accesorios">Accesorios</option>
+                            <option value="equipos">Equipos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="observacionesInsumo" class="form-label">Observaciones:</label>
+                        <textarea class="form-control" id="observacionesInsumo" rows="3" placeholder="Justificación para agregar este insumo..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmarAgregarInsumo()">
+                        <i class="bi bi-plus-circle"></i> Agregar Insumo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para observaciones de retorno -->
+    <div class="modal fade" id="modalObservacionesRetorno" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Observaciones de Retorno</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="observacionesRetorno" class="form-label">Observaciones para el retorno a despacho:</label>
+                        <textarea class="form-control" id="observacionesRetorno" rows="4" placeholder="Ingrese las observaciones sobre el retorno de esta solicitud..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" onclick="confirmarRetorno()">Retornar a Despacho</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Instalación -->
+    <div class="modal fade" id="modalConfirmarInstalacion" tabindex="-1" aria-labelledby="modalConfirmarInstalacionLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalConfirmarInstalacionLabel">
+                        <i class="bi bi-tools me-2"></i>Confirmar Instalación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>¿Estás seguro de marcar esta solicitud como instalada?</strong>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ID Solicitud:</label>
+                        <input type="text" class="form-control" id="confirmarInstalacionId" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cliente:</label>
+                        <input type="text" class="form-control" id="confirmarInstalacionCliente" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Observaciones (opcional):</label>
+                        <textarea class="form-control" id="confirmarInstalacionObservaciones" rows="3" 
+                                placeholder="Observaciones sobre la instalación..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-arrow-left me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="confirmarInstalacion()">
+                        <i class="bi bi-tools me-1"></i>Confirmar Instalación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Supabase CDN + DataService -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="dataService.js"></script>
+    <script src="accessGuard.js"></script>
+
+    <script>
+        (async function(){
+            const ok = await window.accessGuard.ensureAuth(['admin','instalaciones']);
+            if (!ok) return;
+            try {
+                const rol = await (window.dataService && window.dataService.getUserRole ? window.dataService.getUserRole() : Promise.resolve(null));
+                const isAdmin = rol === 'admin';
+                const headerBtn = document.getElementById('btnPrincipalHeader');
+                if (headerBtn) headerBtn.style.display = isAdmin ? '' : 'none';
+                const side = document.getElementById('adminActionsSidebar');
+                if (side) side.style.display = isAdmin ? '' : 'none';
+            } catch(_) {}
+        })();
+        document.addEventListener('DOMContentLoaded', function(){
+            const logoutBtn = document.getElementById('btnLogout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try { await window.dataService.authSignOut(); } catch(_){}
+                    window.location.href = './login.html';
+                });
+            }
+        });
+        // ===== VARIABLES GLOBALES =====
+        let notificacionesInstalaciones = [];
+        let solicitudActual = null;
+        let solicitudRetornando = null;
+        let modoCentralizado = false;
+
+        async function cargarNotificacionesDesdeSupabaseYFallback() {
+            // Si estamos evitando recarga desde Supabase, usar solo localStorage
+            if (evitarRecargaSupabase) {
+                console.log('🔄 DEBUG: Evitando recarga desde Supabase, usando solo localStorage');
+                cargarNotificacionesDesdeStorage();
+                return;
+            }
+            
+            // Verificar si hay datos locales más recientes que Supabase
+            const datosLocales = localStorage.getItem('notificaciones_instalaciones');
+            if (datosLocales) {
+                try {
+                    const notificacionesLocales = JSON.parse(datosLocales);
+                    const hayInstaladas = notificacionesLocales.some(n => n.estado === 'instalada');
+                    if (hayInstaladas) {
+                        console.log('🔄 DEBUG: Detectadas solicitudes instaladas en localStorage, priorizando datos locales');
+                        cargarNotificacionesDesdeStorage();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Error parseando datos locales:', e);
+                }
+            }
+            
+            try {
+                if (window.dataService && window.dataService.hasSupabase()) {
+                    const data = await window.dataService.fetchNotificacionesInstalaciones();
+                    if (Array.isArray(data)) {
+                        notificacionesInstalaciones = data;
+                        console.log('✅ Notificaciones cargadas desde Supabase:', notificacionesInstalaciones.length);
+                        return;
+                    }
+                }
+                cargarNotificacionesDesdeStorage();
+            } catch (e) {
+                console.warn('⚠️ Error leyendo Supabase; usando localStorage.', e);
+                cargarNotificacionesDesdeStorage();
+            }
+        }
+
+        function inicializarRealtimeInstalaciones() {
+            if (!(window.dataService && window.dataService.hasSupabase())) return;
+            window.dataService.subscribeNotificacionesInstalaciones(async () => {
+                // Si estamos evitando recarga desde Supabase, no hacer nada
+                if (evitarRecargaSupabase) {
+                    console.log('🔄 DEBUG: Realtime ignorado - evitarRecargaSupabase activo');
+                    return;
+                }
+                
+                const data = await window.dataService.fetchNotificacionesInstalaciones();
+                if (Array.isArray(data)) {
+                    notificacionesInstalaciones = data;
+                    cargarListaSolicitudes();
+                    actualizarEstadisticas();
+                }
+            });
+            // También observar cambios en solicitudes_despacho para marcar 'despachada'
+            window.dataService.subscribeSolicitudesDespacho(async (payload) => {
+                try {
+                    const row = payload && payload.new ? payload.new : null;
+                    const data = row && row.data ? row.data : null;
+                    if (data && data.id && data.estado === 'despachada') {
+                        await window.dataService.patchNotificacionBySolicitudId(data.id, { estado: 'despachada' });
+                        const notif = await window.dataService.fetchNotificacionesInstalaciones();
+                        if (Array.isArray(notif)) {
+                            notificacionesInstalaciones = notif;
+                            cargarListaSolicitudes();
+                            actualizarEstadisticas();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Realtime sync despachada:', e);
+                }
+            });
+        }
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔄 Inicializando módulo de instalaciones...');
+            await cargarNotificacionesDesdeSupabaseYFallback();
+            modoCentralizado = !!(window.dataService && window.dataService.hasSupabase());
+            inicializarRealtimeInstalaciones();
+            if (!modoCentralizado) {
+                limpiarSolicitudesInvalidas(); // Limpieza automática
+            }
+            cargarListaSolicitudes();
+            actualizarEstadisticas();
+            
+            // Listener para cambios en localStorage
+            window.addEventListener('storage', function(e) {
+                console.log('🔄 DEBUG: Cambio detectado en localStorage:', e.key, e.newValue);
+                if (e.key === 'notificaciones_instalaciones') {
+                    console.log('🔄 DEBUG: Recargando datos por cambio en notificaciones_instalaciones');
+                    cargarNotificacionesDesdeStorage();
+                    cargarListaSolicitudes();
+                    actualizarEstadisticas();
+                }
+            });
+            
+            // Actualización automática cada 30 segundos (solo local)
+            setInterval(() => {
+                if (!modoCentralizado) {
+                    cargarNotificacionesDesdeStorage();
+                    limpiarSolicitudesInvalidas();
+                    cargarListaSolicitudes();
+                    actualizarEstadisticas();
+                }
+            }, 30000);
+            
+            console.log('✅ Módulo de instalaciones iniciado');
+        });
+
+        function cargarNotificacionesDesdeStorage() {
+            const notificacionesGuardadas = localStorage.getItem('notificaciones_instalaciones');
+            console.log('🔍 DEBUG: Buscando notificaciones en localStorage...');
+            console.log('🔍 DEBUG: Datos encontrados:', notificacionesGuardadas);
+            console.log('🔍 DEBUG: Tipo de datos:', typeof notificacionesGuardadas);
+            console.log('🔍 DEBUG: Longitud de datos:', notificacionesGuardadas ? notificacionesGuardadas.length : 'null');
+            
+            // Verificar todas las claves del localStorage
+            console.log('🔍 DEBUG: Todas las claves en localStorage:', Object.keys(localStorage));
+            
+            if (notificacionesGuardadas) {
+                try {
+                    notificacionesInstalaciones = JSON.parse(notificacionesGuardadas);
+                    console.log('✅ Notificaciones cargadas desde localStorage:', notificacionesInstalaciones.length, 'elementos');
+                    console.log('📋 DEBUG: Contenido:', notificacionesInstalaciones);
+                    
+                    // Debug específico para solicitudes instaladas
+                    const instaladas = notificacionesInstalaciones.filter(n => n.estado === 'instalada');
+                    console.log('🔧 DEBUG: Solicitudes instaladas encontradas:', instaladas.length);
+                    instaladas.forEach(inst => {
+                        console.log(`🔧 DEBUG: Instalada - ID: ${inst.id}, Estado: ${inst.estado}, Fecha: ${inst.fecha_instalacion}`);
+                    });
+                    
+                    // Actualizar solicitudes existentes con datos faltantes
+                    actualizarSolicitudesExistentes();
+                } catch (error) {
+                    console.error('❌ Error parseando notificaciones de localStorage:', error);
+                }
+            } else {
+                console.log('⚠️ DEBUG: No se encontraron notificaciones en localStorage');
+                notificacionesInstalaciones = [];
+            }
+        }
+
+        function actualizarSolicitudesExistentes() {
+            let actualizacionesRealizadas = false;
+            
+            notificacionesInstalaciones.forEach(notificacion => {
+                // Agregar campos faltantes si no existen
+                if (!notificacion.unidadesDetalladas) {
+                    notificacion.unidadesDetalladas = [];
+                    actualizacionesRealizadas = true;
+                }
+                if (!notificacion.solucionesDetalladas) {
+                    notificacion.solucionesDetalladas = [];
+                    actualizacionesRealizadas = true;
+                }
+                
+                // Intentar obtener datos de la cotización original si no existen
+                if (notificacion.unidadesDetalladas.length === 0 && notificacion.solucionesDetalladas.length === 0) {
+                    const cotizacionOriginal = obtenerCotizacionOriginal(notificacion.cotizacionId);
+                    if (cotizacionOriginal) {
+                        notificacion.unidadesDetalladas = cotizacionOriginal.unidades || [];
+                        notificacion.solucionesDetalladas = obtenerSolucionesDetalladas(cotizacionOriginal);
+                        actualizacionesRealizadas = true;
+                        console.log(`🔄 DEBUG: Actualizada solicitud ${notificacion.id} con datos de cotización`);
+                    }
+                }
+            });
+            
+            if (actualizacionesRealizadas) {
+                guardarNotificaciones();
+                console.log('✅ DEBUG: Solicitudes existentes actualizadas con datos faltantes');
+            }
+        }
+
+        function obtenerCotizacionOriginal(cotizacionId) {
+            // Buscar en cotizaciones guardadas
+            const cotizacionesGuardadas = localStorage.getItem('cotizaciones_guardadas');
+            if (cotizacionesGuardadas) {
+                try {
+                    const cotizaciones = JSON.parse(cotizacionesGuardadas);
+                    return cotizaciones.find(cot => cot.id === cotizacionId);
+                } catch (error) {
+                    console.error('Error parseando cotizaciones guardadas:', error);
+                }
+            }
+            
+            // Buscar en cotizacionData
+            const cotizacionData = localStorage.getItem('cotizacionData');
+            if (cotizacionData) {
+                try {
+                    const cotizaciones = JSON.parse(cotizacionData);
+                    return cotizaciones.find(cot => cot.id === cotizacionId);
+                } catch (error) {
+                    console.error('Error parseando cotizacionData:', error);
+                }
+            }
+            
+            return null;
+        }
+
+        function obtenerSolucionesDetalladas(cotizacion) {
+            const solucionesDetalladas = [];
+            
+            if (cotizacion.unidades && Array.isArray(cotizacion.unidades)) {
+                cotizacion.unidades.forEach((unidad, index) => {
+                    if (unidad.soluciones && Array.isArray(unidad.soluciones)) {
+                        unidad.soluciones.forEach(solucion => {
+                            if (solucion && (solucion.nombre || solucion.tipo_solucion)) {
+                                solucionesDetalladas.push({
+                                    unidad: index + 1,
+                                    tipoUnidad: unidad.tipo,
+                                    solucion: solucion.nombre || solucion.tipo_solucion,
+                                    configuraciones: solucion.configuraciones || {}
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            return solucionesDetalladas;
+        }
+
+        function cargarListaSolicitudes() {
+            console.log('🔄 DEBUG: Iniciando cargarListaSolicitudes');
+            console.log('🔄 DEBUG: Flag evitarRecargaSupabase:', evitarRecargaSupabase);
+            console.log('🔄 DEBUG: Total notificaciones:', notificacionesInstalaciones.length);
+            console.log('🔄 DEBUG: Estados de notificaciones:', notificacionesInstalaciones.map(n => ({ id: n.id, estado: n.estado })));
+            console.log('🔄 DEBUG: Array completo de notificaciones:', notificacionesInstalaciones);
+            
+            const contenedor = document.getElementById('listaSolicitudes');
+            contenedor.innerHTML = '';
+
+            if (notificacionesInstalaciones.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-4 text-muted"></i>
+                        <h4 class="text-muted mt-3">No hay solicitudes de instalación</h4>
+                        <p class="text-muted">Las solicitudes enviadas desde el módulo de despacho aparecerán aquí.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notificacionesInstalaciones.forEach((notificacion, index) => {
+                console.log(`🔄 DEBUG: Procesando notificación ${index + 1}:`, {
+                    id: notificacion.id,
+                    estado: notificacion.estado,
+                    cliente: notificacion.cliente
+                });
+                
+                const urgenciaClass = `urgencia-${notificacion.urgencia}`;
+                const estadoBadge = obtenerEstadoBadge(notificacion.estado);
+                const urgenciaBadge = obtenerUrgenciaBadge(notificacion.urgencia);
+                const claseDespachada = notificacion.estado === 'despachada' ? 'solicitud-despachada' : '';
+                const claseInstalada = notificacion.estado === 'instalada' ? 'solicitud-instalada' : '';
+                
+                console.log(`🔄 DEBUG: Clases para ${notificacion.id}:`, {
+                    urgenciaClass,
+                    claseDespachada,
+                    claseInstalada,
+                    estado: notificacion.estado
+                });
+                
+                // Debug para verificar clases aplicadas
+                if (notificacion.estado === 'instalada') {
+                    console.log('🎨 DEBUG: Aplicando clase instalada a solicitud:', notificacion.id);
+                    console.log('🎨 DEBUG: Clase instalada:', claseInstalada);
+                }
+
+                const totalInsumos = Object.values(notificacion.insumos || {}).reduce((sum, cant) => sum + cant, 0);
+                const totalEquipos = Object.values(notificacion.equipos || {}).reduce((sum, cant) => sum + cant, 0);
+
+                const card = `
+                    <div class="solicitud-card ${urgenciaClass} ${claseDespachada} ${claseInstalada}" data-solicitud-id="${notificacion.id}">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-tools me-2"></i>
+                                        Solicitud ${notificacion.id}
+                                        ${estadoBadge}
+                                        ${urgenciaBadge}
+                                    </h5>
+                                    <p class="card-text">
+                                        <strong>Cliente:</strong> ${notificacion.cliente}<br>
+                                        <strong>Cotización:</strong> ${notificacion.cotizacionId}<br>
+                                        <strong>Unidades:</strong> ${notificacion.cantidadUnidades} (${notificacion.tipoUnidades})<br>
+                                        <strong>Fecha:</strong> ${notificacion.fecha}
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Elementos a validar:</small><br>
+                                        <span class="badge bg-primary">${totalInsumos} Insumos</span>
+                                        <span class="badge bg-info">${totalEquipos} Equipos</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="verDetalleSolicitud('${notificacion.id}')">
+                                        <i class="bi bi-eye"></i> Ver Detalles
+                                    </button>
+                                     <button class="btn btn-warning btn-sm" onclick="agregarInsumosDirecto('${notificacion.id}')">
+                                         <i class="bi bi-plus-circle"></i> Agregar
+                                     </button>
+                                    ${notificacion.estado === 'despacho_cambios_solicitados' ? 
+                                        `<button class="btn btn-success btn-sm" onclick="validarCambiosProcesados('${notificacion.id}')">
+                                            <i class="bi bi-check-circle"></i> Validar Cambios
+                                        </button>` :
+                                        (notificacion.estado === 'despachada' || notificacion.estado === 'validada' || notificacion.estado === 'cambios_validados') ? 
+                                        `<button class="btn btn-success btn-sm" onclick="marcarComoInstalada('${notificacion.id}')">
+                                            <i class="bi bi-tools"></i> Marcar Instalada
+                                        </button>` :
+                                        `<button class="btn btn-success btn-sm" onclick="validarSolicitud('${notificacion.id}')">
+                                            <i class="bi bi-check"></i> Validar
+                                        </button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                contenedor.innerHTML += card;
+            });
+        }
+
+        function obtenerEstadoBadge(estado) {
+            const estados = {
+                'pendiente_validacion': '<span class="badge bg-warning">Pendiente Validación</span>',
+                'validada': '<span class="badge bg-success">Validada</span>',
+                'retornada': '<span class="badge bg-info">Retornada a Despacho</span>',
+                'despacho_cambios_solicitados': '<span class="badge bg-primary">Despacho de Cambios Solicitados</span>',
+                'cambios_validados': '<span class="badge bg-success">Cambios Validados</span>',
+                'despachada': '<span class="badge bg-secondary">Despachada</span>',
+                'instalada': '<span class="badge bg-success">Instalada</span>'
+            };
+            return estados[estado] || '<span class="badge bg-secondary">Desconocido</span>';
+        }
+
+        function obtenerUrgenciaBadge(urgencia) {
+            const urgencias = {
+                'alta': '<span class="badge bg-danger">Urgente</span>',
+                'media': '<span class="badge bg-warning">Media</span>',
+                'baja': '<span class="badge bg-success">Baja</span>'
+            };
+            return urgencias[urgencia] || '<span class="badge bg-secondary">Normal</span>';
+        }
+
+        function verDetalleSolicitud(notificacionId) {
+            const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+            if (!notificacion) return;
+
+            solicitudActual = notificacion;
+
+            let detalleHTML = `
+                <div class="detail-section">
+                    <h6><i class="bi bi-info-circle"></i> Información General</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>ID Solicitud:</strong> ${notificacion.id}<br>
+                            <strong>Cotización:</strong> ${notificacion.cotizacionId}<br>
+                            <strong>Cliente:</strong> ${notificacion.cliente}<br>
+                            <strong>Estado:</strong> ${obtenerEstadoBadge(notificacion.estado)}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Fecha:</strong> ${notificacion.fecha}<br>
+                            <strong>Urgencia:</strong> ${obtenerUrgenciaBadge(notificacion.urgencia)}<br>
+                            <strong>Unidades:</strong> ${notificacion.cantidadUnidades} (${notificacion.tipoUnidades})
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h6><i class="bi bi-tools"></i> Soluciones a Instalar</h6>
+                    <div class="row">
+                        ${(notificacion.soluciones || []).map(solucion => `<div class="col-md-4"><span class="badge bg-info me-1">${solucion}</span></div>`).join('')}
+                    </div>
+                </div>
+
+                 ${notificacion.unidadesDetalladas && notificacion.unidadesDetalladas.length > 0 ? `
+                 <div class="detail-section">
+                     <h6><i class="bi bi-truck"></i> Unidades Detalladas</h6>
+                     ${notificacion.unidadesDetalladas.map((unidad, index) => `
+                         <div class="item-row">
+                             <div class="row">
+                                 <div class="col-md-3"><strong>Unidad ${index + 1}:</strong> ${unidad.tipo_unidad || unidad.tipo || 'No especificado'}</div>
+                                 <div class="col-md-3">${unidad.marca || 'N/A'} ${unidad.modelo || ''} ${unidad.anio || ''}</div>
+                                 <div class="col-md-3">
+                                     <small class="text-muted">
+                                         <strong>Combustible:</strong> ${unidad.combustible || 'N/A'}<br>
+                                         <strong>Voltaje:</strong> ${unidad.voltaje || 'N/A'}
+                                     </small>
+                                 </div>
+                                 <div class="col-md-3">
+                                     ${unidad.soluciones && unidad.soluciones.length > 0 ? 
+                                         unidad.soluciones.map(sol => `<span class="badge bg-secondary me-1">${sol.nombre || sol.tipo_solucion}</span>`).join('') :
+                                         '<span class="text-muted">Sin soluciones</span>'
+                                     }
+                                 </div>
+                             </div>
+                         </div>
+                     `).join('')}
+                 </div>
+                 ` : ''}
+
+                 ${notificacion.solucionesDetalladas && notificacion.solucionesDetalladas.length > 0 ? `
+                 <div class="detail-section">
+                     <h6><i class="bi bi-gear"></i> Configuraciones de Soluciones</h6>
+                     ${(() => {
+                         // Agrupar configuraciones idénticas
+                         const configuracionesUnicas = [];
+                         const configuracionesVistas = new Set();
+                         
+                         notificacion.solucionesDetalladas.forEach(sol => {
+                             const configKey = JSON.stringify({
+                                 tipoUnidad: sol.tipoUnidad,
+                                 solucion: sol.solucion,
+                                 configuraciones: sol.configuraciones
+                             });
+                             
+                             if (!configuracionesVistas.has(configKey)) {
+                                 configuracionesVistas.add(configKey);
+                                 
+                                 // Contar cuántas unidades tienen esta configuración
+                                 const unidadesConEstaConfig = notificacion.solucionesDetalladas.filter(s => 
+                                     JSON.stringify({
+                                         tipoUnidad: s.tipoUnidad,
+                                         solucion: s.solucion,
+                                         configuraciones: s.configuraciones
+                                     }) === configKey
+                                 );
+                                 
+                                 configuracionesUnicas.push({
+                                     ...sol,
+                                     cantidadUnidades: unidadesConEstaConfig.length,
+                                     unidades: unidadesConEstaConfig.map(s => s.unidad)
+                                 });
+                             }
+                         });
+                         
+                         return configuracionesUnicas.map(config => `
+                             <div class="item-row">
+                                 <div class="row">
+                                     <div class="col-md-2">
+                                         <strong>${config.cantidadUnidades > 1 ? 
+                                             `Unidades ${config.unidades.join(', ')}:` : 
+                                             `Unidad ${config.unidad}:`
+                                         }</strong>
+                                     </div>
+                                     <div class="col-md-3">${config.tipoUnidad || 'No especificado'}</div>
+                                     <div class="col-md-3">${config.solucion}</div>
+                                     <div class="col-md-4">
+                                         ${Object.keys(config.configuraciones).length > 0 ? 
+                                             Object.entries(config.configuraciones).map(([key, value]) => 
+                                                 `<small class="text-muted">${key}: ${value}</small><br>`
+                                             ).join('') :
+                                             '<small class="text-muted">Sin configuraciones</small>'
+                                         }
+                                     </div>
+                                 </div>
+                             </div>
+                         `).join('');
+                     })()}
+                 </div>
+                 ` : ''}
+            `;
+
+            if (Object.keys(notificacion.insumos || {}).length > 0) {
+                detalleHTML += `
+                    <div class="detail-section">
+                        <h6><i class="bi bi-box"></i> Insumos Requeridos</h6>
+                        ${Object.entries(notificacion.insumos).map(([insumo, cantidad]) => `
+                            <div class="item-row">
+                                <div class="row">
+                                    <div class="col-md-8">${insumo}</div>
+                                    <div class="col-md-4 text-end"><strong>${cantidad}</strong> unidades</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            if (Object.keys(notificacion.equipos || {}).length > 0) {
+                detalleHTML += `
+                    <div class="detail-section">
+                        <h6><i class="bi bi-cpu"></i> Equipos Requeridos</h6>
+                        ${Object.entries(notificacion.equipos).map(([equipo, cantidad]) => `
+                            <div class="item-row">
+                                <div class="row">
+                                    <div class="col-md-8">${equipo}</div>
+                                    <div class="col-md-4 text-end"><strong>${cantidad}</strong> unidades</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            if (notificacion.observaciones) {
+                detalleHTML += `
+                    <div class="detail-section">
+                        <h6><i class="bi bi-chat-text"></i> Observaciones</h6>
+                        <p>${notificacion.observaciones}</p>
+                    </div>
+                `;
+            }
+
+            // Mostrar insumos adicionales si existen
+            if (notificacion.insumosAdicionales && notificacion.insumosAdicionales.length > 0) {
+                detalleHTML += `
+                    <div class="detail-section">
+                        <h6><i class="bi bi-plus-circle"></i> Insumos Adicionales Agregados</h6>
+                        ${notificacion.insumosAdicionales.map(insumo => `
+                            <div class="item-row">
+                                <div class="row">
+                                    <div class="col-md-6">${insumo.nombre}</div>
+                                    <div class="col-md-2 text-end"><strong>${insumo.cantidad}</strong></div>
+                                    <div class="col-md-4"><small class="text-muted">${insumo.observaciones}</small></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            document.getElementById('contenidoDetalle').innerHTML = detalleHTML;
+            new bootstrap.Modal(document.getElementById('modalDetalleSolicitud')).show();
+        }
+
+        function validarSolicitud(notificacionId) {
+            const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+            if (!notificacion) return;
+
+            if (confirm(`¿Validar la solicitud ${notificacion.id}? Esto confirmará que todos los materiales están correctos para la instalación.`)) {
+                notificacion.estado = 'validada';
+                notificacion.fechaValidacion = new Date().toISOString().split('T')[0];
+                notificacion.validadoPor = 'Gerente de Instalaciones';
+                
+                // Enviar notificación de vuelta a despacho
+                enviarNotificacionValidacionADespacho(notificacion);
+                
+                guardarNotificaciones();
+                cargarListaSolicitudes();
+                actualizarEstadisticas();
+                
+                mostrarAlerta(`Solicitud ${notificacion.id} validada correctamente`, 'success');
+            }
+        }
+
+        function validarSolicitudModal() {
+            if (!solicitudActual) return;
+            validarSolicitud(solicitudActual.id);
+            bootstrap.Modal.getInstance(document.getElementById('modalDetalleSolicitud')).hide();
+        }
+
+        // Función para validar cambios procesados por despacho
+        function validarCambiosProcesados(notificacionId) {
+            try {
+                console.log('🔄 DEBUG: Iniciando validación de cambios procesados...');
+                const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+                if (!notificacion) {
+                    console.log('❌ DEBUG: Notificación no encontrada');
+                    mostrarAlerta('Solicitud no encontrada', 'danger');
+                    return;
+                }
+
+                console.log('🔍 DEBUG: Notificación encontrada:', notificacion);
+                console.log('🔍 DEBUG: Estado anterior:', notificacion.estado);
+
+                // Cambiar estado a "cambios_validados"
+                notificacion.estado = 'cambios_validados';
+                notificacion.fechaValidacion = new Date().toISOString();
+                notificacion.mensaje = 'Cambios validados por Instalaciones. Listo para despacho final.';
+
+                console.log('✅ DEBUG: Estado actualizado a:', notificacion.estado);
+
+                // Guardar cambios
+                if (modoCentralizado) {
+                    window.dataService.patchNotificacionInstalacionesById(notificacion.id, {
+                        estado: 'cambios_validados',
+                        fechaValidacion: notificacion.fechaValidacion,
+                        mensaje: notificacion.mensaje
+                    });
+                } else {
+                    localStorage.setItem('notificaciones_instalaciones', JSON.stringify(notificacionesInstalaciones));
+                    console.log('💾 DEBUG: Cambios guardados en localStorage');
+                }
+
+                // Notificar a Despacho que los cambios han sido validados
+                console.log('📤 DEBUG: Notificando a Despacho...');
+                notificarDespachoCambiosValidados(notificacion);
+
+                // Actualizar interfaz
+                actualizarSolicitudes();
+                mostrarAlerta('Cambios validados correctamente. Despacho ha sido notificado.', 'success');
+                
+                console.log('✅ DEBUG: Proceso completado - Estado: cambios_validados');
+            } catch (error) {
+                console.error('❌ Error al validar cambios:', error);
+                mostrarAlerta('Error al validar cambios', 'danger');
+            }
+        }
+
+        // Función para corregir el estado de una solicitud que tiene insumos adicionales
+        function corregirEstadoSolicitud() {
+            try {
+                console.log('🔧 DEBUG: Iniciando corrección de estado...');
+                
+                // Buscar solicitudes que tienen insumos adicionales pero están en estado 'validada'
+                const solicitudesConInsumos = notificacionesInstalaciones.filter(n => 
+                    n.insumosAdicionales && n.insumosAdicionales.length > 0 && n.estado === 'validada'
+                );
+                
+                console.log('🔍 DEBUG: Solicitudes con insumos adicionales encontradas:', solicitudesConInsumos.length);
+                
+                if (solicitudesConInsumos.length === 0) {
+                    mostrarAlerta('No hay solicitudes que necesiten corrección de estado', 'info');
+                    return;
+                }
+                
+                // Cambiar el estado a 'despacho_cambios_solicitados' para que puedan usar el flujo correcto
+                solicitudesConInsumos.forEach(notificacion => {
+                    console.log('🔧 DEBUG: Corrigiendo estado de solicitud:', notificacion.id);
+                    notificacion.estado = 'despacho_cambios_solicitados';
+                    notificacion.mensaje = 'Despacho ha procesado los insumos adicionales solicitados. Por favor validar.';
+                });
+                
+                // Guardar cambios
+                if (!modoCentralizado) {
+                    localStorage.setItem('notificaciones_instalaciones', JSON.stringify(notificacionesInstalaciones));
+                }
+                
+                // Actualizar interfaz
+                actualizarSolicitudes();
+                
+                mostrarAlerta(`${solicitudesConInsumos.length} solicitudes corregidas. Ahora puedes usar "Validar Cambios".`, 'success');
+                console.log('✅ DEBUG: Estados corregidos correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error al corregir estados:', error);
+                mostrarAlerta('Error al corregir estados', 'danger');
+            }
+        }
+
+        // Función para notificar a Despacho que los cambios han sido validados
+        function notificarDespachoCambiosValidados(notificacion) {
+            try {
+                console.log('📤 DEBUG: Iniciando notificación a Despacho...');
+                console.log('🔍 DEBUG: ID de solicitud a buscar:', notificacion.solicitudDespachoId);
+                
+                const patch = {
+                    estado: 'cambios_validados',
+                    fechaValidacion: new Date().toISOString(),
+                    mensaje: 'Cambios validados por Instalaciones. Listo para despacho final.'
+                };
+                if (modoCentralizado) {
+                    window.dataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch)
+                      .then(() => console.log('✅ DEBUG: (Supabase) Despacho actualizado a cambios_validados'));
+                } else {
+                    // Modo local
+                    let solicitudesDespacho = JSON.parse(localStorage.getItem('solicitudes_despacho') || '[]');
+                    const solicitudIndex = solicitudesDespacho.findIndex(s => s.id === notificacion.solicitudDespachoId);
+                    if (solicitudIndex !== -1) {
+                        solicitudesDespacho[solicitudIndex].estado = patch.estado;
+                        solicitudesDespacho[solicitudIndex].fechaValidacion = patch.fechaValidacion;
+                        solicitudesDespacho[solicitudIndex].mensaje = patch.mensaje;
+                        localStorage.setItem('solicitudes_despacho', JSON.stringify(solicitudesDespacho));
+                        window.dispatchEvent(new CustomEvent('solicitudesDespachoActualizadas', { detail: { solicitudId: notificacion.solicitudDespachoId, nuevoEstado: patch.estado, mensaje: patch.mensaje } }));
+                        console.log('✅ DEBUG: Notificación enviada a Despacho - Estado: cambios_validados');
+                    } else {
+                        console.log('⚠️ DEBUG: No se encontró la solicitud correspondiente en Despacho');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error al notificar a Despacho:', error);
+            }
+        }
+
+        function agregarInsumos() {
+            if (!solicitudActual) {
+                mostrarAlerta('Por favor seleccione una solicitud primero haciendo clic en "Ver Detalles"', 'warning');
+                return;
+            }
+            new bootstrap.Modal(document.getElementById('modalAgregarInsumos')).show();
+        }
+
+        function agregarInsumosDirecto(notificacionId) {
+            console.log('🔧 DEBUG: Intentando agregar insumos para solicitud:', notificacionId);
+            console.log('🔧 DEBUG: Total notificaciones disponibles:', notificacionesInstalaciones.length);
+            
+            const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+            if (!notificacion) {
+                console.log('❌ DEBUG: No se encontró la notificación');
+                console.log('❌ DEBUG: IDs disponibles:', notificacionesInstalaciones.map(n => n.id));
+                return;
+            }
+            
+            console.log('✅ DEBUG: Notificación encontrada:', notificacion.id);
+            solicitudActual = notificacion;
+            
+            const modal = document.getElementById('modalAgregarInsumos');
+            if (!modal) {
+                console.log('❌ DEBUG: No se encontró el modal modalAgregarInsumos');
+                console.log('❌ DEBUG: Modales disponibles:', document.querySelectorAll('.modal').length);
+                return;
+            }
+            
+            console.log('✅ DEBUG: Modal encontrado, abriendo...');
+            try {
+                const modalInstance = new bootstrap.Modal(modal);
+                modalInstance.show();
+                console.log('✅ DEBUG: Modal abierto exitosamente');
+            } catch (error) {
+                console.error('❌ DEBUG: Error al abrir modal:', error);
+            }
+        }
+
+        function agregarInsumosModal() {
+            if (!solicitudActual) return;
+            
+            // Cerrar el modal de detalles
+            const modalDetalle = bootstrap.Modal.getInstance(document.getElementById('modalDetalleSolicitud'));
+            if (modalDetalle) {
+                modalDetalle.hide();
+            }
+            
+            // Abrir el modal de agregar insumos
+            new bootstrap.Modal(document.getElementById('modalAgregarInsumos')).show();
+        }
+
+        function confirmarAgregarInsumo() {
+            if (!solicitudActual) return;
+
+            const nombre = document.getElementById('nuevoInsumo').value.trim();
+            const cantidad = parseInt(document.getElementById('cantidadInsumo').value);
+            const categoria = document.getElementById('categoriaInsumo').value;
+            const observaciones = document.getElementById('observacionesInsumo').value.trim();
+
+            if (!nombre || cantidad <= 0) {
+                mostrarAlerta('Por favor complete todos los campos requeridos', 'warning');
+                return;
+            }
+
+            // Buscar la notificación en el array principal
+            const notificacion = notificacionesInstalaciones.find(n => n.id === solicitudActual.id);
+            if (!notificacion) {
+                mostrarAlerta('Error: No se encontró la notificación', 'danger');
+                return;
+            }
+
+            if (!notificacion.insumosAdicionales) {
+                notificacion.insumosAdicionales = [];
+            }
+
+            notificacion.insumosAdicionales.push({
+                nombre: nombre,
+                cantidad: cantidad,
+                categoria: categoria,
+                observaciones: observaciones,
+                fechaAgregado: new Date().toISOString().split('T')[0],
+                agregadoPor: 'Gerente de Instalaciones'
+            });
+
+            // Actualizar también solicitudActual para mantener consistencia
+            solicitudActual.insumosAdicionales = notificacion.insumosAdicionales;
+
+            document.getElementById('nuevoInsumo').value = '';
+            document.getElementById('cantidadInsumo').value = '1';
+            document.getElementById('categoriaInsumo').value = 'insumos';
+            document.getElementById('observacionesInsumo').value = '';
+
+            guardarNotificaciones();
+            cargarListaSolicitudes();
+            
+            bootstrap.Modal.getInstance(document.getElementById('modalAgregarInsumos')).hide();
+            mostrarAlerta(`Insumo "${nombre}" agregado correctamente`, 'success');
+        }
+
+        function retornarADespacho(notificacionId) {
+            const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+            if (!notificacion) return;
+
+            // Guardar el ID de la solicitud que se está retornando
+            solicitudRetornando = notificacionId;
+            
+            // Limpiar el textarea y mostrar el modal
+            document.getElementById('observacionesRetorno').value = '';
+            new bootstrap.Modal(document.getElementById('modalObservacionesRetorno')).show();
+        }
+
+        function confirmarRetorno() {
+            if (!solicitudRetornando) return;
+
+            const observaciones = document.getElementById('observacionesRetorno').value.trim();
+            if (!observaciones) {
+                alert('Por favor ingrese las observaciones del retorno');
+                return;
+            }
+
+            const notificacion = notificacionesInstalaciones.find(n => n.id === solicitudRetornando);
+            if (!notificacion) return;
+
+            console.log('🔄 DEBUG: Retornando solicitud a despacho:', solicitudRetornando);
+            console.log('🔄 DEBUG: Solicitud despacho ID:', notificacion.solicitudDespachoId);
+
+            notificacion.estado = 'retornada';
+            notificacion.fechaRetorno = new Date().toISOString().split('T')[0];
+            notificacion.observacionesRetorno = observaciones;
+            notificacion.retornadoPor = 'Gerente de Instalaciones';
+
+            // Actualizar la solicitud original en el módulo de despacho
+            const solicitudesDespacho = JSON.parse(localStorage.getItem('solicitudes_despacho') || '[]');
+            console.log('🔄 DEBUG: Solicitudes en despacho antes de actualizar:', solicitudesDespacho.length);
+            
+            const solicitudEnDespacho = solicitudesDespacho.find(s => s.id === notificacion.solicitudDespachoId);
+            
+            if (solicitudEnDespacho || modoCentralizado) {
+                console.log('✅ DEBUG: Encontrada solicitud en despacho:', solicitudEnDespacho ? solicitudEnDespacho.id : '(Supabase)');
+                if (solicitudEnDespacho) {
+                    console.log('✅ DEBUG: Estado anterior:', solicitudEnDespacho.estado);
+                } else {
+                    console.log('✅ DEBUG: Estado anterior: (Supabase)');
+                }
+                console.log('✅ DEBUG: Insumos adicionales a enviar:', notificacion.insumosAdicionales);
+                
+                const patch = {
+                    estado: 'retornada_instalaciones',
+                    fechaRetorno: notificacion.fechaRetorno,
+                    observacionesRetorno: observaciones,
+                    retornadoPor: notificacion.retornadoPor,
+                    insumosAdicionales: notificacion.insumosAdicionales || []
+                };
+                if (modoCentralizado) {
+                    window.dataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch);
+                } else {
+                    solicitudEnDespacho.estado = patch.estado;
+                    solicitudEnDespacho.fechaRetorno = patch.fechaRetorno;
+                    solicitudEnDespacho.observacionesRetorno = patch.observacionesRetorno;
+                    solicitudEnDespacho.retornadoPor = patch.retornadoPor;
+                    solicitudEnDespacho.insumosAdicionales = patch.insumosAdicionales;
+                }
+                
+                if (!modoCentralizado) {
+                    console.log('✅ DEBUG: Estado nuevo:', solicitudEnDespacho.estado);
+                    console.log('✅ DEBUG: Insumos adicionales guardados en despacho:', solicitudEnDespacho.insumosAdicionales);
+                }
+                
+                if (!modoCentralizado) {
+                    localStorage.setItem('solicitudes_despacho', JSON.stringify(solicitudesDespacho));
+                }
+                console.log(`✅ DEBUG: Solicitud ${notificacion.solicitudDespachoId} actualizada en despacho con estado 'retornada_instalaciones'`);
+                
+                // Disparar evento personalizado para notificar cambios
+                window.dispatchEvent(new CustomEvent('solicitudesDespachoActualizadas', {
+                    detail: { solicitudId: notificacion.solicitudDespachoId, nuevoEstado: 'retornada_instalaciones' }
+                }));
+                
+                // Verificar que se guardó correctamente
+                const verificacion = JSON.parse(localStorage.getItem('solicitudes_despacho') || '[]');
+                const solicitudVerificada = verificacion.find(s => s.id === notificacion.solicitudDespachoId);
+                console.log('✅ DEBUG: Verificación - Estado guardado:', solicitudVerificada ? solicitudVerificada.estado : 'NO ENCONTRADA');
+            } else {
+                console.log(`⚠️ DEBUG: No se encontró la solicitud ${notificacion.solicitudDespachoId} en el módulo de despacho`);
+                console.log('⚠️ DEBUG: IDs disponibles en despacho:', solicitudesDespacho.map(s => s.id));
+            }
+
+            if (modoCentralizado) {
+                window.dataService.patchNotificacionInstalacionesById(notificacion.id, {
+                    estado: 'retornada',
+                    fechaRetorno: notificacion.fechaRetorno,
+                    observacionesRetorno: observaciones,
+                    retornadoPor: notificacion.retornadoPor,
+                    insumosAdicionales: notificacion.insumosAdicionales || []
+                });
+            } else {
+                guardarNotificaciones();
+            }
+            cargarListaSolicitudes();
+            actualizarEstadisticas();
+            
+            // Cerrar el modal
+            bootstrap.Modal.getInstance(document.getElementById('modalObservacionesRetorno')).hide();
+            
+            // Limpiar la variable
+            solicitudRetornando = null;
+            
+            mostrarAlerta(`Solicitud ${notificacion.id} retornada a despacho`, 'info');
+        }
+
+        function retornarADespachoModal() {
+            if (!solicitudActual) return;
+            retornarADespacho(solicitudActual.id);
+            bootstrap.Modal.getInstance(document.getElementById('modalDetalleSolicitud')).hide();
+        }
+
+        function enviarNotificacionValidacionADespacho(notificacion) {
+            console.log(`✉️ DEBUG: Enviando notificación de validación para solicitud ${notificacion.id} a Despacho.`);
+            
+            // Actualizar el estado en el módulo de despacho
+            if (modoCentralizado) {
+                if (notificacion.estado !== 'cambios_validados') {
+                    const patch = {
+                        estado: 'validada_instalaciones',
+                        fechaValidacion: notificacion.fechaValidacion,
+                        validadoPor: notificacion.validadoPor,
+                        observacionesInstalaciones: `Validada por ${notificacion.validadoPor} el ${notificacion.fechaValidacion}`
+                    };
+                    window.dataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch);
+                    console.log(`✅ DEBUG: (Supabase) Estado de solicitud ${notificacion.solicitudDespachoId} actualizado a 'validada_instalaciones'.`);
+                } else {
+                    console.log(`✅ DEBUG: (Supabase) Estado ya 'cambios_validados'.`);
+                }
+            } else {
+                const solicitudesDespacho = JSON.parse(localStorage.getItem('solicitudes_despacho') || '[]');
+                const solicitudEnDespacho = solicitudesDespacho.find(s => s.id === notificacion.solicitudDespachoId);
+                if (solicitudEnDespacho) {
+                    if (notificacion.estado !== 'cambios_validados') {
+                        solicitudEnDespacho.estado = 'validada_instalaciones';
+                        solicitudEnDespacho.fechaValidacion = notificacion.fechaValidacion;
+                        solicitudEnDespacho.validadoPor = notificacion.validadoPor;
+                        solicitudEnDespacho.observacionesInstalaciones = `Validada por ${notificacion.validadoPor} el ${notificacion.fechaValidacion}`;
+                        localStorage.setItem('solicitudes_despacho', JSON.stringify(solicitudesDespacho));
+                        console.log(`✅ DEBUG: Estado de solicitud ${notificacion.solicitudDespachoId} actualizado a 'validada_instalaciones' en Despacho.`);
+                    } else {
+                        console.log(`✅ DEBUG: Estado ya actualizado a 'cambios_validados' por notificarDespachoCambiosValidados`);
+                    }
+                } else {
+                    console.log(`⚠️ DEBUG: No se encontró la solicitud ${notificacion.solicitudDespachoId} en el módulo de despacho.`);
+                }
+            }
+        }
+
+        function actualizarEstadisticas() {
+            const total = notificacionesInstalaciones.length;
+            const pendientes = notificacionesInstalaciones.filter(n => n.estado === 'pendiente_validacion').length;
+            const validadas = notificacionesInstalaciones.filter(n => n.estado === 'validada').length;
+            const retornadas = notificacionesInstalaciones.filter(n => n.estado === 'retornada').length;
+            const cambiosSolicitados = notificacionesInstalaciones.filter(n => n.estado === 'despacho_cambios_solicitados').length;
+            const cambiosValidados = notificacionesInstalaciones.filter(n => n.estado === 'cambios_validados').length;
+            const urgentes = notificacionesInstalaciones.filter(n => n.urgencia === 'alta' && n.estado !== 'validada').length;
+            const despachadas = notificacionesInstalaciones.filter(n => n.estado === 'despachada').length;
+            const instaladas = notificacionesInstalaciones.filter(n => n.estado === 'instalada').length;
+
+            document.getElementById('totalSolicitudes').textContent = total;
+            document.getElementById('pendientes').textContent = pendientes;
+            document.getElementById('validadas').textContent = validadas;
+            document.getElementById('retornadas').textContent = retornadas;
+            document.getElementById('cambiosSolicitados').textContent = cambiosSolicitados;
+            document.getElementById('cambiosValidados').textContent = cambiosValidados;
+            document.getElementById('urgentes').textContent = urgentes;
+            document.getElementById('despachadas').textContent = despachadas;
+            document.getElementById('instaladas').textContent = instaladas;
+        }
+
+        function aplicarFiltros() {
+            const filtroEstado = document.getElementById('filtroEstado').value;
+            const filtroUrgencia = document.getElementById('filtroUrgencia').value;
+            const filtroFecha = document.getElementById('filtroFecha').value;
+            const filtroCotizacion = document.getElementById('filtroCotizacion').value.toLowerCase();
+
+            const cards = document.querySelectorAll('.solicitud-card');
+            let visibles = 0;
+
+            cards.forEach(card => {
+                const notificacionId = card.dataset.solicitudId;
+                const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+                
+                if (!notificacion) return;
+
+                let mostrar = true;
+
+                if (filtroEstado && notificacion.estado !== filtroEstado) mostrar = false;
+                if (filtroUrgencia && notificacion.urgencia !== filtroUrgencia) mostrar = false;
+                if (filtroFecha && notificacion.fecha !== filtroFecha) mostrar = false;
+                if (filtroCotizacion && !notificacion.cotizacionId.toLowerCase().includes(filtroCotizacion)) mostrar = false;
+
+                card.style.display = mostrar ? '' : 'none';
+                if (mostrar) visibles++;
+            });
+
+            document.getElementById('resultadosFiltro').textContent = `Mostrando ${visibles} solicitudes`;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroEstado').value = '';
+            document.getElementById('filtroUrgencia').value = '';
+            document.getElementById('filtroFecha').value = '';
+            document.getElementById('filtroCotizacion').value = '';
+            
+            const cards = document.querySelectorAll('.solicitud-card');
+            cards.forEach(card => {
+                card.style.display = '';
+            });
+            
+            document.getElementById('resultadosFiltro').textContent = 'Mostrando todas las solicitudes';
+        }
+
+        async function actualizarSolicitudes() {
+            try {
+                if (modoCentralizado && window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
+                    const data = await window.dataService.fetchNotificacionesInstalaciones();
+                    if (Array.isArray(data)) {
+                        notificacionesInstalaciones = data;
+                        // Mantener localStorage sincronizado para evitar reaparecer datos antiguos
+                        try { localStorage.setItem('notificaciones_instalaciones', JSON.stringify(notificacionesInstalaciones)); } catch(_){}
+                    } else {
+                        cargarNotificacionesDesdeStorage();
+                    }
+                } else {
+                    cargarNotificacionesDesdeStorage();
+                }
+            } catch (e) {
+                console.warn('⚠️ Error al actualizar desde Supabase; usando localStorage.', e);
+                cargarNotificacionesDesdeStorage();
+            }
+            cargarListaSolicitudes();
+            actualizarEstadisticas();
+            mostrarAlerta('Solicitudes actualizadas', 'info');
+        }
+
+        function guardarNotificaciones() {
+            localStorage.setItem('notificaciones_instalaciones', JSON.stringify(notificacionesInstalaciones));
+        }
+
+        function limpiarSolicitudesInvalidas() {
+            console.log('🧹 DEBUG: Iniciando limpieza automática de solicitudes inválidas...');
+            
+            // Obtener todas las cotizaciones válidas desde localStorage - usar 'cotizaciones_guardadas' en lugar de 'cotizacionData'
+            const cotizacionesGuardadas = localStorage.getItem('cotizaciones_guardadas');
+            let cotizacionesValidas = [];
+            
+            if (cotizacionesGuardadas) {
+                try {
+                    const cotizaciones = JSON.parse(cotizacionesGuardadas);
+                    cotizacionesValidas = cotizaciones.map(cot => cot.id);
+                    console.log('📋 DEBUG: Cotizaciones válidas encontradas:', cotizacionesValidas.length);
+                    console.log('📋 DEBUG: IDs de cotizaciones válidas:', cotizacionesValidas);
+                } catch (error) {
+                    console.error('❌ Error parseando cotizaciones:', error);
+                }
+            } else {
+                console.log('⚠️ DEBUG: No se encontraron cotizaciones guardadas en localStorage');
+            }
+            
+            // Filtrar solicitudes que tienen cotizaciones válidas
+            const solicitudesOriginales = notificacionesInstalaciones.length;
+            notificacionesInstalaciones = notificacionesInstalaciones.filter(notificacion => {
+                const cotizacionExiste = cotizacionesValidas.includes(notificacion.cotizacionId);
+                
+                // Mantener si tiene cotización válida O si está instalada (preservar instaladas)
+                const mantener = cotizacionExiste || notificacion.estado === 'instalada';
+                
+                if (!mantener) {
+                    console.log(`🗑️ DEBUG: Eliminando solicitud (cotización eliminada): ${notificacion.id} (Cotización: ${notificacion.cotizacionId}, Estado: ${notificacion.estado})`);
+                } else {
+                    console.log(`✅ DEBUG: Manteniendo solicitud válida: ${notificacion.id} (Cotización: ${notificacion.cotizacionId}, Estado: ${notificacion.estado})`);
+                }
+                
+                return mantener;
+            });
+            
+            const solicitudesEliminadas = solicitudesOriginales - notificacionesInstalaciones.length;
+            
+            if (solicitudesEliminadas > 0) {
+                guardarNotificaciones();
+                console.log(`🧹 DEBUG: Limpieza automática - Se eliminaron ${solicitudesEliminadas} solicitudes inválidas`);
+            }
+        }
+
+        function verificarSolicitudesInvalidas() {
+            // Obtener todas las cotizaciones válidas desde localStorage
+            const cotizacionesGuardadas = localStorage.getItem('cotizacionData');
+            let cotizacionesValidas = [];
+            
+            if (cotizacionesGuardadas) {
+                try {
+                    const cotizaciones = JSON.parse(cotizacionesGuardadas);
+                    cotizacionesValidas = cotizaciones.map(cot => cot.id);
+                    console.log('🔍 DEBUG: Cotizaciones válidas encontradas:', cotizacionesValidas.length);
+                } catch (error) {
+                    console.error('❌ Error parseando cotizaciones:', error);
+                }
+            }
+            
+            // Identificar solicitudes inválidas
+            const solicitudesInvalidas = notificacionesInstalaciones.filter(notificacion => {
+                return !cotizacionesValidas.includes(notificacion.cotizacionId);
+            });
+            
+            if (solicitudesInvalidas.length > 0) {
+                let mensaje = `Se encontraron ${solicitudesInvalidas.length} solicitudes inválidas:\n\n`;
+                solicitudesInvalidas.forEach(solicitud => {
+                    mensaje += `• ${solicitud.id} - Cotización: ${solicitud.cotizacionId} - Cliente: ${solicitud.cliente}\n`;
+                });
+                mensaje += `\n¿Desea eliminarlas?`;
+                
+                if (confirm(mensaje)) {
+                    limpiarSolicitudesInvalidasManual();
+                }
+            } else {
+                mostrarAlerta('No se encontraron solicitudes inválidas', 'info');
+            }
+        }
+
+        function limpiarSolicitudesInvalidasManual() {
+            // Obtener todas las cotizaciones válidas desde localStorage
+            const cotizacionesGuardadas = localStorage.getItem('cotizacionData');
+            let cotizacionesValidas = [];
+            
+            if (cotizacionesGuardadas) {
+                try {
+                    const cotizaciones = JSON.parse(cotizacionesGuardadas);
+                    cotizacionesValidas = cotizaciones.map(cot => cot.id);
+                    console.log('🔍 DEBUG: Cotizaciones válidas encontradas:', cotizacionesValidas.length);
+                } catch (error) {
+                    console.error('❌ Error parseando cotizaciones:', error);
+                }
+            }
+            
+            // Filtrar solicitudes que tienen cotizaciones válidas
+            const solicitudesOriginales = notificacionesInstalaciones.length;
+            notificacionesInstalaciones = notificacionesInstalaciones.filter(notificacion => {
+                const cotizacionExiste = cotizacionesValidas.includes(notificacion.cotizacionId);
+                if (!cotizacionExiste) {
+                    console.log(`🗑️ DEBUG: Eliminando solicitud inválida: ${notificacion.id} (Cotización: ${notificacion.cotizacionId})`);
+                }
+                return cotizacionExiste;
+            });
+            
+            const solicitudesEliminadas = solicitudesOriginales - notificacionesInstalaciones.length;
+            
+            if (solicitudesEliminadas > 0) {
+                guardarNotificaciones();
+                cargarListaSolicitudes();
+                actualizarEstadisticas();
+                mostrarAlerta(`Se eliminaron ${solicitudesEliminadas} solicitudes inválidas`, 'success');
+            } else {
+                mostrarAlerta('No se encontraron solicitudes inválidas para eliminar', 'info');
+            }
+        }
+
+        function debugLocalStorage() {
+            console.log('🔍 DEBUG: Verificando localStorage...');
+            console.log('🔍 DEBUG: Todas las claves:', Object.keys(localStorage));
+            
+            const notificacionesInstalaciones = localStorage.getItem('notificaciones_instalaciones');
+            const solicitudesDespacho = localStorage.getItem('solicitudes_despacho');
+            const cotizacionData = localStorage.getItem('cotizacionData');
+            const cotizacionesGuardadas = localStorage.getItem('cotizaciones_guardadas');
+            
+            console.log('🔍 DEBUG: notificaciones_instalaciones:', notificacionesInstalaciones);
+            console.log('🔍 DEBUG: solicitudes_despacho:', solicitudesDespacho);
+            console.log('🔍 DEBUG: cotizacionData:', cotizacionData);
+            console.log('🔍 DEBUG: cotizaciones_guardadas:', cotizacionesGuardadas);
+            
+            let mensaje = 'Debug localStorage:\n\n';
+            mensaje += `notificaciones_instalaciones: ${notificacionesInstalaciones ? 'EXISTE' : 'NO EXISTE'}\n`;
+            mensaje += `solicitudes_despacho: ${solicitudesDespacho ? 'EXISTE' : 'NO EXISTE'}\n`;
+            mensaje += `cotizacionData: ${cotizacionData ? 'EXISTE' : 'NO EXISTE'}\n`;
+            mensaje += `cotizaciones_guardadas: ${cotizacionesGuardadas ? 'EXISTE' : 'NO EXISTE'}\n\n`;
+            mensaje += `Total claves: ${Object.keys(localStorage).length}`;
+            
+            alert(mensaje);
+        }
+
+        function forzarRecargaDatos() {
+            console.log('🔄 DEBUG: Forzando recarga de datos...');
+            
+            // Limpiar variables globales
+            notificacionesInstalaciones = [];
+            
+            // Recargar desde localStorage
+            cargarNotificacionesDesdeStorage();
+            
+            // Recargar interfaz
+            cargarListaSolicitudes();
+            actualizarEstadisticas();
+            
+            mostrarAlerta('Datos recargados forzadamente', 'info');
+        }
+
+        
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // Variables para el modal de instalación
+        let notificacionInstalacionId = null;
+        let procesandoInstalacion = false;
+        let evitarRecargaSupabase = false;
+
+        // Función para mostrar modal de confirmación de instalación
+        function marcarComoInstalada(notificacionId) {
+            const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionId);
+            if (!notificacion) {
+                mostrarAlerta('Solicitud no encontrada', 'danger');
+                return;
+            }
+
+            // Llenar datos del modal
+            notificacionInstalacionId = notificacionId;
+            document.getElementById('confirmarInstalacionId').value = notificacion.id;
+            document.getElementById('confirmarInstalacionCliente').value = notificacion.cliente;
+            document.getElementById('confirmarInstalacionObservaciones').value = '';
+
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalConfirmarInstalacion'));
+            modal.show();
+        }
+
+        // Función para confirmar instalación
+        async function confirmarInstalacion() {
+            console.log('🚀 DEBUG: Iniciando confirmarInstalacion');
+            console.log('🚀 DEBUG: notificacionInstalacionId:', notificacionInstalacionId);
+            
+            if (procesandoInstalacion) {
+                console.log('⚠️ DEBUG: Ya se está procesando una instalación, ignorando...');
+                return;
+            }
+            
+            procesandoInstalacion = true;
+            evitarRecargaSupabase = true;
+            console.log('🚀 DEBUG: Flag procesandoInstalacion establecido a true');
+            console.log('🚀 DEBUG: Flag evitarRecargaSupabase establecido a true');
+            
+            try {
+                const notificacion = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
+                if (!notificacion) {
+                    mostrarAlerta('Solicitud no encontrada', 'danger');
+                    procesandoInstalacion = false;
+                    return;
+                }
+
+                // Obtener observaciones del modal
+                const observaciones = document.getElementById('confirmarInstalacionObservaciones').value.trim();
+
+                // Actualizar estado localmente
+                notificacion.estado = 'instalada';
+                notificacion.fecha_instalacion = new Date().toISOString();
+                if (observaciones) {
+                    notificacion.observaciones_instalacion = observaciones;
+                }
+                
+                console.log('🔄 DEBUG: Estado actualizado localmente:', notificacion.estado);
+                console.log('🔄 DEBUG: Verificando en array principal...');
+                const notificacionEnArray = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
+                console.log('🔄 DEBUG: Estado en array principal:', notificacionEnArray ? notificacionEnArray.estado : 'NO ENCONTRADA');
+
+                // Actualizar en Supabase si está disponible
+                if (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
+                    try {
+                        // Solo actualizar campos que existen en la tabla notificaciones_instalaciones
+                        const datosActualizacion = {
+                            estado: 'instalada'
+                        };
+                        if (observaciones) {
+                            datosActualizacion.observaciones = observaciones;
+                        }
+
+                        console.log('🔄 DEBUG: Actualizando notificación en Supabase:', datosActualizacion);
+                        console.log('🔄 DEBUG: ID de notificación a actualizar:', notificacionInstalacionId);
+                        console.log('🔄 DEBUG: ID en data de notificación:', notificacion.id);
+                        console.log('🔄 DEBUG: _row_id de notificación:', notificacion._row_id);
+                        
+                        // Usar el _row_id si existe, sino el ID del data
+                        const idParaActualizar = notificacion._row_id || notificacionInstalacionId;
+                        console.log('🔄 DEBUG: ID final para actualizar:', idParaActualizar);
+                        
+                        const resultado = await window.dataService.actualizarNotificacionInstalaciones(idParaActualizar, datosActualizacion);
+                        console.log('✅ DEBUG: Resultado actualización Supabase:', resultado);
+
+                        // Actualizar la cotización correspondiente con fecha_instalacion
+                        await window.dataService.actualizarCotizacion(notificacion.cotizacionId, {
+                            fecha_instalacion: notificacion.fecha_instalacion
+                        });
+                        
+                        // Forzar recarga desde localStorage para mantener el estado actualizado
+                        console.log('🔄 DEBUG: Forzando recarga desde localStorage después de actualizar Supabase');
+                        cargarNotificacionesDesdeStorage();
+                    } catch (supabaseError) {
+                        console.warn('⚠️ DEBUG: Error en Supabase, pero continuando con localStorage:', supabaseError);
+                        // Continuar con localStorage aunque falle Supabase
+                    }
+                }
+
+                // Guardar cambios en localStorage (importante para persistencia)
+                guardarNotificaciones();
+                console.log('💾 DEBUG: Cambios guardados en localStorage para solicitud:', notificacionInstalacionId);
+                console.log('💾 DEBUG: Estado actualizado a:', notificacion.estado);
+                
+                // Verificar que el array principal esté actualizado
+                const notificacionVerificada = notificacionesInstalaciones.find(n => n.id === notificacionInstalacionId);
+                console.log('💾 DEBUG: Verificación final - Estado en array:', notificacionVerificada ? notificacionVerificada.estado : 'NO ENCONTRADA');
+                console.log('💾 DEBUG: Array completo después de actualización:', notificacionesInstalaciones.map(n => ({ id: n.id, estado: n.estado })));
+
+                // Cerrar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarInstalacion'));
+                modal.hide();
+
+                // Re-renderizar la lista
+                console.log('🔄 DEBUG: Re-renderizando lista después de actualización');
+                console.log('🔄 DEBUG: Estado final de la notificación:', notificacion.estado);
+                console.log('🔄 DEBUG: Llamando a cargarListaSolicitudes...');
+                cargarListaSolicitudes();
+                console.log('🔄 DEBUG: Llamando a actualizarEstadisticas...');
+                actualizarEstadisticas();
+                console.log('🔄 DEBUG: Mostrando alerta...');
+                mostrarAlerta('Solicitud marcada como instalada exitosamente', 'success');
+            } catch (error) {
+                console.error('Error marcando como instalada:', error);
+                mostrarAlerta('Error al marcar como instalada', 'danger');
+            } finally {
+                procesandoInstalacion = false;
+                // Resetear el flag después de un breve delay para permitir que se complete la actualización
+                setTimeout(() => {
+                    evitarRecargaSupabase = false;
+                    console.log('🔄 DEBUG: Flag evitarRecargaSupabase reseteado a false');
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>

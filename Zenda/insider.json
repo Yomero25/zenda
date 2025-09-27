@@ -1,0 +1,60 @@
+{
+  "combinaciones": [
+    {
+      "tipoUnidad": "Sedan",
+      "tipoSolucion": "Insider",
+      "insumos": {
+        "Cinchos grande": 10,
+        "Cinta de tela": 1,
+        "Cinta de aislar": 1,
+        "Cincho mediado": 20,
+        "Pija brocante 5/16": 3,
+        "Terminal de ojillo": 2,
+        "Cable 2 vias": 4,
+		"Insider": 1
+       }
+    },
+    {
+      "tipoUnidad": "Tracto",
+      "tipoSolucion": "Insider",
+      "insumos": {
+        "Cinchos grande": 10,
+        "Cinta de tela": 1,
+        "Cinta de aislar": 1,
+        "Cincho mediado": 20,
+        "Pija brocante 5/16": 3,
+        "Terminal de ojillo": 2,
+        "Cable 2 vias": 4,
+		"Insider": 1
+      }
+    },
+    {
+      "tipoUnidad": "Rabón",
+      "tipoSolucion": "Insider",
+      "insumos": {
+        "Cinchos grande": 10,
+        "Cinta de tela": 1,
+        "Cinta de aislar": 1,
+        "Cincho mediado": 20,
+        "Pija brocante 5/16": 3,
+        "Terminal de ojillo": 2,
+        "Cable 2 vias": 4,
+		"Insider": 1
+      }
+    },
+    {
+      "tipoUnidad": "Torton",
+      "tipoSolucion": "Insider",
+      "insumos": {
+        "Cinchos grande": 10,
+        "Cinta de tela": 1,
+        "Cinta de aislar": 1,
+        "Cincho mediado": 20,
+        "Pija brocante 5/16": 3,
+        "Terminal de ojillo": 2,
+        "Cable 2 vias": 4,
+		"Insider": 1
+      }
+    }    
+  ]
+}
