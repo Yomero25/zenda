@@ -4,7 +4,7 @@
 (function () {
   const SUPABASE_URL = 'https://lsmhcpsvjcbduqovbatj.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzbWhjcHN2amNiZHVxb3ZiYXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMTM4MzgsImV4cCI6MjA3MjU4OTgzOH0.I7dEer-R2ZaiMvU-Hmve6Ms0wk82U1e7C67e8fYWIEw';
-  const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzbWhjcHN2amNiZHVxb3ZiYXRqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzAxMzgzOCwiZXhwIjoyMDcyNTg5ODM4fQ.DLRwIywQBS4U6V5zhwUiBPBsHCa-ULO2v_55HO1uqqg';
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'REPLACE_WITH_ENV_VARIABLE';
 
   /** @type {import('@supabase/supabase-js').SupabaseClient | null} */
   let client = null;
