@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZendA - Workflow Manager</title>
+    <link rel="icon" type="image/svg+xml" href="ZENDA.svg?v=2">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #fff7ec 0%, #ffe8cf 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .loading-container {
+            text-align: center;
+            color: #fb930c;
+        }
+        .spinner {
+            border: 4px solid #ffe8cf;
+            border-top: 4px solid #fb930c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .logo {
+            height: 80px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <img src="./ZENDA.svg?v=2" alt="ZendA - Workflow Manager" class="logo">
+        <div class="spinner"></div>
+        <h3 style="color: #fb930c; margin: 0;">Cargando ZendA...</h3>
+        <p style="color: #666; margin: 10px 0 0 0;">Redirigiendo al sistema de login</p>
+    </div>
+
+    <script>
+        // Redirección automática después de 1 segundo
+        setTimeout(() => {
+            window.location.href = './login.html';
+        }, 1000);
+        
+        // Redirección inmediata si el usuario hace clic
+        document.addEventListener('click', () => {
+            window.location.href = './login.html';
+        });
+    </script>
+</body>
+</html>
