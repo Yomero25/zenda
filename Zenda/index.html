@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZendA - Workflow Manager</title>
-    <link rel="icon" type="image/svg+xml" href="ZENDA.svg?v=2">
+    <meta http-equiv="refresh" content="0; url=login.html">
     <style>
         body {
             margin: 0;
@@ -20,19 +20,6 @@
             text-align: center;
             color: #fb930c;
         }
-        .spinner {
-            border: 4px solid #ffe8cf;
-            border-top: 4px solid #fb930c;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
         .logo {
             height: 80px;
             margin-bottom: 20px;
@@ -42,21 +29,9 @@
 </head>
 <body>
     <div class="loading-container">
-        <img src="./ZENDA.svg?v=2" alt="ZendA - Workflow Manager" class="logo">
-        <div class="spinner"></div>
-        <h3 style="color: #fb930c; margin: 0;">Cargando ZendA...</h3>
-        <p style="color: #666; margin: 10px 0 0 0;">Redirigiendo al sistema de login</p>
+        <h1 style="color: #fb930c; margin: 0;">ZendA</h1>
+        <p style="color: #666; margin: 10px 0 0 0;">Redirigiendo al sistema de login...</p>
+        <p style="color: #666; margin: 10px 0 0 0;">Si no eres redirigido automáticamente, <a href="login.html" style="color: #fb930c;">haz clic aquí</a>.</p>
     </div>
-
-    <script>
-        // Redirección inmediata
-        window.location.href = './login.html';
-    </script>
-    
-    <!-- Fallback para navegadores que no soportan JavaScript -->
-    <noscript>
-        <meta http-equiv="refresh" content="0; url=login.html">
-        <p>Si no eres redirigido automáticamente, <a href="login.html">haz clic aquí</a>.</p>
-    </noscript>
 </body>
 </html>
