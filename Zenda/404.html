@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página no encontrada - ZendA</title>
+    <link rel="icon" type="image/svg+xml" href="ZENDA.svg?v=2">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #fff7ec 0%, #ffe8cf 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .error-container {
+            text-align: center;
+            color: #fb930c;
+            max-width: 500px;
+            padding: 20px;
+        }
+        .logo {
+            height: 100px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+        }
+        .error-code {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fb930c;
+        }
+        .error-message {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .btn-home {
+            background-color: #fb930c;
+            border-color: #fb930c;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        .btn-home:hover {
+            background-color: #e6850a;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <img src="./ZENDA.svg?v=2" alt="ZendA - Workflow Manager" class="logo">
+        <div class="error-code">404</div>
+        <div class="error-message">Página no encontrada</div>
+        <p style="color: #666; margin-bottom: 30px;">
+            La página que buscas no existe o ha sido movida.
+        </p>
+        <a href="./login.html" class="btn-home">
+            <i class="bi bi-house"></i> Ir al Login
+        </a>
+    </div>
+</body>
+</html>
