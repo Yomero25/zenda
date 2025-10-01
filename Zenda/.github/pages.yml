@@ -1,0 +1,11 @@
+# GitHub Pages configuration
+# This file tells GitHub Pages how to serve your site
+
+# Source directory (where your HTML files are)
+source: .
+
+# Build command (none needed for static site)
+build: 
+
+# Output directory (same as source for static sites)
+destination: .
