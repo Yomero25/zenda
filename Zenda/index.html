@@ -49,15 +49,14 @@
     </div>
 
     <script>
-        // Redirección automática después de 1 segundo
-        setTimeout(() => {
-            window.location.href = './login.html';
-        }, 1000);
-        
-        // Redirección inmediata si el usuario hace clic
-        document.addEventListener('click', () => {
-            window.location.href = './login.html';
-        });
+        // Redirección inmediata
+        window.location.href = './login.html';
     </script>
+    
+    <!-- Fallback para navegadores que no soportan JavaScript -->
+    <noscript>
+        <meta http-equiv="refresh" content="0; url=login.html">
+        <p>Si no eres redirigido automáticamente, <a href="login.html">haz clic aquí</a>.</p>
+    </noscript>
 </body>
 </html>

@@ -1,0 +1,27 @@
+# Configuración para GitHub Pages
+baseurl: "/zenda"
+url: "https://yomero25.github.io"
+
+# Configuración básica
+title: "ZendA - Workflow Manager"
+description: "Sistema de gestión de workflow empresarial"
+lang: es
+
+# Deshabilitar Jekyll para sitios estáticos
+markdown: kramdown
+highlighter: rouge
+
+# Configuración de plugins (vacío para sitios estáticos)
+plugins: []
+
+# Configuración de inclusión/exclusión
+include:
+  - .nojekyll
+
+exclude:
+  - README.md
+  - .gitignore
+  - .github/
+  - node_modules/
+  - package.json
+  - package-lock.json
