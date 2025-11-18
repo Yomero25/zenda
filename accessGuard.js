@@ -20,13 +20,13 @@
       if (!rol || !requiredRoles.includes(rol)){
         // Acceso denegado: redirigir según rol disponible o a login
         const rutas = {
+          admin: './cotizaciones-completo.html',
           ventas: './cotizaciones-completo.html',
           despacho: './modulo-despacho.html',
           instalaciones: './instalaciones_modulo.html',
           almacen: './administrar-almacen.html',
           precios: './administrar-precios.html',
           soporte: './modulo-soporte.html',
-          admin: './cotizaciones-completo.html',
         };
         window.location.href = rutas[rol] || './login.html';
         return false;

@@ -1556,6 +1556,10 @@
     authSignOut,
     getCurrentUser,
     getUserRole,
+    // perfiles (admin)
+    fetchPerfiles,
+    upsertPerfil,
+    deletePerfilByEmailOrUserId,
     fetchSolicitudesDespacho,
     subscribeSolicitudesDespacho,
     patchSolicitudDespachoById,
