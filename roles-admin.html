@@ -64,7 +64,7 @@
 
     async function cargar(){
       tabla.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
-      const perfiles = await window.dataService.fetchPerfiles();
+      const perfiles = await window.DataService.fetchPerfiles();
       tabla.innerHTML = '';
       (perfiles || []).forEach(p => {
         const email = (p.email || (p.data && p.data.email) || '').toString();
@@ -79,7 +79,7 @@
         tr.querySelector('button').addEventListener('click', async (e) => {
           e.preventDefault();
           if (!confirm('¿Eliminar este perfil?')) return;
-          await window.dataService.deletePerfilByEmailOrUserId(email);
+          await window.DataService.deletePerfilByEmailOrUserId(email);
           await cargar();
         });
         tabla.appendChild(tr);
@@ -94,7 +94,7 @@
       const email = document.getElementById('email').value.trim().toLowerCase();
       const rol = document.getElementById('rol').value;
       if (!email || !rol) return;
-      await window.dataService.upsertPerfil({ email, rol });
+      await window.DataService.upsertPerfil({ email, rol });
       form.reset();
       await cargar();
     });

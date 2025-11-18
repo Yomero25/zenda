@@ -1,7 +1,7 @@
 (function(){
   async function ensureAuth(requiredRoles){
     try{
-      if (!window.dataService || !window.dataService.hasSupabase || !window.dataService.hasSupabase()){
+      if (!window.DataService || !window.DataService.hasSupabase || !window.DataService.hasSupabase()){
         // Sin supabase: permitir solo si no se requieren roles (modo local), sino redirigir a login
         if (Array.isArray(requiredRoles) && requiredRoles.length){
           window.location.href = './login.html';
@@ -9,14 +9,14 @@
         }
         return true;
       }
-      const user = await window.dataService.getCurrentUser();
+      const user = await window.DataService.getCurrentUser();
       if (!user){
         window.location.href = './login.html';
         return false;
       }
       // Si no se piden roles específicos, basta con estar logueado
       if (!requiredRoles || requiredRoles.length === 0) return true;
-      const rol = await window.dataService.getUserRole();
+      const rol = await window.DataService.getUserRole();
       if (!rol || !requiredRoles.includes(rol)){
         // Acceso denegado: redirigir según rol disponible o a login
         const rutas = {
