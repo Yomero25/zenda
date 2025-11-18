@@ -1549,7 +1549,7 @@
   }
 
   // Exponer API
-  window.dataService = {
+  window.DataService = {
     hasSupabase: () => !!client,
     // auth
     authSignIn,
