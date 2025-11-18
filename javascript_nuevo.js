@@ -1,7 +1,7 @@
 ﻿        async function cargarPreciosCache() {
             try {
                 if (modoCentralizado) {
-                    const lista = await window.dataService.fetchPreciosElementos();
+                    const lista = await window.DataService.fetchPreciosElementos();
                     preciosCache = {};
                     (lista || []).forEach((it) => {
                         const nombre = it.nombre || it.elemento;
@@ -183,7 +183,7 @@
         async function guardarBorrador() {
             guardarPasoActual();
             try {
-                if (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
+                if (window.DataService && window.DataService.hasSupabase && window.DataService.hasSupabase()) {
                     await guardarBorradorSupabase();
                 }
                 alert('Borrador guardado exitosamente');
@@ -561,7 +561,7 @@
                 }
 
                 console.log('ðŸ”„ Cargando almacÃ©n desde Supabase...');
-                const registros = await window.dataService.fetchAlmacenInsumos();
+                const registros = await window.DataService.fetchAlmacenInsumos();
                 
                 // Convertir registros de Supabase al formato esperado
                 const nuevoAlmacen = {};
@@ -682,7 +682,7 @@
                 }
 
                 console.log('ðŸ”„ Cargando funciones de rastreo desde Supabase...');
-                funcionesRastreo = await window.dataService.fetchFuncionesRastreo();
+                funcionesRastreo = await window.DataService.fetchFuncionesRastreo();
                 console.log(`âœ… Funciones de rastreo cargadas: ${funcionesRastreo.length}`);
             } catch (error) {
                 console.error('âŒ Error cargando funciones de rastreo:', error);
@@ -3987,9 +3987,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             actualizarTodosLosSelects();
             
             // Suscribirse a cambios en tiempo real de precios
-            if (modoCentralizado && window.dataService && window.dataService.subscribePreciosElementos) {
+            if (modoCentralizado && window.DataService && window.DataService.subscribePreciosElementos) {
                 console.log('ðŸ”„ SuscribiÃ©ndose a cambios de precios en tiempo real...');
-                window.dataService.subscribePreciosElementos((payload) => {
+                window.DataService.subscribePreciosElementos((payload) => {
                     console.log('ðŸ’² Cambio en precios detectado:', payload);
                     // Recargar precios cuando hay cambios
                     cargarPreciosCache().then(() => {
@@ -4425,7 +4425,7 @@ habilitado,0,2,0,0,1,1,0,0,0`;
             // Construir objeto de cotizaciÃ³n (borrador)
             const draft = construirBorradorDesdeDatos(cotizacionData, draftId);
             // Upsert en Supabase
-            await window.dataService.upsertCotizacion(draft);
+            await window.DataService.upsertCotizacion(draft);
         }
 
         function construirBorradorDesdeDatos(data, draftId) {
@@ -5372,9 +5372,9 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                             if (editarId && String(editarId).startsWith('DRAFT-')) deleteKey = editarId;
                             else if (cotizacionOriginal && cotizacionOriginal.id && String(cotizacionOriginal.id).startsWith('DRAFT-')) deleteKey = cotizacionOriginal.id;
                         }
-                        await window.dataService.upsertCotizacion(cotizacionFinal);
+                        await window.DataService.upsertCotizacion(cotizacionFinal);
                         if (deleteKey) {
-                            try { await window.dataService.deleteCotizacionByIdOrFolio(deleteKey); } catch (_) {}
+                            try { await window.DataService.deleteCotizacionByIdOrFolio(deleteKey); } catch (_) {}
                         }
                     } else {
                         let cotizacionesExistentes = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');
@@ -5443,12 +5443,12 @@ habilitado,0,2,0,0,1,1,0,0,0`;
                 try {
                     if (modoCentralizado) {
                         // Insertar primero
-                        await window.dataService.upsertCotizacion(cotizacionFinal);
+                        await window.DataService.upsertCotizacion(cotizacionFinal);
                         // Eliminar draft si existÃ­a
                         const draftId = localStorage.getItem('cotizacion_progreso_id');
                         const deleteKey = draftId;
                         if (deleteKey) {
-                            try { await window.dataService.deleteCotizacionByIdOrFolio(deleteKey); } catch (_) {}
+                            try { await window.DataService.deleteCotizacionByIdOrFolio(deleteKey); } catch (_) {}
                         }
                     } else {
                         let cotizacionesExistentes = JSON.parse(localStorage.getItem('cotizaciones_guardadas') || '[]');

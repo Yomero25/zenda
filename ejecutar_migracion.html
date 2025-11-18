@@ -91,13 +91,13 @@
             
             try {
                 // Verificar que dataService esté disponible
-                if (!window.dataService) {
+                if (!window.DataService) {
                     log('❌ dataService no está definido');
                     mostrarResultado('Error: dataService no está definido. Verifica que dataService.js se cargó correctamente.', 'danger');
                     return false;
                 }
                 
-                if (!window.dataService.client) {
+                if (!window.DataService.client) {
                     log('❌ dataService.client no está disponible');
                     mostrarResultado('Error: dataService.client no está disponible. Verifica la conexión a Supabase.', 'danger');
                     return false;
@@ -105,17 +105,17 @@
                 
                 // Probar una consulta simple
                 log('📡 Probando conexión a Supabase...');
-                const testResult = await window.dataService.client.from('tipos_unidad').select('count').limit(1);
+                const testResult = await window.DataService.client.from('tipos_unidad').select('count').limit(1);
                 log('✅ Conexión a Supabase exitosa');
                 
                 // Verificar funciones específicas
-                if (typeof window.dataService.fetchTiposUnidad !== 'function') {
+                if (typeof window.DataService.fetchTiposUnidad !== 'function') {
                     log('❌ fetchTiposUnidad no está disponible');
                     mostrarResultado('Error: fetchTiposUnidad no está disponible', 'danger');
                     return false;
                 }
                 
-                if (typeof window.dataService.upsertTipoUnidad !== 'function') {
+                if (typeof window.DataService.upsertTipoUnidad !== 'function') {
                     log('❌ upsertTipoUnidad no está disponible');
                     mostrarResultado('Error: upsertTipoUnidad no está disponible', 'danger');
                     return false;
@@ -138,7 +138,7 @@
             
             try {
                 // Verificar que dataService esté disponible
-                if (!window.dataService || !window.dataService.client) {
+                if (!window.DataService || !window.DataService.client) {
                     log('❌ dataService no está disponible');
                     mostrarResultado('Error: dataService no está disponible. Usa "Verificar Conexión" primero.', 'danger');
                     return false;
@@ -156,7 +156,7 @@
                 log('🚗 Migrando tipos de vehículo...');
                 for (const vehiculo of tiposGlobales.vehiculos || []) {
                     if (vehiculo && vehiculo.trim()) {
-                        await window.dataService.upsertTipoUnidad(vehiculo.trim(), `Tipo de vehículo: ${vehiculo}`);
+                        await window.DataService.upsertTipoUnidad(vehiculo.trim(), `Tipo de vehículo: ${vehiculo}`);
                         log(`✅ Vehículo migrado: ${vehiculo}`);
                     }
                 }
@@ -165,7 +165,7 @@
                 log('🔧 Migrando tipos de solución...');
                 for (const solucion of tiposGlobales.soluciones || []) {
                     if (solucion && solucion.trim()) {
-                        await window.dataService.upsertTipoSolucion(solucion.trim(), `Tipo de solución: ${solucion}`, 'General');
+                        await window.DataService.upsertTipoSolucion(solucion.trim(), `Tipo de solución: ${solucion}`, 'General');
                         log(`✅ Solución migrada: ${solucion}`);
                     }
                 }
@@ -174,16 +174,16 @@
                 log('📦 Migrando tipos de insumo...');
                 for (const insumo of tiposGlobales.insumos || []) {
                     if (insumo && insumo.trim()) {
-                        await window.dataService.upsertTipoInsumo(insumo.trim(), `Tipo de insumo: ${insumo}`, 'General', 'piezas');
+                        await window.DataService.upsertTipoInsumo(insumo.trim(), `Tipo de insumo: ${insumo}`, 'General', 'piezas');
                         log(`✅ Insumo migrado: ${insumo}`);
                     }
                 }
                 
                 // 5. Verificar migración
                 log('🔍 Verificando migración...');
-                const vehiculosMigrados = await window.dataService.fetchTiposUnidad();
-                const solucionesMigradas = await window.dataService.fetchTiposSolucion();
-                const insumosMigrados = await window.dataService.fetchTiposInsumo();
+                const vehiculosMigrados = await window.DataService.fetchTiposUnidad();
+                const solucionesMigradas = await window.DataService.fetchTiposSolucion();
+                const insumosMigrados = await window.DataService.fetchTiposInsumo();
                 
                 log(`✅ Vehículos migrados: ${vehiculosMigrados.length}`);
                 log(`✅ Soluciones migradas: ${solucionesMigradas.length}`);
@@ -214,9 +214,9 @@
             
             try {
                 // Probar fetch de cada tabla
-                const vehiculos = await window.dataService.fetchTiposUnidad();
-                const soluciones = await window.dataService.fetchTiposSolucion();
-                const insumos = await window.dataService.fetchTiposInsumo();
+                const vehiculos = await window.DataService.fetchTiposUnidad();
+                const soluciones = await window.DataService.fetchTiposSolucion();
+                const insumos = await window.DataService.fetchTiposInsumo();
                 
                 log('📊 Resultados:');
                 log(`- Vehículos: ${vehiculos.length} registros`);

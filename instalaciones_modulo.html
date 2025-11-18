@@ -393,7 +393,7 @@
             const ok = await window.accessGuard.ensureAuth(['admin','instalaciones']);
             if (!ok) return;
             try {
-                const rol = await (window.dataService && window.dataService.getUserRole ? window.dataService.getUserRole() : Promise.resolve(null));
+                const rol = await (window.DataService && window.DataService.getUserRole ? window.DataService.getUserRole() : Promise.resolve(null));
                 const isAdmin = rol === 'admin';
                 const headerBtn = document.getElementById('btnPrincipalHeader');
                 if (headerBtn) headerBtn.style.display = isAdmin ? '' : 'none';
@@ -405,7 +405,7 @@
             const logoutBtn = document.getElementById('btnLogout');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
-                    try { await window.dataService.authSignOut(); } catch(_){}
+                    try { await window.DataService.authSignOut(); } catch(_){}
                     window.location.href = './login.html';
                 });
             }
@@ -441,8 +441,8 @@
             }
             
             try {
-                if (window.dataService && window.dataService.hasSupabase()) {
-                    const data = await window.dataService.fetchNotificacionesInstalaciones();
+                if (window.DataService && window.DataService.hasSupabase()) {
+                    const data = await window.DataService.fetchNotificacionesInstalaciones();
                     if (Array.isArray(data)) {
                         notificacionesInstalaciones = data;
                         console.log('✅ Notificaciones cargadas desde Supabase:', notificacionesInstalaciones.length);
@@ -457,15 +457,15 @@
         }
 
         function inicializarRealtimeInstalaciones() {
-            if (!(window.dataService && window.dataService.hasSupabase())) return;
-            window.dataService.subscribeNotificacionesInstalaciones(async () => {
+            if (!(window.DataService && window.DataService.hasSupabase())) return;
+            window.DataService.subscribeNotificacionesInstalaciones(async () => {
                 // Si estamos evitando recarga desde Supabase, no hacer nada
                 if (evitarRecargaSupabase) {
                     console.log('🔄 DEBUG: Realtime ignorado - evitarRecargaSupabase activo');
                     return;
                 }
                 
-                const data = await window.dataService.fetchNotificacionesInstalaciones();
+                const data = await window.DataService.fetchNotificacionesInstalaciones();
                 if (Array.isArray(data)) {
                     notificacionesInstalaciones = data;
                     cargarListaSolicitudes();
@@ -473,13 +473,13 @@
                 }
             });
             // También observar cambios en solicitudes_despacho para marcar 'despachada'
-            window.dataService.subscribeSolicitudesDespacho(async (payload) => {
+            window.DataService.subscribeSolicitudesDespacho(async (payload) => {
                 try {
                     const row = payload && payload.new ? payload.new : null;
                     const data = row && row.data ? row.data : null;
                     if (data && data.id && data.estado === 'despachada') {
-                        await window.dataService.patchNotificacionBySolicitudId(data.id, { estado: 'despachada' });
-                        const notif = await window.dataService.fetchNotificacionesInstalaciones();
+                        await window.DataService.patchNotificacionBySolicitudId(data.id, { estado: 'despachada' });
+                        const notif = await window.DataService.fetchNotificacionesInstalaciones();
                         if (Array.isArray(notif)) {
                             notificacionesInstalaciones = notif;
                             cargarListaSolicitudes();
@@ -496,7 +496,7 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🔄 Inicializando módulo de instalaciones...');
             await cargarNotificacionesDesdeSupabaseYFallback();
-            modoCentralizado = !!(window.dataService && window.dataService.hasSupabase());
+            modoCentralizado = !!(window.DataService && window.DataService.hasSupabase());
             inicializarRealtimeInstalaciones();
             if (!modoCentralizado) {
                 limpiarSolicitudesInvalidas(); // Limpieza automática
@@ -998,7 +998,7 @@
 
                 // Guardar cambios
                 if (modoCentralizado) {
-                    window.dataService.patchNotificacionInstalacionesById(notificacion.id, {
+                    window.DataService.patchNotificacionInstalacionesById(notificacion.id, {
                         estado: 'cambios_validados',
                         fechaValidacion: notificacion.fechaValidacion,
                         mensaje: notificacion.mensaje
@@ -1076,7 +1076,7 @@
                     mensaje: 'Cambios validados por Instalaciones. Listo para despacho final.'
                 };
                 if (modoCentralizado) {
-                    window.dataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch)
+                    window.DataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch)
                       .then(() => console.log('✅ DEBUG: (Supabase) Despacho actualizado a cambios_validados'));
                 } else {
                     // Modo local
@@ -1253,7 +1253,7 @@
                     insumosAdicionales: notificacion.insumosAdicionales || []
                 };
                 if (modoCentralizado) {
-                    window.dataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch);
+                    window.DataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch);
                 } else {
                     solicitudEnDespacho.estado = patch.estado;
                     solicitudEnDespacho.fechaRetorno = patch.fechaRetorno;
@@ -1287,7 +1287,7 @@
             }
 
             if (modoCentralizado) {
-                window.dataService.patchNotificacionInstalacionesById(notificacion.id, {
+                window.DataService.patchNotificacionInstalacionesById(notificacion.id, {
                     estado: 'retornada',
                     fechaRetorno: notificacion.fechaRetorno,
                     observacionesRetorno: observaciones,
@@ -1327,7 +1327,7 @@
                         validadoPor: notificacion.validadoPor,
                         observacionesInstalaciones: `Validada por ${notificacion.validadoPor} el ${notificacion.fechaValidacion}`
                     };
-                    window.dataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch);
+                    window.DataService.patchSolicitudDespachoById(notificacion.solicitudDespachoId, patch);
                     console.log(`✅ DEBUG: (Supabase) Estado de solicitud ${notificacion.solicitudDespachoId} actualizado a 'validada_instalaciones'.`);
                 } else {
                     console.log(`✅ DEBUG: (Supabase) Estado ya 'cambios_validados'.`);
@@ -1419,8 +1419,8 @@
 
         async function actualizarSolicitudes() {
             try {
-                if (modoCentralizado && window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
-                    const data = await window.dataService.fetchNotificacionesInstalaciones();
+                if (modoCentralizado && window.DataService && window.DataService.hasSupabase && window.DataService.hasSupabase()) {
+                    const data = await window.DataService.fetchNotificacionesInstalaciones();
                     if (Array.isArray(data)) {
                         notificacionesInstalaciones = data;
                         // Mantener localStorage sincronizado para evitar reaparecer datos antiguos
@@ -1683,7 +1683,7 @@
                 console.log('🔄 DEBUG: Estado en array principal:', notificacionEnArray ? notificacionEnArray.estado : 'NO ENCONTRADA');
 
                 // Actualizar en Supabase si está disponible
-                if (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase()) {
+                if (window.DataService && window.DataService.hasSupabase && window.DataService.hasSupabase()) {
                     try {
                         // Solo actualizar campos que existen en la tabla notificaciones_instalaciones
                         const datosActualizacion = {
@@ -1702,11 +1702,11 @@
                         const idParaActualizar = notificacion._row_id || notificacionInstalacionId;
                         console.log('🔄 DEBUG: ID final para actualizar:', idParaActualizar);
                         
-                        const resultado = await window.dataService.actualizarNotificacionInstalaciones(idParaActualizar, datosActualizacion);
+                        const resultado = await window.DataService.actualizarNotificacionInstalaciones(idParaActualizar, datosActualizacion);
                         console.log('✅ DEBUG: Resultado actualización Supabase:', resultado);
 
                         // Actualizar la cotización correspondiente con fecha_instalacion
-                        await window.dataService.actualizarCotizacion(notificacion.cotizacionId, {
+                        await window.DataService.actualizarCotizacion(notificacion.cotizacionId, {
                             fecha_instalacion: notificacion.fecha_instalacion
                         });
                         

@@ -326,8 +326,8 @@ CREATE POLICY "Admin can manage email records" ON registros_correos
 
 /*
   // Exponer nuevas funciones de correo
-  window.dataService = {
-    ...window.dataService,
+  window.DataService = {
+    ...window.DataService,
     
     // Funciones de configuración de correo
     guardarConfiguracionCorreo,

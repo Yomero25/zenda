@@ -6,7 +6,7 @@
     
     try {
         // Obtener el cliente de Supabase
-        const client = window.dataService.client;
+        const client = window.DataService.client;
         
         // Intentar crear la tabla insertando un registro
         // Si la tabla no existe, Supabase la creará automáticamente

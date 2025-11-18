@@ -494,13 +494,13 @@
             const logoutBtn = document.getElementById('btnLogout');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
-                    try { await window.dataService.authSignOut(); } catch(_){}
+                    try { await window.DataService.authSignOut(); } catch(_){}
                     window.location.href = './login.html';
                 });
             }
         });
         // ===== VARIABLES GLOBALES =====
-        const modoCentralizado = (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase());
+        const modoCentralizado = (window.DataService && window.DataService.hasSupabase && window.DataService.hasSupabase());
         let almacenInsumos = {};
         let combinacionEditando = null;
         let datosFiltrados = [];
@@ -563,7 +563,7 @@
 
         async function cargarDesdeSupabase() {
             try {
-                const registros = await window.dataService.fetchAlmacenInsumos();
+                const registros = await window.DataService.fetchAlmacenInsumos();
                 // Soporte esquema single-doc: {insumos: {...}}
                 let mapa = {};
                 if (Array.isArray(registros) && registros.length === 1 && registros[0]._schema === 'single_doc' && registros[0].insumos) {
@@ -604,7 +604,7 @@
                 for (const [tipoUnidad, soluciones] of Object.entries(mapa)) {
                     for (const [tipoSolucion, insumos] of Object.entries(soluciones || {})) {
                         const id = `${tipoUnidad}::${tipoSolucion}`;
-                        tareas.push(window.dataService.upsertAlmacenInsumoById(id, {
+                        tareas.push(window.DataService.upsertAlmacenInsumoById(id, {
                             id,
                             tipoUnidad,
                             tipoSolucion,
@@ -630,8 +630,8 @@
                 
                 // Cargar tipos desde Supabase
                 const [tiposUnidad, tiposSolucion] = await Promise.all([
-                    window.dataService.fetchTiposUnidad(),
-                    window.dataService.fetchTiposSolucion()
+                    window.DataService.fetchTiposUnidad(),
+                    window.DataService.fetchTiposSolucion()
                 ]);
                 
                 const nombresUnidad = tiposUnidad.map(t => t.nombre).sort();
@@ -762,10 +762,10 @@
                 
                 // Cargar datos desde Supabase
                 const [tiposUnidad, tiposSolucion, tiposInsumo, almacenData] = await Promise.all([
-                    window.dataService.fetchTiposUnidad(),
-                    window.dataService.fetchTiposSolucion(),
-                    window.dataService.fetchTiposInsumo(),
-                    window.dataService.fetchAlmacenInsumos()
+                    window.DataService.fetchTiposUnidad(),
+                    window.DataService.fetchTiposSolucion(),
+                    window.DataService.fetchTiposInsumo(),
+                    window.DataService.fetchAlmacenInsumos()
                 ]);
                 
                 // Calcular estadísticas reales desde datos de Supabase
@@ -880,7 +880,7 @@
                 // Sincronizar con Supabase si está activo
                 if (modoCentralizado) {
                     const id = `${tipoUnidad}::${tipoSolucion}`;
-                    await window.dataService.upsertAlmacenInsumoById(id, {
+                    await window.DataService.upsertAlmacenInsumoById(id, {
                         id,
                         tipoUnidad,
                         tipoSolucion,
@@ -919,7 +919,7 @@
                 try {
                     if (modoCentralizado) {
                         const id = `${tipoUnidad}::${tipoSolucion}`;
-                        await window.dataService.deleteAlmacenInsumoById(id);
+                        await window.DataService.deleteAlmacenInsumoById(id);
                     } else {
                         localStorage.setItem('almacen_insumos', JSON.stringify(almacenInsumos));
                     }
@@ -1037,7 +1037,7 @@
                 // Sincronizar con Supabase si está activo
                 if (modoCentralizado) {
                     const id = `${tipoUnidad}::${tipoSolucion}`;
-                    await window.dataService.upsertAlmacenInsumoById(id, {
+                    await window.DataService.upsertAlmacenInsumoById(id, {
                         id,
                         tipoUnidad,
                         tipoSolucion,
@@ -1105,9 +1105,9 @@
         async function cargarTiposExistentes() {
             try {
                 const [tiposUnidad, tiposSolucion, tiposInsumo] = await Promise.all([
-                    window.dataService.fetchTiposUnidad(),
-                    window.dataService.fetchTiposSolucion(),
-                    window.dataService.fetchTiposInsumo()
+                    window.DataService.fetchTiposUnidad(),
+                    window.DataService.fetchTiposSolucion(),
+                    window.DataService.fetchTiposInsumo()
                 ]);
                 
                 tiposUnidadExistentes = tiposUnidad.map(t => t.nombre);
@@ -1216,21 +1216,21 @@
                     // Crear tipos de unidad
                     for (const tipoUnidad of tiposUnidadNuevos) {
                         console.log(`🔄 Creando tipo de unidad: ${tipoUnidad}`);
-                        await window.dataService.upsertTipoUnidad(tipoUnidad, `Tipo de vehículo: ${tipoUnidad}`, 'vehiculo');
+                        await window.DataService.upsertTipoUnidad(tipoUnidad, `Tipo de vehículo: ${tipoUnidad}`, 'vehiculo');
                         tiposUnidadExistentes.push(tipoUnidad);
                     }
                     
                     // Crear tipos de solución
                     for (const tipoSolucion of tiposSolucionNuevos) {
                         console.log(`🔄 Creando tipo de solución: ${tipoSolucion}`);
-                        await window.dataService.upsertTipoSolucion(tipoSolucion, `Tipo de solución: ${tipoSolucion}`, 'solucion');
+                        await window.DataService.upsertTipoSolucion(tipoSolucion, `Tipo de solución: ${tipoSolucion}`, 'solucion');
                         tiposSolucionExistentes.push(tipoSolucion);
                     }
                     
                     // Crear insumos
                     for (const insumo of insumosNuevos) {
                         console.log(`🔄 Creando insumo: ${insumo}`);
-                        await window.dataService.upsertTipoInsumo(insumo, `Insumo: ${insumo}`, 'General', 'piezas');
+                        await window.DataService.upsertTipoInsumo(insumo, `Insumo: ${insumo}`, 'General', 'piezas');
                         tiposInsumoExistentes.push(insumo);
                         listaInsumos.push(insumo);
                     }
@@ -1347,7 +1347,7 @@
                 for (const combinacion of datosCargaMasiva) {
                     try {
                         const id = `${combinacion.tipoUnidad}::${combinacion.tipoSolucion}`;
-                        const resultado = await window.dataService.upsertAlmacenInsumoById(id, {
+                        const resultado = await window.DataService.upsertAlmacenInsumoById(id, {
                             id,
                             tipoUnidad: combinacion.tipoUnidad,
                             tipoSolucion: combinacion.tipoSolucion,
@@ -1444,7 +1444,7 @@
             
             try {
                 // Verificar que dataService esté disponible
-                if (!window.dataService || !window.dataService.client) {
+                if (!window.DataService || !window.DataService.client) {
                     console.error('❌ dataService no está disponible');
                     mostrarAlerta('Error: dataService no está disponible', 'danger');
                     return false;
@@ -1459,7 +1459,7 @@
                 console.log('🚗 Migrando tipos de vehículo...');
                 for (const vehiculo of tiposGlobales.vehiculos || []) {
                     if (vehiculo && vehiculo.trim()) {
-                        await window.dataService.upsertTipoUnidad(vehiculo.trim(), `Tipo de vehículo: ${vehiculo}`);
+                        await window.DataService.upsertTipoUnidad(vehiculo.trim(), `Tipo de vehículo: ${vehiculo}`);
                         console.log(`✅ Vehículo migrado: ${vehiculo}`);
                     }
                 }
@@ -1468,7 +1468,7 @@
                 console.log('🔧 Migrando tipos de solución...');
                 for (const solucion of tiposGlobales.soluciones || []) {
                     if (solucion && solucion.trim()) {
-                        await window.dataService.upsertTipoSolucion(solucion.trim(), `Tipo de solución: ${solucion}`, 'General');
+                        await window.DataService.upsertTipoSolucion(solucion.trim(), `Tipo de solución: ${solucion}`, 'General');
                         console.log(`✅ Solución migrada: ${solucion}`);
                     }
                 }
@@ -1477,16 +1477,16 @@
                 console.log('📦 Migrando tipos de insumo...');
                 for (const insumo of tiposGlobales.insumos || []) {
                     if (insumo && insumo.trim()) {
-                        await window.dataService.upsertTipoInsumo(insumo.trim(), `Tipo de insumo: ${insumo}`, 'General', 'piezas');
+                        await window.DataService.upsertTipoInsumo(insumo.trim(), `Tipo de insumo: ${insumo}`, 'General', 'piezas');
                         console.log(`✅ Insumo migrado: ${insumo}`);
                     }
                 }
                 
                 // 5. Verificar migración
                 console.log('🔍 Verificando migración...');
-                const vehiculosMigrados = await window.dataService.fetchTiposUnidad();
-                const solucionesMigradas = await window.dataService.fetchTiposSolucion();
-                const insumosMigrados = await window.dataService.fetchTiposInsumo();
+                const vehiculosMigrados = await window.DataService.fetchTiposUnidad();
+                const solucionesMigradas = await window.DataService.fetchTiposSolucion();
+                const insumosMigrados = await window.DataService.fetchTiposInsumo();
                 
                 console.log(`✅ Vehículos migrados: ${vehiculosMigrados.length}`);
                 console.log(`✅ Soluciones migradas: ${solucionesMigradas.length}`);
@@ -1517,9 +1517,9 @@
             
             try {
                 // Probar fetch de cada tabla
-                const vehiculos = await window.dataService.fetchTiposUnidad();
-                const soluciones = await window.dataService.fetchTiposSolucion();
-                const insumos = await window.dataService.fetchTiposInsumo();
+                const vehiculos = await window.DataService.fetchTiposUnidad();
+                const soluciones = await window.DataService.fetchTiposSolucion();
+                const insumos = await window.DataService.fetchTiposInsumo();
                 
                 console.log('📊 Resultados:');
                 console.log(`- Vehículos: ${vehiculos.length} registros`);
@@ -1588,7 +1588,7 @@
                 console.log('🔄 Cargando funciones de rastreo desde Supabase...');
                 
                 // Verificar que dataService esté disponible
-                if (!window.dataService || !window.dataService.fetchFuncionesRastreo) {
+                if (!window.DataService || !window.DataService.fetchFuncionesRastreo) {
                     console.warn('⚠️ dataService no disponible, usando datos de prueba');
                     funcionesRastreoExistentes = [
                         {
@@ -1600,7 +1600,7 @@
                         }
                     ];
                 } else {
-                    funcionesRastreoExistentes = await window.dataService.fetchFuncionesRastreo();
+                    funcionesRastreoExistentes = await window.DataService.fetchFuncionesRastreo();
                 }
                 
                 console.log(`✅ Funciones cargadas: ${funcionesRastreoExistentes.length}`);
@@ -1677,7 +1677,7 @@
             if (!confirm(`¿Estás seguro de eliminar la función "${funcionalidad}"?`)) return;
 
             try {
-                const success = await window.dataService.deleteFuncionRastreo(funcionalidad);
+                const success = await window.DataService.deleteFuncionRastreo(funcionalidad);
                 if (success) {
                     mostrarAlerta('Función eliminada correctamente', 'success');
                     await cargarFuncionesRastreo();
@@ -1735,7 +1735,7 @@
             }
 
             try {
-                const success = await window.dataService.upsertFuncionRastreo(funcionalidad, insumos);
+                const success = await window.DataService.upsertFuncionRastreo(funcionalidad, insumos);
                 if (success) {
                     mostrarAlerta('Función guardada correctamente', 'success');
                     await cargarFuncionesRastreo();
@@ -1822,9 +1822,9 @@
 
                 let success = false;
                 if (tipo === 'vehiculo') {
-                    success = await window.dataService.upsertTipoUnidad(nombre, `Tipo de vehículo: ${nombre}`, 'vehiculo');
+                    success = await window.DataService.upsertTipoUnidad(nombre, `Tipo de vehículo: ${nombre}`, 'vehiculo');
                 } else if (tipo === 'solucion') {
-                    success = await window.dataService.upsertTipoSolucion(nombre, `Tipo de solución: ${nombre}`, 'solucion');
+                    success = await window.DataService.upsertTipoSolucion(nombre, `Tipo de solución: ${nombre}`, 'solucion');
                 }
 
                 if (success) {
@@ -1854,7 +1854,7 @@
             }
 
             try {
-                const success = await window.dataService.upsertTipoInsumo(
+                const success = await window.DataService.upsertTipoInsumo(
                     nombre, 
                     `Insumo: ${nombre}`, 
                     categoria || 'General', 

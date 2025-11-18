@@ -380,13 +380,13 @@
             const logoutBtn = document.getElementById('btnLogout');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
-                    try { await window.dataService.authSignOut(); } catch(_){}
+                    try { await window.DataService.authSignOut(); } catch(_){}
                     window.location.href = './login.html';
                 });
             }
         });
         // ===== VARIABLES GLOBALES =====
-        const modoCentralizado = (window.dataService && window.dataService.hasSupabase && window.dataService.hasSupabase());
+        const modoCentralizado = (window.DataService && window.DataService.hasSupabase && window.DataService.hasSupabase());
         let preciosElementos = {};
         let elementoEditando = null;
         let datosFiltrados = [];
@@ -552,12 +552,12 @@
                 
                 try {
                     // Eliminar de Supabase PRIMERO
-                    if (window.dataService && window.dataService.deletePrecioElementoByNombre) {
+                    if (window.DataService && window.DataService.deletePrecioElementoByNombre) {
                         console.log('📡 Eliminando de Supabase:', elementoAEliminar);
-                        console.log('🔍 dataService disponible:', !!window.dataService);
-                        console.log('🔍 deletePrecioElementoByNombre disponible:', !!window.dataService.deletePrecioElementoByNombre);
+                        console.log('🔍 dataService disponible:', !!window.DataService);
+                        console.log('🔍 deletePrecioElementoByNombre disponible:', !!window.DataService.deletePrecioElementoByNombre);
                         
-                        const resultado = await window.dataService.deletePrecioElementoByNombre(elementoAEliminar);
+                        const resultado = await window.DataService.deletePrecioElementoByNombre(elementoAEliminar);
                         console.log('📊 Resultado de eliminación:', resultado);
                         
                         if (resultado) {
@@ -603,7 +603,7 @@
                 if (modoCentralizado) {
                     const tareas = [];
                     for (const [nombre, datos] of Object.entries(preciosElementos)) {
-                        tareas.push(window.dataService.upsertPrecioElementoByNombre(nombre, {
+                        tareas.push(window.DataService.upsertPrecioElementoByNombre(nombre, {
                             nombre,
                             precio: datos.precio || 0,
                             categoria: datos.categoria || obtenerCategoria(nombre),
@@ -658,7 +658,7 @@
 
         async function cargarPreciosDesdeSupabase() {
             try {
-                const filas = await window.dataService.fetchPreciosElementos();
+                const filas = await window.DataService.fetchPreciosElementos();
                 const mapa = {};
                 (filas || []).forEach(f => {
                     const nombre = f.nombre || f.elemento || f.id;
@@ -707,7 +707,7 @@
                         categoria: datos.categoria || obtenerCategoria(nombre),
                         ultimaActualizacion: datos.ultimaActualizacion || new Date().toISOString().split('T')[0],
                     };
-                    tareas.push(window.dataService.upsertPrecioElementoByNombre(nombre, payload));
+                    tareas.push(window.DataService.upsertPrecioElementoByNombre(nombre, payload));
                 }
                 for (let i = 0; i < tareas.length; i += 50) {
                     const slice = tareas.slice(i, i + 50);
@@ -902,7 +902,7 @@
 
             // Guardar automáticamente
             if (modoCentralizado) {
-                await window.dataService.upsertPrecioElementoByNombre(elementoEditando, {
+                await window.DataService.upsertPrecioElementoByNombre(elementoEditando, {
                     nombre: elementoEditando,
                     categoria,
                     precio,
@@ -971,7 +971,7 @@
                     const d = preciosElementos[elemento];
                     if (categoria && d.categoria !== categoria) continue;
                     if (d.precio <= 0) continue;
-                    tareas.push(window.dataService.upsertPrecioElementoByNombre(elemento, {
+                    tareas.push(window.DataService.upsertPrecioElementoByNombre(elemento, {
                         nombre: elemento,
                         categoria: d.categoria,
                         precio: d.precio,
@@ -1329,7 +1329,7 @@
                     categoria: categoria,
                     ultimaActualizacion: new Date().toISOString().split('T')[0]
                 };
-                window.dataService.upsertPrecioElementoByNombre(elemento, record)
+                window.DataService.upsertPrecioElementoByNombre(elemento, record)
                     .then(() => {
                         if (mostrarMensaje) {
                             mostrarAlerta('Elemento agregado correctamente', 'success');
@@ -1441,7 +1441,7 @@
 
         function suscribirRealtimePrecios() {
             if (!modoCentralizado) return;
-            window.dataService.subscribePreciosElementos(async (payload) => {
+            window.DataService.subscribePreciosElementos(async (payload) => {
                 try {
                     await cargarPreciosDesdeSupabase();
                     cargarTablaPrecios();
@@ -1550,7 +1550,7 @@
         async function cargarServiciosDesdeSupabase() {
             try {
                 console.log('🔄 Cargando servicios desde Supabase...');
-                serviciosDatos = await window.dataService.fetchServiciosDatos();
+                serviciosDatos = await window.DataService.fetchServiciosDatos();
                 console.log(`✅ Servicios cargados: ${serviciosDatos.length}`);
                 console.log('🔄 DEBUG: serviciosDatos después de cargar:', serviciosDatos);
             } catch (error) {
@@ -1761,7 +1761,7 @@
 
             try {
                 console.log('💾 Guardando servicio:', servicioData);
-                const resultado = await window.dataService.upsertServicioDatos(servicioData);
+                const resultado = await window.DataService.upsertServicioDatos(servicioData);
                 
                 if (resultado) {
                     console.log('✅ Servicio guardado exitosamente');
@@ -1785,7 +1785,7 @@
         async function eliminarServicio(servicioId, nombreServicio) {
             if (confirm(`¿Estás seguro de que quieres eliminar el servicio "${nombreServicio}"?`)) {
                 try {
-                    const resultado = await window.dataService.deleteServicioDatos(servicioId);
+                    const resultado = await window.DataService.deleteServicioDatos(servicioId);
                     if (resultado) {
                         console.log('✅ Servicio eliminado exitosamente');
                         await cargarServiciosDesdeSupabase();

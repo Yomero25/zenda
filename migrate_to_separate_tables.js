@@ -6,7 +6,7 @@ async function migrarATablasSeparadas() {
     
     try {
         // Verificar que dataService esté disponible
-        if (!window.dataService || !window.dataService.client) {
+        if (!window.DataService || !window.DataService.client) {
             console.error('❌ dataService no está disponible');
             return false;
         }
@@ -20,7 +20,7 @@ async function migrarATablasSeparadas() {
         console.log('🚗 Migrando tipos de vehículo...');
         for (const vehiculo of tiposGlobales.vehiculos || []) {
             if (vehiculo && vehiculo.trim()) {
-                await window.dataService.upsertTipoUnidad(vehiculo.trim(), `Tipo de vehículo: ${vehiculo}`);
+                await window.DataService.upsertTipoUnidad(vehiculo.trim(), `Tipo de vehículo: ${vehiculo}`);
                 console.log(`✅ Vehículo migrado: ${vehiculo}`);
             }
         }
@@ -29,7 +29,7 @@ async function migrarATablasSeparadas() {
         console.log('🔧 Migrando tipos de solución...');
         for (const solucion of tiposGlobales.soluciones || []) {
             if (solucion && solucion.trim()) {
-                await window.dataService.upsertTipoSolucion(solucion.trim(), `Tipo de solución: ${solucion}`, 'General');
+                await window.DataService.upsertTipoSolucion(solucion.trim(), `Tipo de solución: ${solucion}`, 'General');
                 console.log(`✅ Solución migrada: ${solucion}`);
             }
         }
@@ -38,16 +38,16 @@ async function migrarATablasSeparadas() {
         console.log('📦 Migrando tipos de insumo...');
         for (const insumo of tiposGlobales.insumos || []) {
             if (insumo && insumo.trim()) {
-                await window.dataService.upsertTipoInsumo(insumo.trim(), `Tipo de insumo: ${insumo}`, 'General', 'piezas');
+                await window.DataService.upsertTipoInsumo(insumo.trim(), `Tipo de insumo: ${insumo}`, 'General', 'piezas');
                 console.log(`✅ Insumo migrado: ${insumo}`);
             }
         }
         
         // 5. Verificar migración
         console.log('🔍 Verificando migración...');
-        const vehiculosMigrados = await window.dataService.fetchTiposUnidad();
-        const solucionesMigradas = await window.dataService.fetchTiposSolucion();
-        const insumosMigrados = await window.dataService.fetchTiposInsumo();
+        const vehiculosMigrados = await window.DataService.fetchTiposUnidad();
+        const solucionesMigradas = await window.DataService.fetchTiposSolucion();
+        const insumosMigrados = await window.DataService.fetchTiposInsumo();
         
         console.log(`✅ Vehículos migrados: ${vehiculosMigrados.length}`);
         console.log(`✅ Soluciones migradas: ${solucionesMigradas.length}`);
@@ -77,9 +77,9 @@ async function probarTablasSeparadas() {
     
     try {
         // Probar fetch de cada tabla
-        const vehiculos = await window.dataService.fetchTiposUnidad();
-        const soluciones = await window.dataService.fetchTiposSolucion();
-        const insumos = await window.dataService.fetchTiposInsumo();
+        const vehiculos = await window.DataService.fetchTiposUnidad();
+        const soluciones = await window.DataService.fetchTiposSolucion();
+        const insumos = await window.DataService.fetchTiposInsumo();
         
         console.log('📊 Resultados:');
         console.log(`- Vehículos: ${vehiculos.length} registros`);

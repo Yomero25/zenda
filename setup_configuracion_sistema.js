@@ -6,12 +6,12 @@ async function crearTablaConfiguracionSistema() {
     
     try {
         // Verificar que dataService esté disponible
-        if (!window.dataService || !window.dataService.client) {
+        if (!window.DataService || !window.DataService.client) {
             console.error('❌ dataService no está disponible');
             return false;
         }
         
-        const client = window.dataService.client;
+        const client = window.DataService.client;
         
         // SQL para crear la tabla
         const createTableSQL = `
@@ -105,7 +105,7 @@ async function crearTablaConfiguracionSistemaDirecto() {
     console.log('🚀 Creando tabla usando método directo...');
     
     try {
-        const client = window.dataService.client;
+        const client = window.DataService.client;
         
         // Crear la tabla usando upsert directo
         const { error } = await client

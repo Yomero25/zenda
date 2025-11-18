@@ -95,7 +95,7 @@
       const ok = await window.accessGuard.ensureAuth(['soporte','admin']);
       if (!ok) return;
       const logoutBtn = document.getElementById('btnLogout');
-      if (logoutBtn) logoutBtn.onclick = async () => { try{ await window.dataService.authSignOut(); }catch(_){} window.location.href = './login.html'; };
+      if (logoutBtn) logoutBtn.onclick = async () => { try{ await window.DataService.authSignOut(); }catch(_){} window.location.href = './login.html'; };
 
       const contenedor = document.getElementById('contenedorSolicitudes');
       const filtroEstado = document.getElementById('filtroEstado');
@@ -474,7 +474,7 @@
 
       async function cargar(){
         try{
-          const res = await window.dataService.fetchNotificacionesSoporte();
+          const res = await window.DataService.fetchNotificacionesSoporte();
           solicitudes = Array.isArray(res) ? res : [];
         }catch(e){
           console.warn('Soporte: fallback local', e); solicitudes = JSON.parse(localStorage.getItem('notificaciones_soporte')||'[]');
@@ -484,7 +484,7 @@
 
       async function patchEstado(id, nuevoEstado){
         try{
-          await window.dataService.patchNotificacionSoporteById(id, { estado: nuevoEstado, fechaActualizacion: new Date().toISOString() });
+          await window.DataService.patchNotificacionSoporteById(id, { estado: nuevoEstado, fechaActualizacion: new Date().toISOString() });
         }catch(e){
           // fallback local
           const arr = JSON.parse(localStorage.getItem('notificaciones_soporte')||'[]');
@@ -499,7 +499,7 @@
             const patch = { soporte_estado: nuevoEstado };
             if (nuevoEstado === 'en_configuracion') patch.soporte_fechaInicio = new Date().toISOString();
             if (nuevoEstado === 'configurado') patch.soporte_fechaFin = new Date().toISOString();
-            await window.dataService.patchSolicitudDespachoById(String(notif.solicitudDespachoId), patch);
+            await window.DataService.patchSolicitudDespachoById(String(notif.solicitudDespachoId), patch);
           }
         }catch(_){}
       }
@@ -514,7 +514,7 @@
       };
 
       // Realtime
-      const ch = window.dataService.subscribeNotificacionesSoporte(async ()=>{ await cargar(); });
+      const ch = window.DataService.subscribeNotificacionesSoporte(async ()=>{ await cargar(); });
       await cargar();
     })();
   </script>

@@ -282,8 +282,8 @@
         // ===== INTEGRACIÓN SUPABASE =====
         async function cargarSolicitudesDesdeSupabaseYFallback() {
             try {
-                if (window.dataService && window.dataService.hasSupabase()) {
-                    const data = await window.dataService.fetchSolicitudesDespacho();
+                if (window.DataService && window.DataService.hasSupabase()) {
+                    const data = await window.DataService.fetchSolicitudesDespacho();
                     if (Array.isArray(data)) {
                         solicitudesDespacho = data;
                         console.log('✅ Solicitudes cargadas desde Supabase:', solicitudesDespacho.length);
@@ -299,10 +299,10 @@
         }
 
         function inicializarRealtime() {
-            if (!(window.dataService && window.dataService.hasSupabase())) return;
-            window.dataService.subscribeSolicitudesDespacho(async () => {
+            if (!(window.DataService && window.DataService.hasSupabase())) return;
+            window.DataService.subscribeSolicitudesDespacho(async () => {
                 console.log('📡 Realtime: cambio en solicitudes_despacho');
-                const data = await window.dataService.fetchSolicitudesDespacho();
+                const data = await window.DataService.fetchSolicitudesDespacho();
                 if (Array.isArray(data)) {
                     solicitudesDespacho = data;
                     cargarListaSolicitudes();
@@ -358,13 +358,13 @@
             const logoutBtn = document.getElementById('btnLogout');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
-                    try { await window.dataService.authSignOut(); } catch(_){}
+                    try { await window.DataService.authSignOut(); } catch(_){}
                     window.location.href = './login.html';
                 });
             }
             
             try {
-                const rol = await (window.dataService && window.dataService.getUserRole ? window.dataService.getUserRole() : Promise.resolve(null));
+                const rol = await (window.DataService && window.DataService.getUserRole ? window.DataService.getUserRole() : Promise.resolve(null));
                 const isAdmin = rol === 'admin';
                 const headerBtn = document.getElementById('btnPrincipalHeader');
                 if (headerBtn) headerBtn.style.display = isAdmin ? '' : 'none';
@@ -374,7 +374,7 @@
 
             await cargarSolicitudesDesdeSupabaseYFallback();
             inicializarRealtime();
-            modoCentralizado = !!(window.dataService && window.dataService.hasSupabase());
+            modoCentralizado = !!(window.DataService && window.DataService.hasSupabase());
             if (!modoCentralizado) {
                 verificarYGenerarSolicitudesAutomaticas();
                 limpiarSolicitudesEliminadas(); // Limpieza automática
@@ -993,7 +993,7 @@
             solicitud.estado = nuevoEstado;
             if (modoCentralizado) {
                 // Persistir en Supabase
-                window.dataService.patchSolicitudDespachoById(solicitud.id, { estado: nuevoEstado })
+                window.DataService.patchSolicitudDespachoById(solicitud.id, { estado: nuevoEstado })
                   .then(ok => { if (!ok) console.warn('No se pudo persistir estado en Supabase'); });
             } else {
                 guardarSolicitudes();
@@ -1554,9 +1554,9 @@
             if (confirm(`¿Enviar la solicitud ${solicitud.id} al módulo de instalaciones para validación?`)) {
                 // Obtener datos detallados de la cotización original
                 let cotizacionOriginal = obtenerCotizacionOriginal(solicitud.cotizacionId);
-                if (!cotizacionOriginal && modoCentralizado && window.dataService && window.dataService.getCotizacionByIdOrFolio) {
+                if (!cotizacionOriginal && modoCentralizado && window.DataService && window.DataService.getCotizacionByIdOrFolio) {
                     try {
-                        cotizacionOriginal = await window.dataService.getCotizacionByIdOrFolio(String(solicitud.cotizacionId));
+                        cotizacionOriginal = await window.DataService.getCotizacionByIdOrFolio(String(solicitud.cotizacionId));
                     } catch (_) { /* continuar con null */ }
                 }
                 
@@ -1583,18 +1583,18 @@
 
                 if (modoCentralizado) {
                     // Evitar duplicados: verificar si ya existe notificación para esta solicitud
-                    await window.dataService.findNotificacionBySolicitudId(solicitud.id).then(async (exists) => {
+                    await window.DataService.findNotificacionBySolicitudId(solicitud.id).then(async (exists) => {
                         if (exists && exists.id) {
                             mostrarAlerta('Esta solicitud ya fue enviada a Instalaciones.', 'warning');
                             return;
                         } else {
                             // Proceder con inserción y patch
-                            await window.dataService.insertNotificacionInstalaciones(notificacionInstalaciones)
+                            await window.DataService.insertNotificacionInstalaciones(notificacionInstalaciones)
                               .then(ok => { if (!ok) mostrarAlerta('No se pudo enviar a instalaciones (Supabase)', 'danger'); });
                             console.log('✅ DEBUG: Notificación enviada a instalaciones:', notificacionInstalaciones);
                             solicitud.estado = 'enviada_instalaciones';
                             solicitud.fechaEnvioInstalaciones = new Date().toISOString().split('T')[0];
-                            window.dataService.patchSolicitudDespachoById(solicitud.id, { estado: 'enviada_instalaciones', fechaEnvioInstalaciones: solicitud.fechaEnvioInstalaciones });
+                            window.DataService.patchSolicitudDespachoById(solicitud.id, { estado: 'enviada_instalaciones', fechaEnvioInstalaciones: solicitud.fechaEnvioInstalaciones });
                             // Enviar a Soporte en paralelo si la solución requiere configuración
                             try {
                                 const requiereSoporte = (() => {
@@ -1658,11 +1658,11 @@
                                     });
                                     console.log('✅ DEBUG SOPORTE - Notificación creada:', notifSoporte);
                                     
-                                    await window.dataService.findNotificacionSoporteBySolicitudId(solicitud.id).then(async (exSoporte) => {
+                                    await window.DataService.findNotificacionSoporteBySolicitudId(solicitud.id).then(async (exSoporte) => {
                                         console.log('🔍 DEBUG SOPORTE - Verificando si ya existe notificación:', exSoporte);
                                         if (!exSoporte || !exSoporte.id) {
                                             console.log('✅ DEBUG SOPORTE - Insertando nueva notificación...');
-                                            await window.dataService.insertNotificacionSoporte(notifSoporte)
+                                            await window.DataService.insertNotificacionSoporte(notifSoporte)
                                               .then(ok => { 
                                                 if (ok) {
                                                     console.log('✅ DEBUG SOPORTE - Notificación enviada exitosamente');
